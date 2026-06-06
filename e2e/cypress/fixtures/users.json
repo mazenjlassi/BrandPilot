@@ -1,0 +1,16 @@
+{
+  "admin": {
+    "username": "admin",
+    "password": "admin123",
+    "role": "ADMIN"
+  },
+  "marketing": {
+    "username": "marketing",
+    "password": "marketing123",
+    "role": "MARKETING"
+  },
+  "invalid": {
+    "username": "wrong",
+    "password": "wrong"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "brandpilot-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:headed": "cypress run --headed"
+  },
+  "devDependencies": {
+    "cypress": "^14.3.0",
+    "typescript": "^5.8.0"
+  }
+}
