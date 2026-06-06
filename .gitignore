@@ -1,0 +1,45 @@
+# Backend
+backend/target/
+backend/*.iml
+backend/.idea/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.vscode/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+frontend/*.iml
+frontend/.idea/
+frontend/.vscode/
+
+# Scraper
+scraper/node_modules/
+scraper/coverage/
+scraper/*.json
+!scraper/package.json
+!scraper/package-lock.json
+scraper/*.log
+scraper/.env
+scraper/.vscode/
+
+# E2E
+e2e/node_modules/
+e2e/coverage/
+e2e/cypress/videos/
+e2e/cypress/screenshots/
+e2e/.env
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.iml
