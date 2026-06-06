@@ -1,0 +1,34 @@
+{
+  "name": "metatry-scraper",
+  "version": "1.0.0",
+  "description": "Multi-platform social media scraper for competitor analysis",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "cli": "node src/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "scraper",
+    "instagram",
+    "facebook",
+    "linkedin",
+    "playwright"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "fs-extra": "^11.3.5",
+    "playwright": "^1.49.0",
+    "rebrowser-patches": "^1.0.19"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14"
+  }
+}
