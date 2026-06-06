@@ -1,0 +1,98 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--background-gradient);
+  transition: background 0.25s ease;
+}
+
+.main-content {
+  flex: 1;
+  padding: var(--space-lg);
+  padding-bottom: 80px;
+  padding-top: 70px;
+  box-sizing: border-box;
+  transition: margin-left 0.25s ease, padding 0.25s ease;
+}
+
+.main-content.login-mode {
+  padding: 0;
+  margin-left: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .main-content {
+    padding: var(--space-md);
+    padding-bottom: 100px;
+    padding-top: 70px;
+  }
+  .main-content.login-mode {
+    padding: var(--space-md);
+  }
+}
+
+/* Desktop - ALWAYS with 280px margin for permanent sidebar */
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 280px;
+    padding: var(--space-xl);
+    padding-bottom: 80px;
+    padding-top: var(--space-xl);
+  }
+  .main-content.sidebar-collapsed {
+    margin-left: 72px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .main-content {
+    margin-left: 280px;
+    padding: var(--space-2xl);
+  }
+  .main-content.sidebar-collapsed {
+    margin-left: 72px;
+  }
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .main-content,
+  .app-layout {
+    transition: none;
+  }
+}
+
+/* Page entrance animation */
+.page-content {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Breathing room for content */
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}

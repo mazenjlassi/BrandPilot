@@ -1,0 +1,108 @@
+<div class="campaigns-page" role="main" aria-label="Campaigns list">
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1>All Campaigns</h1>
+      <p class="subtitle">Manage and track your content campaigns</p>
+    </div>
+    <button class="btn-primary" routerLink="/campaigns" aria-label="Create new campaign">
+      + New Campaign
+    </button>
+  </header>
+
+  <!-- FILTERS -->
+  <div class="filters-section">
+    <div class="search-box">
+      <span class="search-icon">
+        <lucide-icon [img]="icons.search" [size]="16"></lucide-icon>
+      </span>
+      <input 
+        type="text" 
+        placeholder="Search campaigns..." 
+        [(ngModel)]="searchQuery"
+        aria-label="Search campaigns"
+        class="search-input"
+      />
+    </div>
+    
+    <div class="filter-group">
+      <select [(ngModel)]="statusFilter" aria-label="Filter by status" class="filter-select">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="draft">Draft</option>
+      </select>
+      
+      
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading campaigns...</p>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="error" class="error-state">
+    <lucide-icon [img]="icons.alertTriangle" [size]="24"></lucide-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && !error && filteredCampaigns.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <lucide-icon [img]="icons.folderOpen" [size]="48"></lucide-icon>
+    </div>
+    <h3>No campaigns yet</h3>
+    <p>Create your first campaign to get started</p>
+    <button class="btn-primary" routerLink="/campaigns">
+      + Create Campaign
+    </button>
+  </div>
+
+  <!-- CAMPAIGNS GRID -->
+  <div *ngIf="!loading && filteredCampaigns.length > 0" class="campaigns-grid">
+    
+    <article 
+      *ngFor="let c of filteredCampaigns; let i = index"
+      class="campaign-card"
+      [style.animation-delay.ms]="i * 50"
+    >
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="campaign-info">
+          <h3>{{ c.name }}</h3>
+          <p class="topic" *ngIf="c.topic">{{ c.topic }}</p>
+        </div>
+        <span class="status-badge" [attr.data-status]="c.status?.toLowerCase() || 'draft'">
+          <span class="status-dot"></span>
+        </span>
+      </div>
+
+      <!-- Stats -->
+      <div class="campaign-stats">
+        <div class="stat">
+          <span class="stat-value">{{ c.postCount || 0 }}</span>
+          <span class="stat-label">Posts</span>
+        </div>
+        
+       
+      </div>
+      <!-- Actions -->
+      <div class="card-actions">
+        <button 
+          class="action-btn primary"
+          (click)="openCampaign($event, c.id)"
+          aria-label="Open campaign"
+        >
+          <lucide-icon [img]="icons.arrowUpRight" [size]="16"></lucide-icon>
+          Open
+        </button>
+      </div>
+    </article>
+
+  </div>
+
+</div>

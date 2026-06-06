@@ -1,0 +1,166 @@
+<!-- Desktop Sidebar -->
+<aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+  <div class="sidebar-header">
+    <div class="logo">
+      <img *ngIf="!sidebarCollapsed" src="/logo-3LMS.png" alt="MetaTry Logo" />
+      <span *ngIf="sidebarCollapsed" class="logo-mini">MT</span>
+    </div>
+    <button class="sidebar-collapse-btn" (click)="toggleSidebar()" [attr.aria-label]="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <lucide-icon [img]="sidebarCollapsed ? icons.panelLeftOpen : icons.panelLeftClose" [size]="18"></lucide-icon>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav" aria-label="Main navigation">
+    <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">
+      <lucide-icon [img]="icons.layoutDashboard" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Dashboard</span>
+    </a>
+    <a routerLink="/campaigns" routerLinkActive="active" aria-label="Create Post">
+      <lucide-icon [img]="icons.penTool" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Add Post</span>
+    </a>
+    <a routerLink="/chat" routerLinkActive="active" aria-label="Chat Bot">
+      <lucide-icon [img]="icons.messageCircle" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Chat Bot</span>
+    </a>
+    <a routerLink="/posts" routerLinkActive="active" aria-label="Posts">
+      <lucide-icon [img]="icons.fileText" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Posts</span>
+    </a>
+    <a routerLink="/campaign-list" routerLinkActive="active" aria-label="Campaign List">
+      <lucide-icon [img]="icons.folder" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Campaign List</span>
+    </a>
+    <!-- Calendar - Marketing Only -->
+    <a *ngIf="isMarketing()" routerLink="/calendar" routerLinkActive="active" aria-label="Calendar">
+      <lucide-icon [img]="icons.calendar" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Calendar</span>
+    </a>
+    <!-- Admin Only -->
+    <a *ngIf="isAdmin()" routerLink="/admin/users" routerLinkActive="active" aria-label="User Management">
+      <lucide-icon [img]="icons.users" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">User Management</span>
+    </a>
+    <a *ngIf="isAdmin()" routerLink="/scraped-posts" routerLinkActive="active" aria-label="Scraped Posts">
+      <lucide-icon [img]="icons.search" [size]="20"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Scrap</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <!-- User Info -->
+    <div class="user-info">
+      <span class="user-name">{{ sidebarCollapsed ? (getUserName().charAt(0) || '').toUpperCase() : getUserName() }}</span>
+      <span class="user-role" *ngIf="isAdmin() && !sidebarCollapsed">Admin</span>
+    </div>
+    
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+      <lucide-icon *ngIf="!isDarkMode" [img]="icons.moon" [size]="18"></lucide-icon>
+      <lucide-icon *ngIf="isDarkMode" [img]="icons.sun" [size]="18"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">{{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}</span>
+    </button>
+    
+    <!-- Logout Button -->
+    <button class="logout-btn" (click)="logout()" aria-label="Logout">
+      <lucide-icon [img]="icons.logOut" [size]="18"></lucide-icon>
+      <span *ngIf="!sidebarCollapsed">Logout</span>
+    </button>
+    
+    <div class="brand" *ngIf="!sidebarCollapsed">
+      <span class="brand-name">MetaTry</span>
+      <span class="brand-version">v1.0</span>
+    </div>
+  </div>
+</aside>
+
+<!-- Mobile Header -->
+<header class="mobile-header">
+  <div class="logo">
+    <img src="/logo-3LMS.png" alt="MetaTry Logo" />
+  </div>
+  <div class="mobile-actions">
+    <button
+      class="theme-toggle-mobile"
+      (click)="toggleTheme()"
+      [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+      <lucide-icon *ngIf="!isDarkMode" [img]="icons.moon" [size]="20"></lucide-icon>
+      <lucide-icon *ngIf="isDarkMode" [img]="icons.sun" [size]="20"></lucide-icon>
+    </button>
+    <button
+      class="menu-toggle"
+      (click)="toggleMenu()"
+      [attr.aria-label]="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+      [attr.aria-expanded]="mobileMenuOpen"
+    >
+      <lucide-icon *ngIf="!mobileMenuOpen" [img]="icons.menu" [size]="24"></lucide-icon>
+      <lucide-icon *ngIf="mobileMenuOpen" [img]="icons.x" [size]="24"></lucide-icon>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Nav Overlay -->
+<div
+  class="mobile-nav-overlay"
+  [class.open]="mobileMenuOpen"
+  (click)="closeMenu()"
+  aria-hidden="true"
+></div>
+
+<!-- Mobile Navigation -->
+<nav class="mobile-nav" [class.open]="mobileMenuOpen" aria-label="Mobile navigation">
+  <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.layoutDashboard" [size]="20"></lucide-icon>
+    Dashboard
+  </a>
+  <a routerLink="/campaigns" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.penTool" [size]="20"></lucide-icon>
+    Add Post
+  </a>
+  <a routerLink="/chat" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.messageCircle" [size]="20"></lucide-icon>
+    Chat Bot
+  </a>
+  <a routerLink="/posts" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.fileText" [size]="20"></lucide-icon>
+    Posts
+  </a>
+<a routerLink="/campaign-list" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.folder" [size]="20"></lucide-icon>
+    <span>Campaign List</span>
+  </a>
+  <!-- Calendar - Marketing Only -->
+  <a *ngIf="isMarketing()" routerLink="/calendar" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.calendar" [size]="20"></lucide-icon>
+    <span>Calendar</span>
+  </a>
+  <!-- Admin Only -->
+  <a *ngIf="isAdmin()" routerLink="/admin/users" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.users" [size]="20"></lucide-icon>
+    User Management
+  </a>
+  <a *ngIf="isAdmin()" routerLink="/scraped-posts" routerLinkActive="active" (click)="closeMenu()">
+    <lucide-icon [img]="icons.search" [size]="20"></lucide-icon>
+    Scrap
+  </a>
+  
+  <!-- User Info in Mobile -->
+  <div class="mobile-user-info">
+    <span>{{ getUserName() }}</span>
+    <span *ngIf="isAdmin()" class="mobile-role">Admin</span>
+  </div>
+  
+  <!-- Theme Toggle in Mobile -->
+  <button class="theme-toggle-mobile-nav" (click)="toggleTheme(); closeMenu()">
+    <lucide-icon *ngIf="!isDarkMode" [img]="icons.moon" [size]="20"></lucide-icon>
+    <lucide-icon *ngIf="isDarkMode" [img]="icons.sun" [size]="20"></lucide-icon>
+    {{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}
+  </button>
+  
+  <!-- Logout in Mobile -->
+  <button class="logout-btn-mobile" (click)="logout(); closeMenu()">
+    <lucide-icon [img]="icons.logOut" [size]="20"></lucide-icon>
+    Logout
+  </button>
+</nav>

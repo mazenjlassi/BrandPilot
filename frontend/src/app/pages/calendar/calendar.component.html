@@ -1,0 +1,32 @@
+<div class="calendar-container">
+  <div class="calendar-header">
+    <h1>Content Calendar</h1>
+  </div>
+
+  <div class="calendar-legend">
+    <div class="legend-item">
+      <span class="legend-color" style="background-color: #E1306C;"></span>
+      <span>Instagram</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color" style="background-color: #1877F2;"></span>
+      <span>Facebook</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color" style="background-color: #0A66C2;"></span>
+      <span>LinkedIn</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-color" style="background-color: #1DA1F2;"></span>
+      <span>X</span>
+    </div>
+  </div>
+
+  <div class="calendar-wrapper">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    Loading calendar...
+  </div>
+</div>

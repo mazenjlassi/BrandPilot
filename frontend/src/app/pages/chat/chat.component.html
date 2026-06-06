@@ -1,0 +1,149 @@
+<div class="chat-layout" role="main" aria-label="Chat application">
+
+  <!-- LEFT: CONVERSATIONS SIDEBAR -->
+  <aside class="chat-sidebar" role="navigation" aria-label="Conversations">
+    <div class="sidebar-header">
+      <h2>Messages</h2>
+      <button class="new-chat-btn" (click)="createConversation()" aria-label="Start new conversation">
+        <lucide-icon [img]="icons.plus" [size]="20"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">
+        <lucide-icon [img]="icons.search" [size]="16"></lucide-icon>
+      </span>
+      <input 
+        type="text" 
+        placeholder="Search conversations..." 
+        aria-label="Search conversations"
+        class="search-input"
+      />
+    </div>
+
+    <div class="conversation-list" role="list" aria-label="Conversation list">
+      <button
+        *ngFor="let c of conversations"
+        class="conversation-item"
+        [class.active]="c.id === selectedConversationId"
+        (click)="selectConversation(c.id)"
+        role="listitem"
+        [attr.aria-current]="c.id === selectedConversationId ? 'true' : null"
+      >
+        <div class="avatar">
+          <span>{{ (c.title || 'U').charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="conversation-info">
+          <div class="conversation-header">
+            <h4>{{ c.title || 'Untitled' }}</h4>
+            <span class="time">{{ c.lastMessageTime }}</span>
+          </div>
+          <p class="preview">{{ c.lastMessage || 'No messages yet' }}</p>
+        </div>
+        <span *ngIf="c.unread" class="unread-badge">{{ c.unread }}</span>
+        <button class="delete-conv-btn" (click)="deleteConversation(c.id); $event.stopPropagation()" title="Delete conversation">
+          <lucide-icon [img]="icons.trash2" [size]="14"></lucide-icon>
+        </button>
+      </button>
+    </div>
+  </aside>
+
+  <!-- RIGHT: CHAT MAIN AREA -->
+  <section class="chat-main" role="region" aria-label="Chat messages">
+    
+    <!-- Chat Header -->
+    <header class="chat-header" *ngIf="getSelectedConversation()">
+      <div class="user-info">
+        <div class="avatar large">
+          <span>{{ (getSelectedConversation()?.title || 'U').charAt(0).toUpperCase() }}</span>
+        </div>
+        <div class="user-details">
+          <h3>{{ getSelectedConversation()?.title || 'Untitled' }}</h3>
+          <span class="status">
+            <span class="status-dot" [class.online]="getSelectedConversation()?.online"></span>
+            {{ getSelectedConversation()?.online ? 'Online' : 'Offline' }}
+          </span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" (click)="generateConclusion()" [disabled]="generatingConclusion || conclusion" aria-label="Generate conclusion">
+          <lucide-icon [img]="icons.fileText" [size]="18"></lucide-icon>
+        </button>
+        <button class="icon-btn" aria-label="Search in conversation">
+          <lucide-icon [img]="icons.search" [size]="18"></lucide-icon>
+        </button>
+        <button class="icon-btn" aria-label="More options">
+          <lucide-icon [img]="icons.moreHorizontal" [size]="18"></lucide-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages Area -->
+    <div class="messages-area" role="log" aria-live="polite" aria-atomic="false">
+      <div class="date-divider">
+        <span>Today</span>
+      </div>
+
+      <div
+        *ngFor="let m of messages; let i = index"
+        class="message-wrapper"
+        [class.sent]="m.role === 'USER'"
+        [class.received]="m.role === 'AI'"
+        role="article"
+        [attr.aria-label]="m.role === 'USER' ? 'Your message' : 'AI response'"
+        [style.animation-delay.ms]="i * 50"
+      >
+        <div class="message-bubble">
+          {{ m.content }}
+        </div>
+        <span class="message-time">{{ m.timestamp }}</span>
+      </div>
+
+      <div *ngIf="loading" class="typing-indicator" role="status" aria-live="polite">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <!-- Conclusion Display -->
+      <div *ngIf="conclusion" class="conclusion-section" role="region" aria-label="Generated conclusion">
+        <div class="conclusion-header">
+          <lucide-icon [img]="icons.checkCircle" [size]="18"></lucide-icon>
+          <span>Conclusion</span>
+        </div>
+        <div class="conclusion-content">
+          {{ conclusion }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <footer class="chat-input-area" role="form" aria-label="Message input">
+      <button class="attach-btn" aria-label="Attach file">
+        <lucide-icon [img]="icons.paperclip" [size]="18"></lucide-icon>
+      </button>
+      <div class="input-wrapper">
+        <textarea
+          [(ngModel)]="newMessage"
+          placeholder="Type a message..."
+          (keydown.enter)="sendMessage(); $event.preventDefault()"
+          aria-label="Type your message"
+          rows="1"
+        ></textarea>
+        <button class="emoji-btn" aria-label="Add emoji">
+          <lucide-icon [img]="icons.smile" [size]="18"></lucide-icon>
+        </button>
+      </div>
+      <button 
+        class="send-btn" 
+        (click)="sendMessage()" 
+        [disabled]="!newMessage || !newMessage.trim()"
+        aria-label="Send message"
+      >
+        <lucide-icon [img]="icons.send" [size]="18"></lucide-icon>
+      </button>
+    </footer>
+
+  </section>
+
+</div>

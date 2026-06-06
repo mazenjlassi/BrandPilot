@@ -1,0 +1,188 @@
+<div class="campaign-details-page" *ngIf="!loading" role="main" aria-label="Campaign details">
+
+  <!-- HEADER -->
+  <header class="detail-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()" aria-label="Go back">
+        <lucide-icon [img]="icons.arrowLeft" [size]="16"></lucide-icon>
+        Back
+      </button>
+      <div class="header-info">
+        <h1>{{ campaign?.name }}</h1>
+        <p class="topic">{{ campaign?.topic }}</p>
+        <div class="header-meta">
+          <span class="status-badge" [attr.data-status]="campaign?.status?.toLowerCase() || 'draft'">
+            <span class="status-dot"></span>
+            {{ campaign?.status || 'Draft' }}
+          </span>
+          <span class="post-count">{{ campaign?.postCount || 0 }} posts</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="reloadInsights()" aria-label="Refresh insights">
+        <lucide-icon [img]="icons.refreshCw" [size]="16"></lucide-icon>
+        Refresh
+      </button>
+      <button class="btn-danger" (click)="deleteCampaign()" aria-label="Delete campaign">
+        <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+        Delete
+      </button>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="detail-body">
+
+    <!-- MAIN CONTENT -->
+    <main class="detail-main">
+
+      <!-- Posts Section -->
+      <section class="section card posts-section">
+        <h3>Posts <span class="count">{{ posts.length }}</span></h3>
+
+        <!-- Empty State -->
+        <div *ngIf="posts.length === 0" class="empty-state">
+          <lucide-icon [img]="icons.fileText" [size]="32"></lucide-icon>
+          <p>No posts yet</p>
+        </div>
+
+        <!-- Posts Grid -->
+        <div *ngIf="posts.length > 0" class="posts-grid">
+          <article 
+            *ngFor="let post of posts; let i = index"
+            class="post-card"
+            [style.animation-delay.ms]="i * 50"
+            (click)="openPost(post.id)"
+          >
+            <div class="card-header">
+              <span class="platform-badge" [attr.data-platform]="post.platform">
+                {{ post.platform }}
+              </span>
+              <span class="status" [attr.data-status]="post.status?.toLowerCase()">
+                {{ post.status }}
+              </span>
+            </div>
+            <h4>{{ post.title }}</h4>
+            <p class="preview">{{ post.content }}</p>
+            <div class="post-metrics">
+              <div class="metric">
+                <lucide-icon [img]="icons.heart" [size]="14"></lucide-icon>
+                <span>{{ post.likes || 0 }}</span>
+              </div>
+              <div class="metric">
+                <lucide-icon [img]="icons.messageCircle" [size]="14"></lucide-icon>
+                <span>{{ post.commentsCount || 0 }}</span>
+              </div>
+              <div class="metric">
+                <lucide-icon [img]="icons.eye" [size]="14"></lucide-icon>
+                <span>{{ post.shares || 0 }}</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="action-btn" (click)="editPost(post); $event.stopPropagation()" aria-label="Edit post">
+                <lucide-icon [img]="icons.edit3" [size]="16"></lucide-icon>
+              </button>
+              <button class="action-btn primary" (click)="publishPost(post); $event.stopPropagation()" aria-label="Publish post">
+                <lucide-icon [img]="icons.send" [size]="16"></lucide-icon>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- SIDE PANEL -->
+    <aside class="detail-side" *ngIf="insights">
+
+      <!-- Sentiment Card -->
+      <section class="section card sentiment-card">
+        <h3>Sentiment</h3>
+        <div class="sentiment-value" [attr.data-sentiment]="insights.overallSentiment">
+          <span class="sentiment-icon" *ngIf="insights.overallSentiment === 'positive'">
+            <lucide-icon [img]="icons.trendingUp" [size]="24"></lucide-icon>
+          </span>
+          <span class="sentiment-icon" *ngIf="insights.overallSentiment === 'negative'">
+            <lucide-icon [img]="icons.trendingDown" [size]="24"></lucide-icon>
+          </span>
+          <span class="sentiment-icon" *ngIf="insights.overallSentiment === 'neutral'">
+            <lucide-icon [img]="icons.minus" [size]="24"></lucide-icon>
+          </span>
+          <span class="sentiment-text">{{ insights.overallSentiment }}</span>
+        </div>
+      </section>
+
+      <!-- Summary Card -->
+      <section class="section card summary-card">
+        <h3>Summary</h3>
+        <p>{{ insights.summary }}</p>
+      </section>
+
+      <!-- Advice Card -->
+      <section class="section card advice-card" *ngIf="insights.advice">
+        <h3><lucide-icon [img]="icons.lightbulb" [size]="16"></lucide-icon> Advice</h3>
+        <p>{{ insights.advice }}</p>
+      </section>
+
+      <!-- Ideas Card -->
+      <section class="section card ideas-card" *ngIf="insights.ideas?.length">
+        <h3><lucide-icon [img]="icons.sparkles" [size]="16"></lucide-icon> Ideas</h3>
+        <ul class="ideas-list">
+          <li *ngFor="let idea of insights.ideas.slice(0, 5)">
+            <lucide-icon [img]="icons.check" [size]="14"></lucide-icon>
+            {{ idea }}
+          </li>
+        </ul>
+      </section>
+
+      <!-- Performance Card -->
+      <section class="section card performance-card">
+        <h3>Performance</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value">{{ insights.totalLikes || 0 }}</span>
+            <span class="stat-label">Likes</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ insights.totalComments || 0 }}</span>
+            <span class="stat-label">Comments</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ insights.engagementRate || 0 }}%</span>
+            <span class="stat-label">Engagement</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ insights.reach || 0 }}</span>
+            <span class="stat-label">Reach</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Campaign Comments Card -->
+      <section class="section card comments-card" *ngIf="campaignComments.length > 0">
+        <h3>Recent Comments</h3>
+        <div class="campaign-comments-list">
+          <div class="c-comment" *ngFor="let c of campaignComments.slice(0, 5)">
+            <div class="c-comment-header">
+              <span class="c-sentiment" [class]="getSentimentClass(c.sentiment)">
+                {{ c.sentiment }}
+              </span>
+              <span class="c-date">{{ c.createdAt | date:'short' }}</span>
+            </div>
+            <p class="c-text">{{ c.commentText }}</p>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+</div>
+
+<!-- Loading State -->
+<div *ngIf="loading" class="loading-state">
+  <div class="spinner"></div>
+  <p>Loading campaign...</p>
+</div>
