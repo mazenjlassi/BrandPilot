@@ -1,0 +1,23 @@
+<div class="post-row">
+
+  <!-- IMAGE -->
+  <img 
+    *ngIf="post.image?.imageUrl"
+    [src]="post.image.imageUrl"
+    class="thumbnail"
+  />
+
+  <!-- CONTENT -->
+  <div class="content">
+    <p class="text">{{ post.title }}</p>
+    <span class="date">{{ post.publishedAt | date:'dd MMM, HH:mm' }}</span>
+    <div class="platform">{{ post.platform }}</div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div>❤️ {{ post.likes || 0 }}</div>
+    <div>💬 {{ post.commentsCount || 0 }}</div>
+  </div>
+
+</div>

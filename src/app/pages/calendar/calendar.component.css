@@ -1,0 +1,344 @@
+.calendar-container {
+  padding: 4px 16px 16px 16px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.calendar-header {
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.calendar-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin: 0;
+}
+
+.calendar-legend {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  background: var(--card);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.calendar-wrapper {
+  flex: 1;
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+:host ::ng-deep .fc .fc-scroller {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+:host ::ng-deep .fc .fc-scroller::-webkit-scrollbar {
+  width: 6px;
+}
+
+:host ::ng-deep .fc .fc-scroller::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+:host ::ng-deep .fc .fc-scroller::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+:host ::ng-deep .fc .fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+body.dark-mode :host ::ng-deep .fc .fc-scroller::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode :host ::ng-deep .fc .fc-scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+:host ::ng-deep .fc-timegrid-slot {
+  height: 32px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* FullCalendar Global */
+:host ::ng-deep .fc {
+  font-family: var(--font-family);
+  height: 100%;
+}
+
+:host ::ng-deep .fc-theme-standard td,
+:host ::ng-deep .fc-theme-standard th {
+  border-color: var(--border);
+}
+
+/* Header Toolbar */
+:host ::ng-deep .fc-toolbar {
+  padding: 8px 12px;
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+:host ::ng-deep .fc-toolbar-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+:host ::ng-deep .fc-button {
+  background: var(--primary) !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  text-transform: capitalize;
+}
+
+:host ::ng-deep .fc-button:hover {
+  background: var(--primary-hover) !important;
+}
+
+:host ::ng-deep .fc-button:disabled {
+  background: var(--border) !important;
+  opacity: 0.6;
+}
+
+:host ::ng-deep .fc-button:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Day/Time Grid */
+:host ::ng-deep .fc-timegrid-axis {
+  background: var(--background);
+}
+
+:host ::ng-deep .fc-timegrid-slot-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 0 4px;
+}
+
+:host ::ng-deep .fc-timegrid-slot {
+  height: 32px;
+}
+
+:host ::ng-deep .fc-timegrid-slot-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 0 4px;
+  vertical-align: top;
+}
+
+:host ::ng-deep .fc-timegrid-slot-lane {
+  height: 28px;
+}
+
+/* Column Headers */
+:host ::ng-deep .fc-col-header-cell {
+  padding: 6px 0;
+  background: var(--background);
+}
+
+:host ::ng-deep .fc-col-header-cell-cushion {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+:host ::ng-deep .fc-day-today {
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+/* Events */
+:host ::ng-deep .fc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  min-height: 20px;
+}
+
+:host ::ng-deep .fc-event:hover {
+  opacity: 0.9;
+  filter: brightness(1.05);
+}
+
+:host ::ng-deep .fc-event-title {
+  font-weight: 500;
+}
+
+:host ::ng-deep .fc-h-event .fc-event-main {
+  padding: 2px 4px;
+}
+
+/* Now Indicator */
+:host ::ng-deep .fc-now-indicator-line {
+  border-color: var(--error);
+  border-width: 2px;
+}
+
+:host ::ng-deep .fc-now-indicator-arrow {
+  border-color: var(--error);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+
+/* Scroll */
+:host ::ng-deep .fc-scroller {
+  overflow: hidden !important;
+}
+
+/* More Link */
+:host ::ng-deep .fc-daygrid-more-link {
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* ================= DARK MODE ================= */
+body.dark-mode .calendar-container {
+  background: var(--background);
+}
+
+body.dark-mode .calendar-legend {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+body.dark-mode .calendar-wrapper {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+body.dark-mode :host ::ng-deep .fc {
+  --fc-border-color: var(--border);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-text-color: #ffffff;
+  --fc-button-hover-bg-color: var(--primary-hover);
+  --fc-button-active-bg-color: var(--primary-hover);
+  --fc-today-bg-color: rgba(59, 130, 246, 0.15);
+  --fc-event-bg-color: var(--primary);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--background);
+  --fc-list-event-hover-bg-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode :host ::ng-deep .fc-toolbar {
+  border-color: var(--border);
+}
+
+body.dark-mode :host ::ng-deep .fc-toolbar-title {
+  color: var(--text-primary);
+}
+
+body.dark-mode :host ::ng-deep .fc-col-header-cell {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+body.dark-mode :host ::ng-deep .fc-col-header-cell-cushion {
+  color: var(--text-primary);
+}
+
+body.dark-mode :host ::ng-deep .fc-timegrid-axis {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+body.dark-mode :host ::ng-deep .fc-timegrid-slot-label {
+  color: var(--text-secondary);
+}
+
+body.dark-mode :host ::ng-deep .fc-day-today {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.dark-mode :host ::ng-deep .fc-day-today .fc-col-header-cell-cushion {
+  color: var(--primary);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .calendar-container {
+    padding: 12px;
+  }
+
+  .calendar-legend {
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+  }
+
+  :host ::ng-deep .fc-toolbar {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  :host ::ng-deep .fc-toolbar-title {
+    font-size: 14px;
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  :host ::ng-deep .fc-button {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-header h1 {
+    font-size: 18px;
+  }
+
+  .calendar-legend {
+    gap: 8px;
+  }
+}

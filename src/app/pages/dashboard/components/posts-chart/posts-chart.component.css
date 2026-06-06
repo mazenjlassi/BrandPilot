@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  height: 100%;
+  position: relative;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border-radius: var(--radius-md);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  :host {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  :host {
+    min-height: 180px;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

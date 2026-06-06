@@ -1,0 +1,392 @@
+/* ============================================
+   POSTS PAGE - VIBRANT DESIGN
+   ============================================ */
+
+.posts-page {
+  padding: var(--space-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--background);
+  min-height: 100vh;
+  animation: fadeIn 400ms ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page Header */
+.posts-page h1 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+}
+
+/* Search Bar */
+.search-bar {
+  position: relative;
+  margin-bottom: var(--space-lg);
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.search-bar .search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  background: var(--card);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.search-bar .search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(15, 82, 214, 0.1);
+  outline: none;
+}
+
+/* Tabs - Vibrant styling */
+.tabs {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+  overflow-x: auto;
+}
+
+.tabs button {
+  padding: var(--space-md) var(--space-xl);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  position: relative;
+  transition: all 200ms ease;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.tabs button::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-hover));
+  transform: scaleX(0);
+  transition: transform 200ms ease;
+  border-radius: 3px 3px 0 0;
+}
+
+.tabs button:hover {
+  color: var(--primary);
+  background: rgba(15, 82, 214, 0.05);
+}
+
+.tabs button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.tabs button.active {
+  color: var(--primary);
+  background: linear-gradient(180deg, rgba(15, 82, 214, 0.1) 0%, transparent 100%);
+}
+
+.tabs button.active::after {
+  transform: scaleX(1);
+}
+
+/* GRID - Compact Cards */
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+/* Post Card - Vibrant Style */
+.post-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 250ms ease;
+  animation: cardFadeIn 400ms ease-out;
+  animation-fill-mode: both;
+}
+
+.post-card:nth-child(1) { animation-delay: 50ms; }
+.post-card:nth-child(2) { animation-delay: 100ms; }
+.post-card:nth-child(3) { animation-delay: 150ms; }
+.post-card:nth-child(4) { animation-delay: 200ms; }
+.post-card:nth-child(5) { animation-delay: 250ms; }
+.post-card:nth-child(6) { animation-delay: 300ms; }
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post-card:hover {
+  box-shadow: 0 8px 30px rgba(15, 82, 214, 0.15);
+  transform: translateY(-4px);
+  border-color: var(--primary);
+}
+
+.post-card:active {
+  transform: translateY(-2px);
+}
+
+/* Card Header */
+.post-card .card-header {
+  padding: var(--space-md) var(--space-md) 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-card .platform-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(15, 82, 214, 0.15), rgba(30, 167, 255, 0.15));
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Preview Image */
+.post-card .preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  margin-top: var(--space-md);
+  flex-shrink: 0;
+}
+
+.post-card .preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+}
+
+.post-card:hover .preview img {
+  transform: scale(1.08);
+}
+
+.post-card .preview .placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+/* Content */
+.post-card .content {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.post-card .content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: var(--text-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+/* Meta */
+.post-card .meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.post-card .meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.post-card .meta-item.approved {
+  color: var(--success);
+  font-weight: var(--font-medium);
+}
+
+/* Actions */
+.post-card .actions {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.post-card .actions button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px var(--space-md);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all 200ms ease;
+  min-height: 44px;
+}
+
+.post-card .actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(15, 82, 214, 0.3);
+}
+
+.post-card .actions button:active {
+  transform: scale(0.98);
+}
+
+/* Loading */
+.posts-page .loading {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+}
+
+.posts-page .loading svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-md);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.posts-page .empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .posts-page {
+    padding: var(--space-md);
+  }
+
+  .posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+  }
+
+  .post-card .card-header {
+    padding: var(--space-sm) var(--space-sm) 0;
+  }
+
+  .post-card .content {
+    padding: var(--space-sm);
+  }
+
+  .post-card .actions {
+    padding: var(--space-sm);
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .posts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .posts-page,
+  .post-card,
+  .posts-page .loading svg {
+    animation: none;
+  }
+
+  .post-card:hover {
+    transform: none;
+  }
+
+  .post-card:hover .preview img {
+    transform: none;
+  }
+}

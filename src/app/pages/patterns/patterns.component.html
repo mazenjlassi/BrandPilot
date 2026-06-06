@@ -1,0 +1,170 @@
+<div class="patterns-page">
+
+  <header class="page-header">
+    <h1>Patterns</h1>
+    <span class="admin-badge">Admin Only</span>
+  </header>
+
+  <div class="companies-bar">
+    <button
+      *ngFor="let c of companies"
+      class="company-pill"
+      [class.active]="c === selectedCompany"
+      (click)="selectCompany(c)"
+    >
+      {{ c }}
+    </button>
+    <div *ngIf="companies.length === 0" class="no-companies">
+      No companies found. Add scraped posts first.
+    </div>
+  </div>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <div *ngIf="!selectedCompany" class="empty-state">
+    <p>Select a company to view patterns</p>
+  </div>
+
+  <div *ngIf="selectedCompany" class="content">
+
+    <!-- Actions Bar -->
+    <div class="actions-bar">
+      <div class="actions-left">
+        <button class="btn-primary" (click)="runBatchAnalysis()" [disabled]="batchResult === 'Running...'">
+          <lucide-icon [img]="icons.play" [size]="16"></lucide-icon>
+          Run Batch Analysis
+        </button>
+      </div>
+      <div class="batch-result" *ngIf="batchResult">
+        {{ batchResult }}
+      </div>
+    </div>
+
+    <!-- Patterns List -->
+    <div class="patterns-section">
+      <div class="section-header">
+        <h3>Patterns for "{{ selectedCompany }}"</h3>
+        <span class="count-badge">{{ patterns.length }} patterns</span>
+      </div>
+
+      <div *ngIf="loading"><app-loading-skeleton type="card" [count]="3"></app-loading-skeleton></div>
+
+      <div *ngIf="!loading && patterns.length === 0" class="empty-state">
+        <app-empty-state icon="file-x" heading="No patterns" message="No patterns yet. Run a batch analysis to extract patterns from scraped posts."></app-empty-state>
+      </div>
+
+      <div *ngIf="!loading && patterns.length > 0" class="patterns-list">
+        <div *ngFor="let p of patterns" class="pattern-card">
+          <div class="pattern-row" (click)="toggleExpand(p.id)">
+            <div class="pattern-topic">
+              <strong>{{ p.topic }}</strong>
+            </div>
+            <div class="pattern-campaign">{{ p.campaignName || '-' }}</div>
+            <div class="pattern-posts">{{ p.totalPostsAnalyzed || 0 }}</div>
+            <div class="pattern-score" *ngIf="p.avgEngagementScore != null">
+              <span class="score-badge" [style.background]="getScoreColor(p.avgEngagementScore)">
+                {{ p.avgEngagementScore.toFixed(2) }}
+              </span>
+              <span class="score-label">{{ getScoreLabel(p.avgEngagementScore) }}</span>
+            </div>
+            <div class="pattern-score" *ngIf="p.avgEngagementScore == null">
+              <span class="score-badge no-data">N/A</span>
+            </div>
+            <div class="pattern-advice">{{ p.performanceAdvice ? (p.performanceAdvice.length > 40 ? p.performanceAdvice.slice(0,40) + '...' : p.performanceAdvice) : '-' }}</div>
+            <div class="pattern-actions">
+              <button class="btn-icon" (click)="deletePattern(p.id); $event.stopPropagation()" title="Delete">
+                <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+              </button>
+              <span class="expand-icon">
+                <lucide-icon [img]="expandedId === p.id ? icons.chevronUp : icons.chevronDown" [size]="16"></lucide-icon>
+              </span>
+            </div>
+          </div>
+
+          <!-- Expanded Details -->
+          <div class="pattern-details" *ngIf="expandedId === p.id">
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="detail-label">Campaign</span>
+                <span class="detail-value">{{ p.campaignName || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Platform Breakdown</span>
+                <span class="detail-value">
+                  <span *ngFor="let pb of parsePlatformBreakdown(p.platformBreakdown)" class="platform-chip">
+                    {{ pb.key }}: {{ pb.value }}
+                  </span>
+                  <span *ngIf="!p.platformBreakdown">-</span>
+                </span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Total Analyzed Posts</span>
+                <span class="detail-value">{{ p.totalPostsAnalyzed || 0 }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Avg Engagement Score</span>
+                <span class="detail-value" *ngIf="p.avgEngagementScore != null">
+                  <span class="score-badge" [style.background]="getScoreColor(p.avgEngagementScore)">
+                    {{ p.avgEngagementScore.toFixed(2) }}
+                  </span>
+                  {{ getScoreLabel(p.avgEngagementScore) }}
+                </span>
+                <span class="detail-value" *ngIf="p.avgEngagementScore == null">N/A</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Total Posts Generated</span>
+                <span class="detail-value">{{ p.totalPostsGenerated || 0 }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Tone</span>
+                <span class="detail-value">{{ p.tone || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Content Length</span>
+                <span class="detail-value">{{ p.contentLength || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Media Type</span>
+                <span class="detail-value">{{ p.mediaType || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Hashtag Count</span>
+                <span class="detail-value">{{ p.hashtagCount || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Timing Pattern</span>
+                <span class="detail-value">{{ p.timingPattern || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">CTA Style</span>
+                <span class="detail-value">{{ p.ctaStyle || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Post Frequency</span>
+                <span class="detail-value">{{ p.postFrequency || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Used Post IDs</span>
+                <span class="detail-value">{{ parseUsedPostIds(p.usedPostIds).join(', ') || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Extracted At</span>
+                <span class="detail-value">{{ p.extractedAt | date:'medium' }}</span>
+              </div>
+              <div class="detail-item" *ngIf="p.performanceAdvice">
+                <span class="detail-label">Performance Advice</span>
+                <span class="detail-value advice-text">{{ p.performanceAdvice }}</span>
+              </div>
+              <div class="detail-item" *ngIf="p.lastPerformanceUpdate">
+                <span class="detail-label">Last Performance Update</span>
+                <span class="detail-value">{{ p.lastPerformanceUpdate | date:'medium' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

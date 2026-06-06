@@ -1,0 +1,447 @@
+<div class="campaign-page" role="main" aria-label="Campaign management">
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Campaigns</h1>
+      <p class="subtitle">Create your content topic and then create your posts</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="enableExistingMode()" aria-label="Add to existing campaign">
+        <lucide-icon [img]="icons.folderPlus" [size]="18"></lucide-icon>
+        Add to Existing
+      </button>
+      <button class="btn-primary" (click)="enableNewMode()" aria-label="Create new campaign">
+        + New Campaign
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT LAYOUT -->
+  <div class="campaign-layout">
+    
+    <!-- LEFT: CREATE FORM (when active) -->
+    <aside class="form-panel" *ngIf="showForm">
+      <div class="panel-header">
+        <h2>{{ showExistingMode ? 'Add to Existing Campaign' : 'Create Campaign' }}</h2>
+        <button class="close-btn" (click)="showForm = false" aria-label="Close form">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+        </button>
+      </div>
+
+      <form class="campaign-form" (ngSubmit)="generate()">
+        <!-- Campaign Name -->
+        <div class="form-group">
+          <label for="campaign-name">{{ showExistingMode ? 'Select Campaign' : 'Campaign Name' }}</label>
+          
+          <!-- Existing mode: dropdown with datalist -->
+          <div *ngIf="showExistingMode" class="campaign-selector">
+            <input 
+              id="campaign-name"
+              [(ngModel)]="name"
+              name="name"
+              placeholder="Type to search campaign..."
+              type="text"
+              class="form-input"
+              list="campaigns-list"
+              (change)="onCampaignSelect($event)"
+              autocomplete="off"
+            />
+            <datalist id="campaigns-list">
+              <option *ngFor="let c of recentCampaigns" [value]="c.name">
+            </datalist>
+          </div>
+          
+          <!-- New mode: regular input -->
+          <input 
+            *ngIf="!showExistingMode"
+            id="campaign-name"
+            [(ngModel)]="name"
+            name="name"
+            placeholder="Enter campaign name"
+            type="text"
+            class="form-input"
+            aria-required="true"
+          />
+        </div>
+
+        <!-- Topic (for existing mode, show read-only) -->
+        <div class="form-group" *ngIf="showExistingMode">
+          <label for="campaign-topic">Topic</label>
+          <input 
+            id="campaign-topic"
+            [(ngModel)]="topic"
+            name="topic"
+            type="text"
+            class="form-input topic-display"
+            readonly
+            placeholder="Select a campaign to see its topic"
+          />
+        </div>
+
+        <!-- Topic (for new mode, editable) -->
+        <div class="form-group" *ngIf="!showExistingMode">
+          <label for="campaign-topic">Topic</label>
+          <input 
+            id="campaign-topic"
+            [(ngModel)]="topic"
+            name="topic"
+            placeholder="AI, Marketing, Business..."
+            type="text"
+            class="form-input"
+          />
+        </div>
+
+        <!-- Selected Campaign Info -->
+        <div class="selected-info" *ngIf="showExistingMode && selectedExistingCampaign">
+          <div class="info-item">
+            <span class="info-label">Campaign:</span>
+            <span class="info-value">{{ selectedExistingCampaign.name }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Platform:</span>
+            <span class="info-value">{{ selectedExistingCampaign.platform }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Posts:</span>
+            <span class="info-value">{{ selectedExistingCampaign.postCount || 0 }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button 
+            type="submit"
+            class="btn-primary"
+            [disabled]="loading || (showExistingMode && !campaignId)"
+            aria-busy="loading"
+          >
+            {{ loading ? 'Generating...' : 'Generate with AI' }}
+          </button>
+
+          <button 
+            type="button"
+            class="btn-secondary"
+            (click)="createManualCampaign()"
+            [disabled]="loading || (showExistingMode && !campaignId)"
+          >
+            Manual Post
+          </button>
+        </div>
+      </form>
+    </aside>
+
+    <!-- RIGHT: POSTS GRID -->
+    <section class="posts-section" [class.full-width]="!showForm">
+      <div class="section-header">
+        <h3>Generated Posts</h3>
+        <span class="post-count">{{ posts.length }} posts</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="posts.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <lucide-icon [img]="icons.fileText" [size]="48"></lucide-icon>
+        </div>
+        <h4>No posts yet</h4>
+        <p *ngIf="showExistingMode && selectedExistingCampaign">No posts in this campaign yet</p>
+        <p *ngIf="!showExistingMode || !selectedExistingCampaign">Create a campaign to generate AI-powered posts</p>
+        <button class="btn-primary" (click)="showForm = true">
+          + Create Campaign
+        </button>
+      </div>
+
+      <!-- Posts Grid -->
+      <div class="posts-grid" *ngIf="posts.length > 0">
+        <article 
+          *ngFor="let post of posts; let i = index" 
+          class="post-card"
+          [style.animation-delay.ms]="i * 50"
+          [attr.aria-label]="'Post for ' + post.platform"
+        >
+          <!-- DISPLAY MODE -->
+          <ng-container *ngIf="!post.editing">
+            <!-- Card Header -->
+            <div class="card-header">
+              <span class="platform-badge" [attr.data-platform]="post.platform">
+                {{ post.platform }}
+              </span>
+              <button class="menu-btn" (click)="editPost(post)" aria-label="Edit post">
+                <lucide-icon [img]="icons.edit3" [size]="16"></lucide-icon>
+              </button>
+            </div>
+
+            <!-- Image Preview -->
+            <div *ngIf="post.image?.imageUrl" class="post-image">
+              <img [src]="post.image.imageUrl" [alt]="'Post image'" />
+            </div>
+
+            <!-- Content -->
+            <div class="post-content">
+              <h4>{{ post.title }}</h4>
+              <p>{{ post.content }}</p>
+              <div class="hashtags" *ngIf="post.hashtags">
+                {{ post.hashtags }}
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="card-status">
+              <span class="status-badge" [attr.data-status]="post.status?.toLowerCase()">
+                <span class="status-dot"></span>
+                {{ post.status }}
+              </span>
+              <span *ngIf="post.scheduledAt" class="schedule">
+                <lucide-icon [img]="icons.calendar" [size]="14"></lucide-icon>
+                {{ post.scheduledAt | date:'short' }}
+              </span>
+            </div>
+
+            <!-- Checkboxes Display -->
+            <div class="checkbox-display">
+              <span *ngIf="post.approved" class="check-badge approved">
+                <lucide-icon [img]="icons.check" [size]="14"></lucide-icon>
+                Approved
+              </span>
+              <span *ngIf="post.permanent" class="check-badge permanent">
+                <lucide-icon [img]="icons.infinity" [size]="14"></lucide-icon>
+                Permanent
+              </span>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-actions">
+              <button 
+                class="action-btn primary"
+                (click)="save(post)"
+                [disabled]="savingPostId === post.id"
+              >
+                <lucide-icon [img]="icons.save" [size]="16"></lucide-icon>
+                {{ savingPostId === post.id ? 'Saving...' : 'Save' }}
+              </button>
+              <button 
+                class="action-btn success"
+                (click)="publishNow(post)"
+                [disabled]="!post.approved || publishingPostId === post.id"
+              >
+                <lucide-icon [img]="icons.send" [size]="16"></lucide-icon>
+                {{ publishingPostId === post.id ? 'Publishing...' : 'Publish' }}
+              </button>
+              <button 
+                class="action-btn danger"
+                (click)="delete(post)"
+                aria-label="Delete post"
+              >
+                <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+              </button>
+            </div>
+          </ng-container>
+
+          <!-- EDIT MODE -->
+          <ng-container *ngIf="post.editing">
+            <div class="edit-form">
+              <div class="edit-header">
+                <span class="platform-badge" [attr.data-platform]="post.platform">{{ post.platform }}</span>
+                <button class="close-btn" (click)="post.editing = false" aria-label="Cancel">
+                  <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+                </button>
+              </div>
+
+              <div class="form-group">
+                <label>Title</label>
+                <input type="text" [(ngModel)]="post.title" class="form-input" />
+              </div>
+
+              <div class="form-group">
+                <label>Content</label>
+                <textarea [(ngModel)]="post.content" class="form-input" rows="4"></textarea>
+              </div>
+
+              <!-- Image Prompt -->
+              <div class="form-group">
+                <label>
+                  Image Prompt
+                  <span class="char-count">{{ (post.imagePrompt || '').length }}/500</span>
+                </label>
+                <textarea
+                  [(ngModel)]="post.imagePrompt"
+                  (input)="post.riskyKeywordsWarning = checkRiskyKeywords(post.imagePrompt)"
+                  class="form-input prompt-input"
+                  rows="2"
+                  maxlength="500"
+                  placeholder="Short keyword prompt: subject, style, lighting"
+                ></textarea>
+                <div class="warning-banner" *ngIf="post.riskyKeywordsWarning">
+                  <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
+                  <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+                </div>
+              </div>
+
+              <!-- Generate Image Button -->
+              <div class="form-group">
+                <button 
+                  type="button" 
+                  class="btn-secondary" 
+                  (click)="generateImage(post)"
+                  [disabled]="post.generatingImage || !post.content"
+                >
+                  <lucide-icon *ngIf="!post.generatingImage" [img]="icons.image" [size]="16"></lucide-icon>
+                  <lucide-icon *ngIf="post.generatingImage" [img]="icons.loader2" [size]="16" class="spin"></lucide-icon>
+                  {{ post.generatingImage ? 'Generating...' : 'Generate Image' }}
+                </button>
+              </div>
+
+              <!-- Image Preview -->
+              <div *ngIf="post.imageUrl" class="image-preview">
+                <img [src]="post.imageUrl" alt="Generated image" />
+              </div>
+
+              <div class="form-group">
+                <label>Hashtags</label>
+                <input type="text" [(ngModel)]="post.hashtags" class="form-input" placeholder="#AI #Marketing" />
+              </div>
+
+              <!-- Link -->
+              <div class="form-group">
+                <label>Link</label>
+                <input type="text" [(ngModel)]="post.link" class="form-input" placeholder="https://example.com" />
+              </div>
+
+              <div class="form-group">
+                <label>Platform</label>
+                <select [(ngModel)]="post.platform" class="form-input">
+                  <option value="LINKEDIN">LinkedIn</option>
+                  <option value="INSTAGRAM">Instagram</option>
+                  <option value="FACEBOOK">Facebook</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Scheduled At</label>
+                <input type="datetime-local" [(ngModel)]="post.scheduledAt" class="form-input" />
+              </div>
+
+              <div class="checkbox-group">
+                <label class="checkbox">
+                  <input type="checkbox" [(ngModel)]="post.permanent" />
+                  <span>Permanent</span>
+                </label>
+                <label class="checkbox">
+                  <input type="checkbox" [(ngModel)]="post.approved" />
+                  <span>Approved</span>
+                </label>
+              </div>
+
+              <div class="edit-actions">
+                <button class="btn-secondary" (click)="post.editing = false">Cancel</button>
+                <button 
+                  class="btn-primary"
+                  (click)="save(post); post.editing = false"
+                  [disabled]="savingPostId === post.id"
+                >
+                  {{ savingPostId === post.id ? 'Saving...' : 'Save Changes' }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </article>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MANUAL POST MODAL -->
+  <div class="modal-overlay" *ngIf="showManual" (click)="showManual = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create Manual Post</h3>
+        <button class="close-btn" (click)="showManual = false" aria-label="Close">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+        </button>
+      </div>
+
+      <form class="manual-form">
+        <!-- Platform -->
+        <div class="form-group">
+          <label for="post-platform">Platform</label>
+          <select id="post-platform" [(ngModel)]="manualPost.platform" name="platform" class="form-input">
+            <option value="LINKEDIN">LinkedIn</option>
+            <option value="INSTAGRAM">Instagram</option>
+            <option value="FACEBOOK">Facebook</option>
+          </select>
+        </div>
+
+        <!-- Title -->
+        <div class="form-group">
+          <label for="post-title">Title</label>
+          <input id="post-title" [(ngModel)]="manualPost.title" name="title" placeholder="Enter title" type="text" class="form-input" />
+        </div>
+
+        <!-- Content -->
+        <div class="form-group">
+          <label for="post-content">Content</label>
+          <textarea id="post-content" [(ngModel)]="manualPost.content" name="content" placeholder="Write your post..." class="form-input" rows="4"></textarea>
+        </div>
+
+        <!-- Link -->
+        <div class="form-group">
+          <label for="post-link">Link</label>
+          <input id="post-link" [(ngModel)]="manualPost.link" name="link" placeholder="https://example.com" type="text" class="form-input" />
+        </div>
+
+        <!-- Hashtags -->
+        <div class="form-group">
+          <label for="post-hashtags">Hashtags</label>
+          <input id="post-hashtags" [(ngModel)]="manualPost.hashtags" name="hashtags" placeholder="#AI #Marketing" type="text" class="form-input" />
+        </div>
+
+        <!-- Schedule -->
+        <div class="form-group">
+          <label for="post-schedule">Scheduled At</label>
+          <input id="post-schedule" type="datetime-local" [(ngModel)]="manualPost.scheduledAt" name="scheduledAt" class="form-input" />
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="checkbox-group">
+          <label class="checkbox">
+            <input type="checkbox" [(ngModel)]="manualPost.permanent" name="permanent" />
+            <span>Permanent Post</span>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" [(ngModel)]="manualPost.approved" name="approved" />
+            <span>Approved</span>
+          </label>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="form-group">
+          <label for="post-image">Upload Image</label>
+          <input id="post-image" type="file" (change)="onFileSelected($event)" accept="image/*" class="form-input file-input" />
+        </div>
+
+        <!-- Preview -->
+        <div *ngIf="previewUrl" class="image-preview">
+          <img [src]="previewUrl" alt="Preview" />
+        </div>
+
+        <!-- Warning -->
+        <div *ngIf="manualPost.platform === 'INSTAGRAM' && !previewUrl" class="warning-box">
+          <lucide-icon [img]="icons.alertTriangle" [size]="16"></lucide-icon>
+          Instagram requires an image
+        </div>
+
+        <!-- Submit -->
+        <button 
+          type="button"
+          class="btn-primary full-width"
+          (click)="createManualPost()"
+          [disabled]="loading || (manualPost.platform === 'INSTAGRAM' && !previewUrl)"
+        >
+          <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
+          {{ loading ? 'Saving...' : 'Create Post' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>

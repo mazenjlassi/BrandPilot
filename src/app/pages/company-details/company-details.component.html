@@ -1,0 +1,183 @@
+<div class="company-details-page">
+
+  <!-- Header -->
+  <header class="page-header">
+    <button class="btn-icon back-btn" (click)="goBack()">
+      <lucide-icon [img]="icons.arrowLeft" [size]="20"></lucide-icon>
+    </button>
+    <h1>{{ companyName }}</h1>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="launchScraper()" [disabled]="scraperLoading">
+        <lucide-icon *ngIf="!scraperLoading" [img]="icons.search" [size]="16"></lucide-icon>
+        <lucide-icon *ngIf="scraperLoading" [img]="icons.loader2" [size]="16" class="spin"></lucide-icon>
+        {{ scraperLoading ? 'Scraping...' : 'Launch Scraper' }}
+      </button>
+      <button class="btn-icon danger" (click)="deleteCompany()" title="Delete company">
+        <lucide-icon [img]="icons.trash2" [size]="18"></lucide-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="loading.profile"><app-loading-skeleton type="card" [count]="1"></app-loading-skeleton></div>
+
+  <!-- Company Profile Section -->
+  <div *ngIf="!loading.profile && profile" class="section">
+    <div class="section-header">
+      <h3>Profile</h3>
+      <button class="btn-primary" (click)="saveProfile()" [disabled]="saving">
+        <lucide-icon [img]="icons.save" [size]="16"></lucide-icon>
+        {{ saving ? 'Saving...' : 'Save' }}
+      </button>
+    </div>
+
+    <div class="profile-form">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" [value]="companyName" disabled class="input-readonly" />
+      </div>
+
+      <div class="form-group">
+        <label>
+          Instagram URL
+          <a *ngIf="editForm.instagramUrl" [href]="editForm.instagramUrl" target="_blank" class="external-link">
+            <lucide-icon [img]="icons.externalLink" [size]="12"></lucide-icon>
+          </a>
+        </label>
+        <input type="url" [(ngModel)]="editForm.instagramUrl" name="instagramUrl" placeholder="https://www.instagram.com/..." />
+      </div>
+
+      <div class="form-group">
+        <label>
+          Facebook URL
+          <a *ngIf="editForm.facebookUrl" [href]="editForm.facebookUrl" target="_blank" class="external-link">
+            <lucide-icon [img]="icons.externalLink" [size]="12"></lucide-icon>
+          </a>
+        </label>
+        <input type="url" [(ngModel)]="editForm.facebookUrl" name="facebookUrl" placeholder="https://www.facebook.com/..." />
+      </div>
+
+      <div class="form-group">
+        <label>
+          LinkedIn URL
+          <a *ngIf="editForm.linkedinUrl" [href]="editForm.linkedinUrl" target="_blank" class="external-link">
+            <lucide-icon [img]="icons.externalLink" [size]="12"></lucide-icon>
+          </a>
+        </label>
+        <input type="url" [(ngModel)]="editForm.linkedinUrl" name="linkedinUrl" placeholder="https://www.linkedin.com/company/..." />
+      </div>
+    </div>
+  </div>
+
+  <!-- Scraped Posts Section -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Scraped Posts</h3>
+      <span class="count-badge">{{ scrapedPosts.length }} posts</span>
+    </div>
+
+    <div *ngIf="loading.posts"><app-loading-skeleton type="table-row" [count]="5"></app-loading-skeleton></div>
+
+    <div *ngIf="!loading.posts && scrapedPosts.length === 0" class="empty-state">
+      <app-empty-state icon="search-x" heading="No scraped posts" message="No scraped posts for this company yet. Launch the scraper or add posts manually."></app-empty-state>
+    </div>
+
+    <div *ngIf="!loading.posts && scrapedPosts.length > 0" class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Content</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let post of scrapedPosts">
+            <td>
+              <span class="platform-badge" [style.background]="getPlatformColor(post.platform)">
+                {{ post.platform }}
+              </span>
+            </td>
+            <td class="content-cell">{{ post.postText }}</td>
+            <td>{{ post.postedAt || (post.scrapedAt | date:'shortDate') || '-' }}</td>
+            <td>
+              <button class="btn-icon danger" (click)="deletePost(post.id)" title="Delete">
+                <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Patterns Section -->
+  <div class="section">
+    <div class="section-header">
+      <h3>Patterns</h3>
+      <span class="count-badge">{{ patterns.length }} patterns</span>
+    </div>
+
+    <div *ngIf="loading.patterns"><app-loading-skeleton type="card" [count]="3"></app-loading-skeleton></div>
+
+    <div *ngIf="!loading.patterns && patterns.length === 0" class="empty-state">
+      <app-empty-state icon="file-x" heading="No patterns" message="No patterns extracted yet. Run a batch analysis from the Patterns page."></app-empty-state>
+    </div>
+
+    <div *ngIf="!loading.patterns && patterns.length > 0" class="patterns-list">
+      <div *ngFor="let p of patterns" class="pattern-card">
+        <div class="pattern-row" (click)="toggleExpand(p.id)">
+          <div class="pattern-topic"><strong>{{ p.topic }}</strong></div>
+          <div class="pattern-posts">{{ p.totalPostsAnalyzed || 0 }} posts</div>
+          <div class="pattern-score" *ngIf="p.avgEngagementScore != null">
+            <span class="score-badge" [style.background]="getScoreColor(p.avgEngagementScore)">
+              {{ p.avgEngagementScore.toFixed(2) }}
+            </span>
+            <span class="score-label">{{ getScoreLabel(p.avgEngagementScore) }}</span>
+          </div>
+          <div class="pattern-advice">{{ p.performanceAdvice ? (p.performanceAdvice.length > 40 ? p.performanceAdvice.slice(0,40) + '...' : p.performanceAdvice) : '-' }}</div>
+          <div class="pattern-actions">
+            <span class="expand-icon">
+              <lucide-icon [img]="expandedPatternId === p.id ? icons.chevronUp : icons.chevronDown" [size]="16"></lucide-icon>
+            </span>
+          </div>
+        </div>
+        <div class="pattern-detail" *ngIf="expandedPatternId === p.id">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Post Frequency</span>
+              <span class="detail-value">{{ p.postFrequency || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Content Length</span>
+              <span class="detail-value">{{ p.contentLength || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Media Type</span>
+              <span class="detail-value">{{ p.mediaType || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hashtags</span>
+              <span class="detail-value">{{ p.hashtagCount || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tone</span>
+              <span class="detail-value">{{ p.tone || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">CTA Style</span>
+              <span class="detail-value">{{ p.ctaStyle || '-' }}</span>
+            </div>
+            <div class="detail-item" *ngIf="p.performanceAdvice">
+              <span class="detail-label">Performance Advice</span>
+              <span class="detail-value">{{ p.performanceAdvice }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

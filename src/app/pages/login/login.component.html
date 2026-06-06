@@ -1,0 +1,66 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="/logo-3LMS.png" alt="MetaTry" class="login-logo" />
+      <h2>Welcome Back</h2>
+      <p class="login-subtitle">Sign in to your account</p>
+    </div>
+
+    <form class="login-form" (ngSubmit)="login()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Enter your username"
+          type="text"
+          required
+          autocomplete="username"
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter your password"
+            [type]="showPassword ? 'text' : 'password'"
+            required
+            autocomplete="current-password"
+            [disabled]="loading"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            tabindex="-1"
+          >
+            <lucide-icon [img]="showPassword ? icons.eyeOff : icons.eye" [size]="18"></lucide-icon>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="loading || !username || !password">
+        <lucide-icon *ngIf="loading" [img]="icons.loader2" [size]="18" class="spin"></lucide-icon>
+        <lucide-icon *ngIf="!loading" [img]="icons.logIn" [size]="18"></lucide-icon>
+        <span>{{ loading ? 'Signing in...' : 'Sign In' }}</span>
+      </button>
+    </form>
+
+    <div class="error-message" *ngIf="error">
+      {{ error }}
+    </div>
+  </div>
+
+  <div class="login-bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<div class="posts-page">
+  <h1>Posts</h1>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <span class="search-icon">
+      <lucide-icon [img]="icons.search" [size]="16"></lucide-icon>
+    </span>
+    <input 
+      type="text" 
+      placeholder="Search posts..." 
+      [(ngModel)]="searchQuery"
+      aria-label="Search posts"
+      class="search-input"
+    />
+  </div>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs" role="tablist">
+    <button [class.active]="activeTab === 'drafts'" (click)="setTab('drafts')" role="tab" [attr.aria-selected]="activeTab === 'drafts'">
+      Drafts
+    </button>
+    <button [class.active]="activeTab === 'scheduled'" (click)="setTab('scheduled')" role="tab" [attr.aria-selected]="activeTab === 'scheduled'">
+      Scheduled
+    </button>
+    <button [class.active]="activeTab === 'permanent'" (click)="setTab('permanent')" role="tab" [attr.aria-selected]="activeTab === 'permanent'">
+      Permanent
+    </button>
+    <button [class.active]="activeTab === 'published'" (click)="setTab('published')" role="tab" [attr.aria-selected]="activeTab === 'published'">
+      Published
+    </button>
+  </nav>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading" role="status" aria-live="polite">
+    <lucide-icon [img]="icons.loader2" [size]="24" class="spin"></lucide-icon>
+    <span>Loading posts...</span>
+  </div>
+
+  <!-- Posts Grid -->
+  <main class="posts-grid" role="list">
+
+    <!-- Post Card -->
+    <article class="post-card" *ngFor="let post of filteredPosts" role="listitem">
+
+      <!-- Card Header -->
+      <header class="card-header">
+        <span class="platform-badge">{{ post.platform }}</span>
+      </header>
+
+      <!-- Preview Image -->
+      <figure class="preview">
+        <img *ngIf="post.image?.imageUrl" 
+             [src]="post.image.imageUrl" 
+             [alt]="'Post image for ' + post.platform"
+             loading="lazy" />
+        <div *ngIf="!post.image?.imageUrl" class="placeholder" aria-label="No image">
+          <lucide-icon [img]="icons.image" [size]="32"></lucide-icon>
+        </div>
+      </figure>
+
+      <!-- Content -->
+      <div class="content">
+        <p>{{ post.content }}</p>
+        
+        <!-- Meta Information -->
+        <div class="meta">
+          <span *ngIf="post.scheduledAt" class="meta-item">
+            <lucide-icon [img]="icons.clock" [size]="12"></lucide-icon>
+            {{ post.scheduledAt }}
+          </span>
+          <span *ngIf="post.approved" class="meta-item approved">
+            <lucide-icon [img]="icons.checkCircle" [size]="12"></lucide-icon>
+            Approved
+          </span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button (click)="viewDetails(post.id)" aria-label="View details for this post">
+          <lucide-icon [img]="icons.eye" [size]="16"></lucide-icon>
+          View Details
+        </button>
+        <button *ngIf="activeTab === 'permanent'" (click)="postNow(post)" aria-label="Post this to social media now">
+          <lucide-icon [img]="icons.send" [size]="16"></lucide-icon>
+          Post Now
+        </button>
+      </div>
+
+    </article>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && posts.length === 0" class="empty" role="status">
+      <lucide-icon [img]="icons.fileText" [size]="48"></lucide-icon>
+      <p>No posts found</p>
+    </div>
+
+  </main>
+
+</div>
