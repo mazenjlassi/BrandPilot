@@ -84,8 +84,24 @@ jobs:
         working-directory: ./backend
       - name: Debug backend
         run: |
-          ps aux | grep java || echo "No java process"
-          cat backend/target/backend.log 2>/dev/null || echo "No log file yet"
+          {
+            echo "## Backend Diagnostics"
+            echo ""
+            echo "### Java processes"
+            echo '```'
+            ps aux | grep -v grep | grep java || echo "NO JAVA PROCESS"
+            echo '```'
+            echo "### Backend log"
+            echo '```'
+            cat backend/backend.log 2>/dev/null || echo "No log file yet"
+            echo '```'
+            echo "### Curl test"
+            echo '```'
+            curl -v http://localhost:8081/auth/login 2>&1 || echo "CONNECTION REFUSED"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Wait for backend
+        run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
