@@ -79,19 +79,32 @@ jobs:
         working-directory: ./backend
       - name: Start backend
         run: |
-          nohup java -jar target/metaTry-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
+          java -version
+          echo "=== Build JAR size ==="
+          ls -lh target/metaTry-0.0.1-SNAPSHOT.jar
+          echo "=== Verifying JAR ==="
+          jar tf target/metaTry-0.0.1-SNAPSHOT.jar | head -20
+          echo "=== Starting backend ==="
+          java -jar target/metaTry-0.0.1-SNAPSHOT.jar --debug > backend.log 2>&1 &
           echo $! > backend.pid
           echo "Backend PID: $(cat backend.pid)"
-          sleep 15
+          sleep 3
           if kill -0 $(cat backend.pid) 2>/dev/null; then
-            echo "PROCESS RUNNING"
+            echo "ALIVE after 3s"
+          else
+            echo "DEAD after 3s"
+          fi
+          sleep 12
+          if kill -0 $(cat backend.pid) 2>/dev/null; then
+            echo "ALIVE after 15s (total)"
             echo "=== Ports ==="
             ss -tlnp 2>/dev/null | grep java || netstat -tlnp 2>/dev/null | grep java || echo "ss/netstat not available"
           else
-            echo "PROCESS EXITED"
-            awk '{gsub(/%/,"%25"); gsub(/\r/,"%0D"); gsub(/\n/,"%0A"); print "::error::" $0}' backend.log
-            exit 1
+            echo "DEAD after 15s"
           fi
+          echo "=== Full log ==="
+          cat backend.log
+          if ! kill -0 $(cat backend.pid) 2>/dev/null; then exit 1; fi
         working-directory: ./backend
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
