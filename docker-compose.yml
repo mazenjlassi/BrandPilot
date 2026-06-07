@@ -1,17 +1,16 @@
 services:
-  postgres:
-    image: postgres:15-alpine
+  mysql:
+    image: mysql:8.0
     environment:
-      POSTGRES_DB: metatry
-      POSTGRES_USER: metatry
-      POSTGRES_PASSWORD: metatry
+      MYSQL_DATABASE: metatry
+      MYSQL_ROOT_PASSWORD: rootpassword
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U metatry"]
-      interval: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
       timeout: 5s
       retries: 5
 
@@ -22,11 +21,13 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/metatry
-      SPRING_DATASOURCE_USERNAME: metatry
-      SPRING_DATASOURCE_PASSWORD: metatry
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/metatry?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootpassword
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
 
   frontend:
@@ -39,4 +40,4 @@ services:
       - backend
 
 volumes:
-  pgdata:
+  mysql_data:

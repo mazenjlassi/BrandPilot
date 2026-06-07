@@ -1,14 +1,12 @@
-FROM eclipse-temurin:17-jdk-alpine
-
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY pom.xml ./
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn package -DskipTests -B
 
-# Copy the JAR file
-COPY target/metaTry-0.0.1-SNAPSHOT.jar app.jar
-
-# Create a non-root user to run the app
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
-
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/metaTry-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8081
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
