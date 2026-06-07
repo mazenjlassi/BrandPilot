@@ -79,7 +79,7 @@ class RepositoriesTest {
 
         postCommentRepository.save(PostComment.builder()
                 .commentText("Great!").sentiment("POSITIVE")
-                .externalCommentId("ext_1").post(post).build());
+                .externalCommentId("ext_1").post(post).platform(PlatformType.LINKEDIN).build());
 
         postMetricRepository.save(PostMetric.builder()
                 .likes(100).comments(10).post(post).build());
