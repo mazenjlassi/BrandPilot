@@ -79,9 +79,13 @@ jobs:
         working-directory: ./backend
       - name: Start backend
         run: |
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar &
+          nohup java -jar target/metaTry-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
           echo "Backend PID: $!"
         working-directory: ./backend
+      - name: Debug backend
+        run: |
+          ps aux | grep java || echo "No java process"
+          cat backend/target/backend.log 2>/dev/null || echo "No log file yet"
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
