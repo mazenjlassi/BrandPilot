@@ -19,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - run: mvn clean verify -Dspring.test.context.failure.threshold=99
+      - run: mvn clean verify
 
   frontend:
     runs-on: ubuntu-latest
