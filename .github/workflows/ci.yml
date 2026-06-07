@@ -55,35 +55,50 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     needs: [backend, frontend, scraper]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: metatry
+          MYSQL_ROOT_PASSWORD: rootpassword
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose up -d --build
-      - name: Wait for frontend
-        run: timeout 120 sh -c 'until curl -s http://localhost:4200 > /dev/null 2>&1; do sleep 5; done'
-      - name: Debug backend
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - run: mvn package -DskipTests -B
+        working-directory: ./backend
+      - name: Start backend
         run: |
-          echo "=== Container Status ==="
-          docker compose ps --all
-          echo "=== Backend Logs ==="
-          docker compose logs --tail=100 backend
-          echo "=== Curl test ==="
-          curl -v http://localhost:8081/auth/login 2>&1 || echo "CURL FAILED"
+          java -jar target/metaTry-0.0.1-SNAPSHOT.jar &
+          echo "Backend PID: $!"
+        working-directory: ./backend
       - name: Wait for backend
-        run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 5; done'
-      - name: Debug after wait
-        if: failure()
-        run: |
-          echo "=== Container Status ==="
-          docker compose ps --all
-          echo "=== Backend Logs ==="
-          docker compose logs --tail=100 backend
+        run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: ./e2e/package-lock.json
       - run: npm ci
+        working-directory: ./frontend
+      - name: Start frontend
+        run: |
+          npx ng serve --port 4200 --host 0.0.0.0 --disable-host-check &
+          echo "Frontend PID: $!"
+        working-directory: ./frontend
+      - name: Wait for frontend
+        run: timeout 120 sh -c 'until curl -s http://localhost:4200 > /dev/null 2>&1; do sleep 3; done'
+      - run: npm ci
         working-directory: ./e2e
       - run: npm test
         working-directory: ./e2e
-      - run: docker compose down -v
