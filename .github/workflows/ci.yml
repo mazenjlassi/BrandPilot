@@ -80,31 +80,17 @@ jobs:
       - name: Start backend
         run: |
           java -version
-          echo "=== Build JAR size ==="
-          ls -lh target/metaTry-0.0.1-SNAPSHOT.jar
-          echo "=== Verifying JAR ==="
-          jar tf target/metaTry-0.0.1-SNAPSHOT.jar | head -20
-          echo "=== Starting backend ==="
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar --debug > backend.log 2>&1 &
-          echo $! > backend.pid
-          echo "Backend PID: $(cat backend.pid)"
+          echo "=== Starting backend (foreground, timeout 20s) ==="
+          timeout 20 java -jar target/metaTry-0.0.1-SNAPSHOT.jar --debug &
+          BGPID=$!
+          echo "Backend PID: $BGPID"
           sleep 3
-          if kill -0 $(cat backend.pid) 2>/dev/null; then
-            echo "ALIVE after 3s"
-          else
-            echo "DEAD after 3s"
-          fi
+          kill -0 $BGPID 2>/dev/null && echo "ALIVE after 3s" || echo "DEAD after 3s"
           sleep 12
-          if kill -0 $(cat backend.pid) 2>/dev/null; then
-            echo "ALIVE after 15s (total)"
-            echo "=== Ports ==="
-            ss -tlnp 2>/dev/null | grep java || netstat -tlnp 2>/dev/null | grep java || echo "ss/netstat not available"
-          else
-            echo "DEAD after 15s"
-          fi
           echo "=== Full log ==="
-          cat backend.log
-          if ! kill -0 $(cat backend.pid) 2>/dev/null; then exit 1; fi
+          wait $BGPID 2>/dev/null
+          echo "Exit code: $?"
+          ss -tlnp 2>/dev/null | grep java || netstat -tlnp 2>/dev/null | grep java || echo "Ports: none"
         working-directory: ./backend
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
