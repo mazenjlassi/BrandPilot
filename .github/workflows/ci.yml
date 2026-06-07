@@ -61,6 +61,8 @@ jobs:
       - run: docker compose up -d --build
       - name: Wait for frontend
         run: timeout 120 sh -c 'until curl -s http://localhost:4200 > /dev/null 2>&1; do sleep 5; done'
+      - name: Wait for backend
+        run: timeout 300 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 10; done'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
