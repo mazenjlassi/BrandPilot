@@ -47,6 +47,15 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(admin);
         }
 
+        if (userRepository.findByName("marketer").isEmpty()) {
+            User marketer = new User();
+            marketer.setName("marketer");
+            marketer.setEmail("marketer@test.com");
+            marketer.setPassword(passwordEncoder.encode("pass123"));
+            marketer.setRole(Role.MARKETING);
+            userRepository.save(marketer);
+        }
+
         if (campaignRepository.count() == 0) {
             Campaign campaign = new Campaign();
             campaign.setName("Summer Launch 2025");
