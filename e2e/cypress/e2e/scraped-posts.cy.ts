@@ -9,6 +9,6 @@ describe('Scraped Posts', () => {
   })
 
   it('shows platform indicators', () => {
-    cy.contains(/facebook|instagram|linkedin|twitter|x/i).should('exist')
+    cy.get('.platform-badge').should('exist')
   })
 })

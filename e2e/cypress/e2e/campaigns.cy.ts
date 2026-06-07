@@ -1,7 +1,7 @@
 describe('Campaigns', () => {
   beforeEach(() => {
     cy.loginAsAdmin()
-    cy.visit('/campaigns')
+    cy.visit('/campaign-list')
   })
 
   it('lists campaigns', () => {
@@ -9,16 +9,12 @@ describe('Campaigns', () => {
   })
 
   it('opens campaign details', () => {
-    cy.get('a, button, tr, [class*="card"]')
-      .first()
-      .click()
+    cy.contains('Open').first().click()
     cy.url().should('include', '/campaigns/')
   })
 
   it('shows posts within a campaign', () => {
-    cy.get('a, button, tr, [class*="card"]')
-      .first()
-      .click()
+    cy.contains('Open').first().click()
     cy.contains(/post/i).should('exist')
   })
 })

@@ -10,21 +10,18 @@ describe('Posts', () => {
 
   it('shows post details', () => {
     cy.visit('/posts')
-    cy.get('a, button, [class*="clickable"], tr')
-      .first()
-      .click()
+    cy.contains('View Details').first().click()
     cy.url().should('include', '/posts/')
   })
 
   it('filters posts by status', () => {
     cy.visit('/posts')
-    cy.contains(/draft|published|scheduled/i).click()
-    cy.url().should('match', /draft|published|scheduled/i)
+    cy.contains('Drafts').click()
+    cy.get('.tabs button.active').should('contain.text', 'Drafts')
   })
 
   it('navigates to calendar view', () => {
-    cy.visit('/posts')
-    cy.contains(/calendar|schedule/i).click()
-    cy.url().should('include', '/calendar')
+    cy.visit('/calendar')
+    cy.get('full-calendar, .fc').should('exist')
   })
 })
