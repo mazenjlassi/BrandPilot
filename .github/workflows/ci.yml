@@ -102,8 +102,6 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
-      - name: Wait for backend
-        run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -113,7 +111,7 @@ jobs:
         working-directory: ./frontend
       - name: Start frontend
         run: |
-          npx ng serve --port 4200 --host 0.0.0.0 --disable-host-check &
+          nohup npx ng serve --port 4200 --host 0.0.0.0 --disable-host-check > frontend.log 2>&1 &
           echo "Frontend PID: $!"
         working-directory: ./frontend
       - name: Wait for frontend
