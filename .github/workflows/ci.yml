@@ -82,9 +82,13 @@ jobs:
           nohup java -jar target/metaTry-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
           echo $! > backend.pid
           echo "Backend PID: $(cat backend.pid)"
-          sleep 3
+          sleep 15
           if kill -0 $(cat backend.pid) 2>/dev/null; then
             echo "PROCESS RUNNING"
+            echo "=== Ports ==="
+            ss -tlnp 2>/dev/null | grep java || netstat -tlnp 2>/dev/null | grep java || echo "ss/netstat not available"
+            echo "=== Log ==="
+            cat backend.log
           else
             echo "PROCESS EXITED"
             cat backend.log
