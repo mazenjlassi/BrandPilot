@@ -87,14 +87,17 @@ jobs:
             echo "PROCESS RUNNING"
             echo "=== Ports ==="
             ss -tlnp 2>/dev/null | grep java || netstat -tlnp 2>/dev/null | grep java || echo "ss/netstat not available"
-            echo "=== Log ==="
-            cat backend.log
           else
             echo "PROCESS EXITED"
             cat backend.log
             exit 1
           fi
         working-directory: ./backend
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-log
+          path: backend/backend.log
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
