@@ -2,10 +2,10 @@ package com.example.metatry;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfile;
 
-@Import(TestcontainersConfiguration.class)
 @SpringBootTest
+@ActiveProfile("test")
 class MetaTryApplicationTests {
 
     @Test
