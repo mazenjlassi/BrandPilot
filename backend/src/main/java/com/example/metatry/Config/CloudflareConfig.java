@@ -1,15 +1,17 @@
 package com.example.metatry.Config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty("cloudflare.api.token")
 public class CloudflareConfig {
 
-    @Value("${cloudflare.api.token}")
+    @Value("${cloudflare.api.token:}")
     private String apiToken;
 
-    @Value("${cloudflare.account.id}")
+    @Value("${cloudflare.account.id:}")
     private String accountId;
 
     public String getApiToken() {

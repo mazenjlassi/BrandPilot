@@ -69,7 +69,7 @@ jobs:
           echo "=== Curl test ==="
           curl -v http://localhost:8081/auth/login 2>&1 || echo "CURL FAILED"
       - name: Wait for backend
-        run: timeout 600 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 10; done'
+        run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 5; done'
       - name: Debug after wait
         if: failure()
         run: |
