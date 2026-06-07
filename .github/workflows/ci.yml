@@ -60,12 +60,23 @@ jobs:
       - run: docker compose up -d --build
       - name: Wait for frontend
         run: timeout 120 sh -c 'until curl -s http://localhost:4200 > /dev/null 2>&1; do sleep 5; done'
-      - name: Debug containers
+      - name: Debug backend
         run: |
-          docker compose ps
-          docker compose logs --tail=50 backend
+          echo "=== Container Status ==="
+          docker compose ps --all
+          echo "=== Backend Logs ==="
+          docker compose logs --tail=100 backend
+          echo "=== Curl test ==="
+          curl -v http://localhost:8081/auth/login 2>&1 || echo "CURL FAILED"
       - name: Wait for backend
         run: timeout 600 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 10; done'
+      - name: Debug after wait
+        if: failure()
+        run: |
+          echo "=== Container Status ==="
+          docker compose ps --all
+          echo "=== Backend Logs ==="
+          docker compose logs --tail=100 backend
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
