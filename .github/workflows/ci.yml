@@ -80,26 +80,17 @@ jobs:
       - name: Start backend
         run: |
           nohup java -jar target/metaTry-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
-          echo "Backend PID: $!"
+          echo $! > backend.pid
+          echo "Backend PID: $(cat backend.pid)"
+          sleep 3
+          if kill -0 $(cat backend.pid) 2>/dev/null; then
+            echo "PROCESS RUNNING"
+          else
+            echo "PROCESS EXITED"
+            cat backend.log
+            exit 1
+          fi
         working-directory: ./backend
-      - name: Debug backend
-        run: |
-          {
-            echo "## Backend Diagnostics"
-            echo ""
-            echo "### Java processes"
-            echo '```'
-            ps aux | grep -v grep | grep java || echo "NO JAVA PROCESS"
-            echo '```'
-            echo "### Backend log"
-            echo '```'
-            cat backend/backend.log 2>/dev/null || echo "No log file yet"
-            echo '```'
-            echo "### Curl test"
-            echo '```'
-            curl -v http://localhost:8081/auth/login 2>&1 || echo "CONNECTION REFUSED"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
