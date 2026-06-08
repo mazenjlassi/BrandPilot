@@ -103,26 +103,31 @@ jobs:
           echo "::error::CRASH:"
           if [ -f /tmp/metatry-crash.log ]; then
             wc -l /tmp/metatry-crash.log | while read n f; do echo "::error::crash lines=$n"; done
-            echo "::error::=== HEAD 30 ==="
-            head -30 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
-            echo "::error::=== CAUSE LINES ==="
-            grep -n "^--- Cause\[" /tmp/metatry-crash.log | head -20 | while IFS= read -r line; do echo "::error::$line"; done
-            echo "::error::=== SUPPRESSED LINES ==="
-            grep -n "^--- Suppressed\[" /tmp/metatry-crash.log | head -20 | while IFS= read -r line; do echo "::error::$line"; done
-            echo "::error::=== TAIL 10 ==="
-            tail -10 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::MAIN:"
+            sed -n '1,5p' /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+            c=$(grep -c "^--- Cause\[" /tmp/metatry-crash.log || true)
+            s=$(grep -c "^--- Suppressed\[" /tmp/metatry-crash.log || true)
+            echo "::error::Cause entries: $c, Suppressed entries: $s"
+            if [ "$c" -gt 0 ]; then
+              echo "::error::FIRST CAUSE:"
+              awk '/^--- Cause\[0\] ---/,0' /tmp/metatry-crash.log | head -15 | while IFS= read -r line; do echo "::error::$line"; done
+              echo "::error::LAST CAUSE:"
+              tac /tmp/metatry-crash.log | awk '/^--- Cause\[/{c++; if(c==1){print; while(getline && $0 !~ /^--- (Cause|Suppressed)/ && $0 !~ /^===/) print; exit}}' | tac | head -15 | while IFS= read -r line; do echo "::error::$line"; done
+            fi
+            echo "::error::TAIL:"
+            tail -5 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
           else
-            echo "::error::no crash log file"
+            echo "::error::no crash log"
           fi
           echo "::error::STDOUT:"
           if [ -f /tmp/backend.log ]; then
             wc -c /tmp/backend.log | while read n f; do echo "::error::stdout $n bytes"; done
-            head -10 /tmp/backend.log | while IFS= read -r line; do echo "::error::$line"; done
+            head -5 /tmp/backend.log | while IFS= read -r line; do echo "::error::$line"; done
           fi
           echo "::error::SPRING LOGS:"
           find /tmp -name spring.log 2>/dev/null | while IFS= read -r f; do
             echo "::error::found $f ($(wc -c < $f) bytes)"
-            head -10 "$f" | while IFS= read -r line; do echo "::error::$line"; done
+            head -5 "$f" | while IFS= read -r line; do echo "::error::$line"; done
           done
           echo "::error::ALL DONE"
         working-directory: ./backend
