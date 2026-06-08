@@ -103,10 +103,10 @@ jobs:
           EC=$?
           kill $WATCHDOG 2>/dev/null
           echo "::error::EC=$EC"
-          echo "::error::=== strace last 30 ==="
-          tail -30 /tmp/strace.log 2>/dev/null | while IFS= read -r line; do echo "::error::str $line"; done
-          echo "::error::=== exit/error/write in strace ==="
-          grep -E 'exit_group|exit\(|write\(2|EACCES|ENOENT|ECONNREFUSE|Connection refused|failed|error' /tmp/strace.log 2>/dev/null | tail -30 | while IFS= read -r line; do echo "::error::stg $line"; done
+          echo "::error::=== crash log ==="
+          cat /tmp/metatry-crash.log 2>/dev/null | while IFS= read -r line; do echo "::error::crash $line"; done
+          echo "::error::=== strace last 20 ==="
+          tail -20 /tmp/strace.log 2>/dev/null | while IFS= read -r line; do echo "::error::str $line"; done
           echo "::error::=== stdout ==="
           head -30 /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::out $line"; done
           echo "::error::=== hs_err ==="
