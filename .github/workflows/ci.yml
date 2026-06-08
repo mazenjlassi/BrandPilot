@@ -82,23 +82,20 @@ jobs:
           java -version
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
           echo "Starting backend..."
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar &
+          java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           BGPID=$!
           echo "PID: $BGPID"
-          sleep 3
-          kill -0 $BGPID 2>/dev/null && echo "ALIVE at 3s" || echo "DEAD at 3s"
-          sleep 7
-          kill -0 $BGPID 2>/dev/null && echo "ALIVE at 10s" || echo "DEAD at 10s"
           sleep 10
-          echo "=== Status at 20s ==="
           if kill -0 $BGPID 2>/dev/null; then
-            echo "ALIVE"
+            echo "ALIVE at 10s"
             ss -tlnp 2>/dev/null | grep -E "8081|java" || netstat -tlnp 2>/dev/null | grep -E "8081|java" || echo "no port info"
           else
-            echo "DEAD"
+            echo "DEAD at 10s"
+            while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
             exit 1
           fi
           kill $BGPID 2>/dev/null
+        working-directory: ./backend
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
       - uses: actions/setup-node@v4
