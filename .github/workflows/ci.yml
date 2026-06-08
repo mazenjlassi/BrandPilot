@@ -91,6 +91,7 @@ jobs:
             --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
             --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
             -Djava.io.tmpdir=/tmp/javatmp \
+            -Dspring.mail.host=smtp.gmail.com \
             -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           JPID=$!; sleep 5; wait $JPID 2>/dev/null; EC=$?
           if [ -f /tmp/metatry-crash.log ]; then
