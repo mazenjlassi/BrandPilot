@@ -81,10 +81,13 @@ jobs:
         run: |
           java -version 2>&1
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
-          echo "=== hs_err before ==="
-          find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 || echo "(none)"
-          echo "=== Starting backend ==="
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2> /tmp/backend.err &
+          which strace 2>/dev/null && echo "strace available" || echo "strace not available"
+          echo "=== Starting backend with strace ==="
+          if which strace 2>/dev/null; then
+            strace -f -e trace=process,network,file -o /tmp/strace.log java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          else
+            java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          fi
           JPID=$!
           echo "Java PID: $JPID"
           sleep 5
@@ -93,12 +96,14 @@ jobs:
           else
             echo "::error::PROCESS DIED BEFORE 5s"
           fi
-          echo "=== hs_err after ==="
-          find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 || echo "(none)"
+          wait $JPID 2>/dev/null; EC=$?
+          echo "::error::EXIT CODE: $EC"
+          echo "=== strace log (last 50 lines) ==="
+          tail -50 /tmp/strace.log 2>/dev/null | while IFS= read -r line; do echo "::error::str $line"; done
           echo "=== stdout ==="
-          cat /tmp/backend.log | head -20 | while IFS= read -r line; do echo "::error::out $line"; done
-          echo "=== stderr ==="
-          cat /tmp/backend.err | while IFS= read -r line; do echo "::error::err $line"; done
+          head -20 /tmp/backend.log | while IFS= read -r line; do echo "::error::out $line"; done
+          echo "=== hs_err ==="
+          find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 || echo "(none)" | while IFS= read -r line; do echo "::error::hs $line"; done
           echo "=== done ==="
           echo "=== Full backend log ==="
           while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
