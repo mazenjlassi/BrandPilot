@@ -2,6 +2,7 @@ package com.example.metatry;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 
 import org.springframework.boot.SpringApplication;
@@ -16,12 +17,20 @@ public class MetaTryApplication {
         try {
             SpringApplication.run(MetaTryApplication.class, args);
         } catch (Throwable t) {
-            try (PrintWriter pw = new PrintWriter(new FileWriter("/tmp/metatry-crash.log", true))) {
-                pw.println("=== CRASH at " + LocalDateTime.now() + " ===");
-                t.printStackTrace(pw);
-                pw.flush();
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            pw.flush();
+            String trace = sw.toString();
+            System.out.println("=== METATRY CRASH ===");
+            System.out.println(trace);
+            System.out.flush();
+            try (PrintWriter fw = new PrintWriter(new FileWriter("/tmp/metatry-crash.log"))) {
+                fw.println("=== CRASH at " + LocalDateTime.now() + " ===");
+                fw.print(trace);
+                fw.flush();
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Failed to write crash log: " + e);
             }
             throw t;
         }
