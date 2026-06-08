@@ -91,6 +91,7 @@ jobs:
             --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
             --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
             -Djava.io.tmpdir=/tmp/javatmp \
+            -Dspring.jpa.hibernate.ddl-auto=update \
             -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           JPID=$!
           sleep 5
