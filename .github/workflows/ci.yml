@@ -84,12 +84,16 @@ jobs:
           echo "::error::SCRIPT BEGINS"
           java -version
           echo "::error::Starting backend"
-          java -Djava.io.tmpdir=/tmp/javatmp \
+          mkdir -p /tmp/javatmp
+          java \
             --add-opens java.base/java.lang=ALL-UNNAMED \
             --add-opens java.base/java.util=ALL-UNNAMED \
             --add-opens java.base/java.io=ALL-UNNAMED \
             --add-opens java.base/java.net=ALL-UNNAMED \
             --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+            --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
+            --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
+            -Djava.io.tmpdir=/tmp/javatmp \
             -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           JPID=$!
           echo "::error::PID=$JPID"
@@ -97,12 +101,24 @@ jobs:
           kill -0 $JPID 2>/dev/null; AL=$?; echo "::error::ALIVE=$AL"
           wait $JPID 2>/dev/null; EC=$?; echo "::error::EC=$EC"
           echo "::error::CRASH:"
-          cat /tmp/metatry-crash.log 2>/dev/null | head -30 | while IFS= read -r line; do echo "::error::cr $line"; done || echo "::error::no crash log"
+          if [ -f /tmp/metatry-crash.log ]; then
+            wc -l /tmp/metatry-crash.log | while read n f; do echo "::error::crash lines=$n"; done
+            cat /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+          else
+            echo "::error::no crash log file"
+          fi
           echo "::error::STDOUT:"
-          wc -l /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::sze $line"; done
-          head -100 /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::ol $line"; done || echo "::error::no stdout"
-          echo "::error::SPRING LOG:"
-          find /tmp -name spring.log -exec cat {} \; 2>/dev/null | while IFS= read -r line; do echo "::error::sl $line"; done || echo "::error::no spring log"
+          if [ -f /tmp/backend.log ]; then
+            echo "::error::stdout $(wc -c < /tmp/backend.log) bytes"
+            head -200 /tmp/backend.log
+          fi
+          echo "::error::SPRING LOGS:"
+          find /tmp -name spring.log 2>/dev/null | while IFS= read -r f; do
+            echo "::error::found $f ($(wc -c < $f) bytes)"
+            head -200 "$f"
+          done
+          echo "::error::TMP FILES:"
+          find /tmp -maxdepth 2 -name "*.log" -o -name "*.dump" -o -name "hs_err*" 2>/dev/null | head -20
           echo "::error::ALL DONE"
         working-directory: ./backend
       - name: Wait for backend
