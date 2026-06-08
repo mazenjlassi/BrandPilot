@@ -108,7 +108,8 @@ jobs:
           echo "::error::=== strace last 20 ==="
           tail -20 /tmp/strace.log 2>/dev/null | while IFS= read -r line; do echo "::error::str $line"; done
           echo "::error::=== stdout ==="
-          head -30 /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::out $line"; done
+          wc -l /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::out_lines $line"; done
+          head -100 /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::out $line"; done
           echo "::error::=== hs_err ==="
           find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 | while IFS= read -r line; do echo "::error::hs $line"; done
           echo "::error::ALL DONE"
