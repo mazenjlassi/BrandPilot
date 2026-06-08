@@ -97,9 +97,8 @@ jobs:
             lines=$(wc -l < /tmp/metatry-crash.log)
             c=$(grep -c "^--- Cause\[" /tmp/metatry-crash.log || true)
             s=$(grep -c "^--- Suppressed\[" /tmp/metatry-crash.log || true)
-            echo "::error::C:$c S:$s L:$lines EC:$EC"
-            grep -A5 "^--- Cause\[0\] ---" /tmp/metatry-crash.log | head -6 | while IFS= read -r line; do echo "::error::$line"; done
-            grep -A3 "^--- Cause\[$(($c-1))\] ---" /tmp/metatry-crash.log | head -4 | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::C:$c EC:$EC"
+            awk '/^--- Cause\[/{h=$0; getline; print h " -> " $0}' /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
           fi
         working-directory: ./backend
       - name: Wait for backend
