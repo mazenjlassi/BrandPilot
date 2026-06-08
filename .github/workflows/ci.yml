@@ -81,18 +81,33 @@ jobs:
         run: |
           java -version
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
-          echo "=== hs_err before ==="
-          find . /tmp -name "hs_err_pid*" 2>/dev/null || true
-          echo "=== Starting backend (foreground, 60s timeout) ==="
-          set -o pipefail
-          timeout 60 java -jar target/metaTry-0.0.1-SNAPSHOT.jar 2>&1 | tee /tmp/backend.log || true
-          EC=${PIPESTATUS[0]}
-          echo "Exit code: $EC"
-          echo "=== hs_err after ==="
-          find . /tmp -name "hs_err_pid*" 2>/dev/null || true
+          echo "=== Starting backend in background ==="
+          java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          JPID=$!
+          echo "Java PID: $JPID"
+          sleep 5; echo "=== After 5s ==="
+          ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
+          if kill -0 $JPID 2>/dev/null; then
+            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 || jcmd $JPID Thread.print 2>&1 | head -60 || echo "(thread dump failed)"
+            sleep 10; echo "=== After 15s ==="
+            ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
+            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 || jcmd $JPID Thread.print 2>&1 | head -60 || echo "(thread dump failed)"
+            sleep 15; echo "=== After 30s ==="
+            ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
+            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 || jcmd $JPID Thread.print 2>&1 | head -60 || echo "(thread dump failed)"
+            sleep 20; echo "=== After 50s ==="
+          else
+            echo "Process died!"
+            wait $JPID 2>/dev/null || true
+          fi
+          if kill -0 $JPID 2>/dev/null; then
+            echo "=== Still alive after 50s, letting it continue ==="
+          fi
           echo "=== Full backend log ==="
           while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
-          if [ $EC -ne 0 ] && [ $EC -ne 124 ]; then exit 1; fi
+          echo "=== hs_err files ==="
+          find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 || echo "(none found)"
+          echo "Backend exited"
         working-directory: ./backend
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
