@@ -29,13 +29,13 @@ public class AnalyticsService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${facebook.page-access-token}")
+    @Value("${facebook.page-access-token:}")
     private String token;
 
-    @Value("${facebook.page-id}")
+    @Value("${facebook.page-id:}")
     private String pageId;
 
-    @Value("${instagram.business-id}")
+    @Value("${instagram.business-id:}")
     private String instagramBusinessId;
 
     // ================= MAIN =================

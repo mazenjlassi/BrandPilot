@@ -19,10 +19,10 @@ public class FacebookService {
     private final RestTemplate restTemplate;
     private final CloudinaryService cloudinaryService;
 
-    @Value("${facebook.page-id}")
+    @Value("${facebook.page-id:}")
     private String pageId;
 
-    @Value("${facebook.page-access-token}")
+    @Value("${facebook.page-access-token:}")
     private String token;
 
     private static final String GRAPH_API_URL = "https://graph.facebook.com/v19.0/";
