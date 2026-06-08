@@ -83,9 +83,9 @@ jobs:
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
           echo "=== hs_err before ==="
           find . /tmp -name "hs_err_pid*" 2>/dev/null || true
-          echo "=== Starting backend (foreground, 10s timeout) ==="
+          echo "=== Starting backend (foreground, 60s timeout) ==="
           set -o pipefail
-          timeout 10 java -jar target/metaTry-0.0.1-SNAPSHOT.jar 2>&1 | tee /tmp/backend.log || true
+          timeout 60 java -jar target/metaTry-0.0.1-SNAPSHOT.jar 2>&1 | tee /tmp/backend.log || true
           EC=${PIPESTATUS[0]}
           echo "Exit code: $EC"
           echo "=== hs_err after ==="
