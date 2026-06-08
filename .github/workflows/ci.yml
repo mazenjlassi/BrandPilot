@@ -93,8 +93,8 @@ jobs:
             echo "PROCESS DEAD"
             echo "BACKEND LOG:"
             cat /tmp/backend.log
-            URL=$(curl -s -F 'clbin=<-' https://clbin.com < /tmp/backend.log 2>/dev/null)
-            echo "::notice::Backend log uploaded to: ${URL:-upload failed}"
+            URL=$(curl -s -F "clbin=<-" https://clbin.com < /tmp/backend.log 2>/dev/null || true)
+            echo "::notice::Backend log uploaded to: ${URL:-upload_failed}"
             exit 1
           fi
           kill $BGPID 2>/dev/null
