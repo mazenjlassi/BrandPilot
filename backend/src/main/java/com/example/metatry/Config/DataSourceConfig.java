@@ -18,15 +18,30 @@ public class DataSourceConfig {
     @Primary
     public DataSource dataSource() {
         Properties props = new Properties();
-        try (InputStream is = getClass().getResourceAsStream("/application.properties")) {
-            if (is == null) {
-                throw new RuntimeException("Cannot find application.properties on classpath");
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        String[] paths = {
+            "application.properties",
+            "/application.properties",
+            "BOOT-INF/classes/application.properties",
+            "classpath:application.properties"
+        };
+        Exception lastEx = null;
+        for (String path : paths) {
+            try (InputStream is = cl.getResourceAsStream(path)) {
+                if (is != null) {
+                    props.load(is);
+                    break;
+                }
+            } catch (Exception e) {
+                lastEx = e;
             }
-            props.load(is);
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load application.properties", e);
+        }
+        if (props.isEmpty()) {
+            StringBuilder sb = new StringBuilder("Cannot find application.properties. Tried: ");
+            for (String p : paths) sb.append(p).append(" ");
+            sb.append(" CL=").append(cl);
+            if (lastEx != null) sb.append(" ex=").append(lastEx);
+            throw new RuntimeException(sb.toString());
         }
         String url = props.getProperty("spring.datasource.url");
         String username = props.getProperty("spring.datasource.username");
