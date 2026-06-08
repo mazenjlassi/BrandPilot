@@ -5,7 +5,9 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 
 import javax.sql.DataSource;
 
@@ -15,16 +17,21 @@ public class DataSourceConfig {
     @Bean
     @Primary
     public DataSource dataSource(Environment env) {
-        String url = env.getProperty("spring.datasource.url");
-        String username = env.getProperty("spring.datasource.username");
-        String password = env.getProperty("spring.datasource.password");
-        String driverClassName = env.getProperty("spring.datasource.driver-class-name");
-        return DataSourceBuilder.create()
-                .url(url)
-                .username(username)
-                .password(password)
-                .driverClassName(driverClassName)
-                .type(HikariDataSource.class)
-                .build();
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== DataSourceConfig DEBUG ===\n");
+        sb.append("Environment: ").append(env).append('\n');
+        if (env instanceof ConfigurableEnvironment) {
+            ConfigurableEnvironment ce = (ConfigurableEnvironment) env;
+            sb.append("PropertySources:\n");
+            for (PropertySource<?> ps : ce.getPropertySources()) {
+                Object val = ps.getProperty("spring.datasource.url");
+                sb.append("  ").append(ps.getName()).append(" -> ").append(val).append('\n');
+            }
+        }
+        sb.append("url=").append(env.getProperty("spring.datasource.url")).append('\n');
+        sb.append("username=").append(env.getProperty("spring.datasource.username")).append('\n');
+        sb.append("password=").append(env.getProperty("spring.datasource.password")).append('\n');
+        sb.append("driver=").append(env.getProperty("spring.datasource.driver-class-name")).append('\n');
+        throw new RuntimeException(sb.toString());
     }
 }
