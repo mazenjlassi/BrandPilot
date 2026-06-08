@@ -83,7 +83,7 @@ jobs:
           set +e
           mkdir -p /tmp/javatmp
           mkdir -p $PWD/config
-          jar xf target/metaTry-0.0.1-SNAPSHOT.jar BOOT-INF/classes/application.properties 2>/dev/null; mv -f BOOT-INF/classes/application.properties $PWD/config/ 2>/dev/null; rm -rf BOOT-INF 2>/dev/null; ls -la $PWD/config/
+          cp -f target/classes/application.properties $PWD/config/ 2>/dev/null
           java \
             --add-opens java.base/java.lang=ALL-UNNAMED \
             --add-opens java.base/java.util=ALL-UNNAMED \
@@ -93,6 +93,7 @@ jobs:
             --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
             --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
             -Djava.io.tmpdir=/tmp/javatmp \
+            -Dspring.config.additional-location=file:./config/ \
             -Dspring.datasource.url="jdbc:mysql://localhost:3306/metatry?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
             -Dspring.datasource.username=root \
             -Dspring.datasource.password=rootpassword \
