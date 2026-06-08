@@ -82,14 +82,16 @@ jobs:
           java -version
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
           echo "=== hs_err before ==="
-          find . /tmp -name "hs_err_pid*" 2>/dev/null
+          find . /tmp -name "hs_err_pid*" 2>/dev/null || true
           echo "=== Starting backend (foreground, 10s timeout) ==="
           set -o pipefail
-          timeout 10 java -jar target/metaTry-0.0.1-SNAPSHOT.jar 2>&1 | tee /tmp/backend.log
-          EC=$?
+          timeout 10 java -jar target/metaTry-0.0.1-SNAPSHOT.jar 2>&1 | tee /tmp/backend.log || true
+          EC=${PIPESTATUS[0]}
           echo "Exit code: $EC"
           echo "=== hs_err after ==="
-          find . /tmp -name "hs_err_pid*" 2>/dev/null
+          find . /tmp -name "hs_err_pid*" 2>/dev/null || true
+          echo "=== Full backend log ==="
+          while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
           if [ $EC -ne 0 ] && [ $EC -ne 124 ]; then exit 1; fi
         working-directory: ./backend
       - name: Wait for backend
