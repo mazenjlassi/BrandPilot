@@ -82,26 +82,33 @@ jobs:
           java -version
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
           echo "=== Starting backend in background ==="
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          java -Djava.security.egd=file:/dev/urandom -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           JPID=$!
           echo "Java PID: $JPID"
           sleep 5; echo "=== After 5s ==="
           ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
           if kill -0 $JPID 2>/dev/null; then
-            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 || jcmd $JPID Thread.print 2>&1 | head -60 || echo "(thread dump failed)"
-            sleep 10; echo "=== After 15s ==="
-            ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
-            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 || jcmd $JPID Thread.print 2>&1 | head -60 || echo "(thread dump failed)"
-            sleep 15; echo "=== After 30s ==="
-            ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
-            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 || jcmd $JPID Thread.print 2>&1 | head -60 || echo "(thread dump failed)"
-            sleep 20; echo "=== After 50s ==="
+            echo "::error::=== THREAD DUMP 1 (5s) ==="
+            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 | while IFS= read -r line; do echo "::error::td1 $line"; done
+            sleep 10
+            echo "::error::=== PORT CHECK (15s) ==="
+            (ss -tlnp 2>/dev/null | grep -q 8081 && echo "port 8081 OPEN" || echo "port 8081 NOT OPEN") | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::=== THREAD DUMP 2 (15s) ==="
+            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 | while IFS= read -r line; do echo "::error::td2 $line"; done
+            sleep 15
+            echo "::error::=== PORT CHECK (30s) ==="
+            (ss -tlnp 2>/dev/null | grep -q 8081 && echo "port 8081 OPEN" || echo "port 8081 NOT OPEN") | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::=== THREAD DUMP 3 (30s) ==="
+            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 | while IFS= read -r line; do echo "::error::td3 $line"; done
+            sleep 20
+            echo "::error::=== AFTER 50s ==="
+            (ss -tlnp 2>/dev/null | grep -q 8081 && echo "port 8081 OPEN" || echo "port 8081 NOT OPEN") | while IFS= read -r line; do echo "::error::$line"; done
           else
-            echo "Process died!"
+            echo "::error::PROCESS DIED BEFORE 5s"
             wait $JPID 2>/dev/null || true
           fi
           if kill -0 $JPID 2>/dev/null; then
-            echo "=== Still alive after 50s, letting it continue ==="
+            echo "::error::PROCESS STILL ALIVE AFTER 50s"
           fi
           echo "=== Full backend log ==="
           while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
