@@ -83,7 +83,7 @@ jobs:
           set +e
           mkdir -p /tmp/javatmp
           mkdir -p $PWD/config
-          unzip -o -j target/metaTry-0.0.1-SNAPSHOT.jar "BOOT-INF/classes/application.properties" -d $PWD/config/ 2>/dev/null || echo "::warning::unzip failed, proceeding without config/"
+          jar xf target/metaTry-0.0.1-SNAPSHOT.jar BOOT-INF/classes/application.properties 2>/dev/null; mv -f BOOT-INF/classes/application.properties $PWD/config/ 2>/dev/null; rm -rf BOOT-INF 2>/dev/null; ls -la $PWD/config/
           java \
             --add-opens java.base/java.lang=ALL-UNNAMED \
             --add-opens java.base/java.util=ALL-UNNAMED \
