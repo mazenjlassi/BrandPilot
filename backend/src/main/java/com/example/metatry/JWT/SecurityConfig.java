@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/patterns/**").authenticated()
                         .requestMatchers("/api/company-profiles/**").authenticated()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/health").permitAll()
 
                         // ✅ PROTECTED
                         .requestMatchers("/api/facebook/**").authenticated()

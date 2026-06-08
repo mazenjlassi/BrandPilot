@@ -92,17 +92,51 @@ jobs:
             --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
             -Djava.io.tmpdir=/tmp/javatmp \
             -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
-          JPID=$!; sleep 5; wait $JPID 2>/dev/null; EC=$?
+          JPID=$!
+          sleep 5
           if [ -f /tmp/metatry-crash.log ]; then
-            lines=$(wc -l < /tmp/metatry-crash.log)
             c=$(grep -c "^--- Cause\[" /tmp/metatry-crash.log || true)
             s=$(grep -c "^--- Suppressed\[" /tmp/metatry-crash.log || true)
-            echo "::error::C:$c EC:$EC"
+            echo "::error::Backend crash log found C:$c S:$s"
             awk '/^--- Cause\[/{h=$0; getline; print h " -> " $0}' /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
           fi
+          if ! kill -0 $JPID 2>/dev/null; then
+            echo "::error::Backend process exited early (PID $JPID)"
+            wait $JPID 2>/dev/null
+            EC=$?
+            echo "::error::Exit code: $EC"
+            echo "=== Full backend log ==="
+            cat /tmp/backend.log
+            exit 1
+          fi
+          echo "Backend PID=$JPID started successfully"
+          echo "=== Java processes ==="
+          ps aux | grep -i java | head -5 || true
+          echo "=== Listening on port 8081 ==="
+          ss -tlnp 2>/dev/null | grep 8081 || true
+          echo "=== Backend log (last 50 lines) ==="
+          tail -50 /tmp/backend.log
         working-directory: ./backend
-      - name: Wait for backend
-        run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
+      - name: Wait for backend readiness
+        run: |
+          echo "Polling http://localhost:8081/api/health ..."
+          timeout 120 sh -c '
+            i=0
+            while ! curl -sf http://localhost:8081/api/health > /dev/null 2>&1; do
+              i=$((i + 1))
+              if [ $i -ge 40 ]; then
+                echo "::error::Backend not ready after 120s"
+                echo "=== Backend log ==="
+                cat /tmp/backend.log
+                exit 1
+              fi
+              printf "."
+              sleep 3
+            done
+            echo ""
+            echo "Backend is ready!"
+            echo "Health response: $(curl -sf http://localhost:8081/api/health)"
+          '
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
