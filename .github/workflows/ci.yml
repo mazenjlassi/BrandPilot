@@ -81,20 +81,16 @@ jobs:
         run: |
           java -version
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
-          echo "Starting backend..."
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
-          BGPID=$!
-          echo "PID: $BGPID"
-          sleep 10
-          if kill -0 $BGPID 2>/dev/null; then
-            echo "ALIVE at 10s"
-            ss -tlnp 2>/dev/null | grep -E "8081|java" || netstat -tlnp 2>/dev/null | grep -E "8081|java" || echo "no port info"
-          else
-            echo "DEAD at 10s"
-            while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
-            exit 1
-          fi
-          kill $BGPID 2>/dev/null
+          echo "=== hs_err before ==="
+          find . /tmp -name "hs_err_pid*" 2>/dev/null
+          echo "=== Starting backend (foreground, 10s timeout) ==="
+          set -o pipefail
+          timeout 10 java -jar target/metaTry-0.0.1-SNAPSHOT.jar 2>&1 | tee /tmp/backend.log
+          EC=$?
+          echo "Exit code: $EC"
+          echo "=== hs_err after ==="
+          find . /tmp -name "hs_err_pid*" 2>/dev/null
+          if [ $EC -ne 0 ] && [ $EC -ne 124 ]; then exit 1; fi
         working-directory: ./backend
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
