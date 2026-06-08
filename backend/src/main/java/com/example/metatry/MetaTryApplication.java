@@ -19,14 +19,18 @@ public class MetaTryApplication {
         } catch (Throwable t) {
             StringBuilder sb = new StringBuilder();
             sb.append("=== CRASH at ").append(LocalDateTime.now()).append(" ===\n");
-            sb.append("Exception class: ").append(t.getClass().getName()).append("\n");
-            sb.append("Message: ").append(t.getMessage()).append("\n");
-            sb.append("Cause: ");
-            if (t.getCause() == null) {
-                sb.append("null\n");
-            } else {
-                sb.append(t.getCause().getClass().getName())
-                  .append(": ").append(t.getCause().getMessage()).append("\n");
+            Throwable cur = t;
+            int depth = 0;
+            while (cur != null && depth < 5) {
+                sb.append("[").append(depth).append("] ")
+                  .append(cur.getClass().getName())
+                  .append(": ").append(cur.getMessage()).append("\n");
+                StackTraceElement[] st = cur.getStackTrace();
+                for (int i = 0; i < Math.min(st.length, 5); i++) {
+                    sb.append("   at ").append(st[i]).append("\n");
+                }
+                cur = cur.getCause();
+                depth++;
             }
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
