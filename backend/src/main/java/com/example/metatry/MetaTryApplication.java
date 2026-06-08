@@ -1,9 +1,7 @@
 package com.example.metatry;
 
 import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,37 +15,39 @@ public class MetaTryApplication {
         try {
             SpringApplication.run(MetaTryApplication.class, args);
         } catch (Throwable t) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("=== CRASH at ").append(LocalDateTime.now()).append(" ===\n");
-            Throwable cur = t;
-            int depth = 0;
-            while (cur != null && depth < 5) {
-                sb.append("[").append(depth).append("] ")
-                  .append(cur.getClass().getName())
-                  .append(": ").append(cur.getMessage()).append("\n");
-                StackTraceElement[] st = cur.getStackTrace();
-                for (int i = 0; i < Math.min(st.length, 5); i++) {
-                    sb.append("   at ").append(st[i]).append("\n");
-                }
-                cur = cur.getCause();
-                depth++;
-            }
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            t.printStackTrace(pw);
-            pw.flush();
-            sb.append("Full trace:\n").append(sw.toString());
-            String result = sb.toString();
-            System.out.println(result);
-            System.out.flush();
-            try (PrintWriter fw = new PrintWriter(new FileWriter("/tmp/metatry-crash.log"))) {
-                fw.print(result);
-                fw.flush();
-            } catch (Exception e) {
-                // ignore
-            }
-            throw t;
+            dumpCrash(t);
+            System.exit(1);
         }
     }
 
+    private static void dumpCrash(Throwable t) {
+        try (FileWriter fw = new FileWriter("/tmp/metatry-crash.log")) {
+            fw.write("=== CRASH at " + Instant.now() + " ===\n"); fw.flush();
+            writeException(t, fw, 0);
+            Throwable cause = t.getCause();
+            int depth = 0;
+            while (cause != null && depth < 20) {
+                fw.write("--- Cause[" + depth + "] ---\n"); fw.flush();
+                writeException(cause, fw, 0);
+                cause = cause.getCause();
+                depth++;
+            }
+            Throwable[] suppressed = t.getSuppressed();
+            for (int i = 0; i < suppressed.length; i++) {
+                fw.write("--- Suppressed[" + i + "] ---\n"); fw.flush();
+                writeException(suppressed[i], fw, 0);
+            }
+        } catch (Exception e) {
+            // cannot log further
+        }
+    }
+
+    private static void writeException(Throwable t, FileWriter fw, int indent) throws Exception {
+        for (int i = 0; i < indent; i++) fw.write("  ");
+        fw.write(t.getClass().getName() + ": " + t.getMessage() + "\n"); fw.flush();
+        for (StackTraceElement ste : t.getStackTrace()) {
+            for (int i = 0; i < indent; i++) fw.write("  ");
+            fw.write("  at " + ste + "\n"); fw.flush();
+        }
+    }
 }
