@@ -17,20 +17,30 @@ public class MetaTryApplication {
         try {
             SpringApplication.run(MetaTryApplication.class, args);
         } catch (Throwable t) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== CRASH at ").append(LocalDateTime.now()).append(" ===\n");
+            sb.append("Exception class: ").append(t.getClass().getName()).append("\n");
+            sb.append("Message: ").append(t.getMessage()).append("\n");
+            sb.append("Cause: ");
+            if (t.getCause() == null) {
+                sb.append("null\n");
+            } else {
+                sb.append(t.getCause().getClass().getName())
+                  .append(": ").append(t.getCause().getMessage()).append("\n");
+            }
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             t.printStackTrace(pw);
             pw.flush();
-            String trace = sw.toString();
-            System.out.println("=== METATRY CRASH ===");
-            System.out.println(trace);
+            sb.append("Full trace:\n").append(sw.toString());
+            String result = sb.toString();
+            System.out.println(result);
             System.out.flush();
             try (PrintWriter fw = new PrintWriter(new FileWriter("/tmp/metatry-crash.log"))) {
-                fw.println("=== CRASH at " + LocalDateTime.now() + " ===");
-                fw.print(trace);
+                fw.print(result);
                 fw.flush();
             } catch (Exception e) {
-                System.err.println("Failed to write crash log: " + e);
+                // ignore
             }
             throw t;
         }
