@@ -80,24 +80,26 @@ jobs:
       - name: Start backend
         run: |
           set +e
-          echo "::error::SCRIPT BEGINS"
-          java -version 2>&1 | while IFS= read -r line; do echo "::error::jv $line"; done
-          echo "::error::cleaning stale temp"
-          rm -rf /tmp/tomcat-* /tmp/java-tmp 2>/dev/null
-          echo "::error::starting backend"
-          java -jar target/metaTry-0.0.1-SNAPSHOT.jar &
+          echo "=== SCRIPT BEGINS ==="
+          java -version
+          echo "=== Cleaning temp ==="
+          rm -rf /tmp/tomcat-* /tmp/java-tmp*
+          echo "=== Starting backend ==="
+          java \
+            -Djava.io.tmpdir="/tmp/java-tmp-$$" \
+            --add-opens java.base/java.lang=ALL-UNNAMED \
+            --add-opens java.base/java.util=ALL-UNNAMED \
+            --add-opens java.base/java.io=ALL-UNNAMED \
+            --add-opens java.base/java.net=ALL-UNNAMED \
+            -jar target/metaTry-0.0.1-SNAPSHOT.jar &
           JPID=$!
-          echo "::error::PID=$JPID"
+          echo "PID=$JPID"
           sleep 5
-          kill -0 $JPID && echo "::error::ALIVE" || echo "::error::DEAD"
+          kill -0 $JPID && echo "ALIVE" || echo "DEAD"
           wait $JPID 2>/dev/null; EC=$?
-          echo "::error::EC=$EC"
-          echo "::error::CRASH LOG:"
-          cat /tmp/metatry-crash.log 2>/dev/null | while IFS= read -r line; do echo "::error::cr $line"; done || echo "::error::no crash log"
-          echo "::error::STDOUT:"
-          wc -c /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::sz $line"; done 
-          cat /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::ol $line"; done || echo "::error::no stdout"
-          echo "::error::SCRIPT ENDS"
+          echo "EC=$EC"
+          echo "=== STDOUT ==="
+          cat /tmp/backend.log 2>&1
         working-directory: ./backend
       - name: Wait for backend
         run: timeout 120 sh -c 'until curl -s http://localhost:8081/auth/login > /dev/null 2>&1; do sleep 3; done'
