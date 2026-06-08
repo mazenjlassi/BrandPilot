@@ -103,24 +103,26 @@ jobs:
           echo "::error::CRASH:"
           if [ -f /tmp/metatry-crash.log ]; then
             wc -l /tmp/metatry-crash.log | while read n f; do echo "::error::crash lines=$n"; done
-            head -10 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
-            cat /tmp/metatry-crash.log >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::=== HEAD 30 ==="
+            head -30 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::=== CAUSE LINES ==="
+            grep -n "^--- Cause\[" /tmp/metatry-crash.log | head -20 | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::=== SUPPRESSED LINES ==="
+            grep -n "^--- Suppressed\[" /tmp/metatry-crash.log | head -20 | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::=== TAIL 10 ==="
+            tail -10 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
           else
             echo "::error::no crash log file"
           fi
           echo "::error::STDOUT:"
           if [ -f /tmp/backend.log ]; then
-            echo "::error::stdout $(wc -c < /tmp/backend.log) bytes"
-            head -20 /tmp/backend.log | while IFS= read -r line; do echo "::error::$line"; done
-            echo "=== BACKEND STDOUT ===" >> "$GITHUB_STEP_SUMMARY"
-            cat /tmp/backend.log >> "$GITHUB_STEP_SUMMARY"
+            wc -c /tmp/backend.log | while read n f; do echo "::error::stdout $n bytes"; done
+            head -10 /tmp/backend.log | while IFS= read -r line; do echo "::error::$line"; done
           fi
           echo "::error::SPRING LOGS:"
           find /tmp -name spring.log 2>/dev/null | while IFS= read -r f; do
             echo "::error::found $f ($(wc -c < $f) bytes)"
-            head -20 "$f" | while IFS= read -r line; do echo "::error::$line"; done
-            echo "=== SPRING LOG $f ===" >> "$GITHUB_STEP_SUMMARY"
-            cat "$f" >> "$GITHUB_STEP_SUMMARY"
+            head -10 "$f" | while IFS= read -r line; do echo "::error::$line"; done
           done
           echo "::error::ALL DONE"
         working-directory: ./backend
