@@ -64,7 +64,7 @@ describe('Full E2E Workflow', () => {
     cy.contains(campaignName).should('exist')
 
     // Step 8: Open campaign (save campaignId from URL)
-    cy.contains('.campaign-card', campaignName).contains('Open').click()
+    cy.contains('.campaign-card', campaignName).find('button').contains('Open').click()
     cy.url().should('match', /\/campaigns\/\d+/)
     cy.url().then((url) => {
       const match = url.match(/\/campaigns\/(\d+)/)
