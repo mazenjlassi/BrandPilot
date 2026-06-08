@@ -82,6 +82,8 @@ jobs:
         run: |
           set +e
           mkdir -p /tmp/javatmp
+          mkdir -p $PWD/config
+          cp target/classes/application.properties $PWD/config/
           java \
             --add-opens java.base/java.lang=ALL-UNNAMED \
             --add-opens java.base/java.util=ALL-UNNAMED \
@@ -91,10 +93,6 @@ jobs:
             --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
             --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
             -Djava.io.tmpdir=/tmp/javatmp \
-            -Dspring.datasource.url="jdbc:mysql://localhost:3306/metatry?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
-            -Dspring.datasource.username=root \
-            -Dspring.datasource.password=rootpassword \
-            -Dspring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver \
             -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           JPID=$!; sleep 5; wait $JPID 2>/dev/null; EC=$?
           if [ -f /tmp/metatry-crash.log ]; then
