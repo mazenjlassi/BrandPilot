@@ -78,24 +78,31 @@ jobs:
       - run: mvn package -DskipTests -B
         working-directory: ./backend
       - name: Start backend
+        shell: bash
         run: |
+          set +e
           echo "::error::SCRIPT BEGINS"
           java -version
           echo "::error::Starting backend"
-          java -Djava.io.tmpdir=/tmp/javatmp -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          java -Djava.io.tmpdir=/tmp/javatmp \
+            --add-opens java.base/java.lang=ALL-UNNAMED \
+            --add-opens java.base/java.util=ALL-UNNAMED \
+            --add-opens java.base/java.io=ALL-UNNAMED \
+            --add-opens java.base/java.net=ALL-UNNAMED \
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+            -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
           JPID=$!
           echo "::error::PID=$JPID"
           sleep 5
-          kill -0 $JPID 2>/dev/null; echo "::error::ALIVE=$?"
-          wait $JPID 2>/dev/null; EC=$?
-          echo "::error::EC=$EC"
+          kill -0 $JPID 2>/dev/null; AL=$?; echo "::error::ALIVE=$AL"
+          wait $JPID 2>/dev/null; EC=$?; echo "::error::EC=$EC"
           echo "::error::CRASH:"
           cat /tmp/metatry-crash.log 2>/dev/null | head -30 | while IFS= read -r line; do echo "::error::cr $line"; done || echo "::error::no crash log"
           echo "::error::STDOUT:"
           wc -l /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::sze $line"; done
           head -100 /tmp/backend.log 2>/dev/null | while IFS= read -r line; do echo "::error::ol $line"; done || echo "::error::no stdout"
           echo "::error::SPRING LOG:"
-          cat /tmp/javatmp/spring.log 2>/dev/null | while IFS= read -r line; do echo "::error::sl $line"; done || echo "::error::no spring log"
+          find /tmp -name spring.log -exec cat {} \; 2>/dev/null | while IFS= read -r line; do echo "::error::sl $line"; done || echo "::error::no spring log"
           echo "::error::ALL DONE"
         working-directory: ./backend
       - name: Wait for backend
