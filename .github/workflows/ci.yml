@@ -79,37 +79,27 @@ jobs:
         working-directory: ./backend
       - name: Start backend
         run: |
-          java -version
+          java -version 2>&1
           ls -la target/metaTry-0.0.1-SNAPSHOT.jar
-          echo "=== Starting backend in background ==="
-          java -Djava.security.egd=file:/dev/urandom -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          echo "=== hs_err before ==="
+          find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 || echo "(none)"
+          echo "=== Starting backend ==="
+          java -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2> /tmp/backend.err &
           JPID=$!
           echo "Java PID: $JPID"
-          sleep 5; echo "=== After 5s ==="
-          ss -tlnp 2>/dev/null | grep 8081 || netstat -tlnp 2>/dev/null | grep 8081 || echo "port 8081 not listening"
+          sleep 5
           if kill -0 $JPID 2>/dev/null; then
-            echo "::error::=== THREAD DUMP 1 (5s) ==="
-            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 | while IFS= read -r line; do echo "::error::td1 $line"; done
-            sleep 10
-            echo "::error::=== PORT CHECK (15s) ==="
-            (ss -tlnp 2>/dev/null | grep -q 8081 && echo "port 8081 OPEN" || echo "port 8081 NOT OPEN") | while IFS= read -r line; do echo "::error::$line"; done
-            echo "::error::=== THREAD DUMP 2 (15s) ==="
-            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 | while IFS= read -r line; do echo "::error::td2 $line"; done
-            sleep 15
-            echo "::error::=== PORT CHECK (30s) ==="
-            (ss -tlnp 2>/dev/null | grep -q 8081 && echo "port 8081 OPEN" || echo "port 8081 NOT OPEN") | while IFS= read -r line; do echo "::error::$line"; done
-            echo "::error::=== THREAD DUMP 3 (30s) ==="
-            $JAVA_HOME/bin/jstack -l $JPID 2>&1 | head -60 | while IFS= read -r line; do echo "::error::td3 $line"; done
-            sleep 20
-            echo "::error::=== AFTER 50s ==="
-            (ss -tlnp 2>/dev/null | grep -q 8081 && echo "port 8081 OPEN" || echo "port 8081 NOT OPEN") | while IFS= read -r line; do echo "::error::$line"; done
+            echo "::error::PROCESS ALIVE AT 5s"
           else
             echo "::error::PROCESS DIED BEFORE 5s"
-            wait $JPID 2>/dev/null || true
           fi
-          if kill -0 $JPID 2>/dev/null; then
-            echo "::error::PROCESS STILL ALIVE AFTER 50s"
-          fi
+          echo "=== hs_err after ==="
+          find . /tmp -name "hs_err_pid*" 2>/dev/null | head -5 || echo "(none)"
+          echo "=== stdout ==="
+          cat /tmp/backend.log | head -20 | while IFS= read -r line; do echo "::error::out $line"; done
+          echo "=== stderr ==="
+          cat /tmp/backend.err | while IFS= read -r line; do echo "::error::err $line"; done
+          echo "=== done ==="
           echo "=== Full backend log ==="
           while IFS= read -r line; do echo "::error::$line"; done < /tmp/backend.log
           echo "=== hs_err files ==="
