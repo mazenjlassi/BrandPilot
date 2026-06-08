@@ -103,22 +103,25 @@ jobs:
           echo "::error::CRASH:"
           if [ -f /tmp/metatry-crash.log ]; then
             wc -l /tmp/metatry-crash.log | while read n f; do echo "::error::crash lines=$n"; done
-            cat /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+            head -10 /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+            cat /tmp/metatry-crash.log >> "$GITHUB_STEP_SUMMARY"
           else
             echo "::error::no crash log file"
           fi
           echo "::error::STDOUT:"
           if [ -f /tmp/backend.log ]; then
             echo "::error::stdout $(wc -c < /tmp/backend.log) bytes"
-            head -200 /tmp/backend.log
+            head -20 /tmp/backend.log | while IFS= read -r line; do echo "::error::$line"; done
+            echo "=== BACKEND STDOUT ===" >> "$GITHUB_STEP_SUMMARY"
+            cat /tmp/backend.log >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "::error::SPRING LOGS:"
           find /tmp -name spring.log 2>/dev/null | while IFS= read -r f; do
             echo "::error::found $f ($(wc -c < $f) bytes)"
-            head -200 "$f"
+            head -20 "$f" | while IFS= read -r line; do echo "::error::$line"; done
+            echo "=== SPRING LOG $f ===" >> "$GITHUB_STEP_SUMMARY"
+            cat "$f" >> "$GITHUB_STEP_SUMMARY"
           done
-          echo "::error::TMP FILES:"
-          find /tmp -maxdepth 2 -name "*.log" -o -name "*.dump" -o -name "hs_err*" 2>/dev/null | head -20
           echo "::error::ALL DONE"
         working-directory: ./backend
       - name: Wait for backend
