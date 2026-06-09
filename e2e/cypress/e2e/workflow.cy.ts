@@ -1,5 +1,10 @@
 import users from '../fixtures/users.json'
 
+Cypress.on('fail', (err) => {
+  console.error(err)
+  throw err
+})
+
 describe('Full E2E Workflow', () => {
   it('completes the 18-step workflow', () => {
     // ============================================================
@@ -10,6 +15,7 @@ describe('Full E2E Workflow', () => {
     cy.visit('/login')
     cy.get('#username').type(users.admin.username)
     cy.get('#password').type(users.admin.password)
+    cy.log('STEP 1')
     cy.get('.login-btn').click()
     cy.url().should('include', '/dashboard')
     cy.window().its('localStorage.token').should('exist')
@@ -43,15 +49,18 @@ describe('Full E2E Workflow', () => {
     cy.wrap(postTitle).as('postTitle')
 
     cy.visit('/campaigns')
+    cy.log('STEP 2')
     cy.contains('+ New Campaign').click()
     cy.get('#campaign-name').type(campaignName)
     cy.get('#campaign-topic').type('Automated Testing')
+    cy.log('STEP 3')
     cy.contains('Manual Post').click()
     cy.get('#post-platform').select('FACEBOOK')
     cy.get('#post-title').type(postTitle)
     cy.get('#post-content').type('This is a test post created by Cypress E2E')
     cy.get('#post-hashtags').type('#E2E #Testing')
     cy.get('input[name="approved"]').uncheck()
+    cy.log('STEP 4')
     cy.contains('Create Post').click()
     cy.get('.post-card', { timeout: 10000 }).should('have.length.at.least', 1)
 
@@ -64,6 +73,7 @@ describe('Full E2E Workflow', () => {
     cy.contains(campaignName).should('exist')
 
     // Step 8: Open campaign (save campaignId from URL)
+    cy.log('STEP 5')
     cy.contains('.campaign-card', campaignName).find('button').contains('Open').click()
     cy.url().should('match', /\/campaigns\/\d+/)
     cy.url().then((url) => {
@@ -80,6 +90,7 @@ describe('Full E2E Workflow', () => {
     // ============================================================
 
     // Step 10: Open post (save postId from URL)
+    cy.log('STEP 6')
     cy.contains('.post-card', postTitle).click()
     cy.url().should('match', /\/posts\/\d+/)
     cy.url().then((url) => {
@@ -88,10 +99,12 @@ describe('Full E2E Workflow', () => {
     })
 
     // Step 11: Update post
+    cy.log('STEP 7')
     cy.contains('Edit Post').click()
     const newContent = 'Updated via Cypress E2E - ' + Date.now()
     cy.wrap(newContent).as('newContent')
     cy.get('textarea[rows="6"]').clear().type(newContent)
+    cy.log('STEP 8')
     cy.contains('Save Changes').click()
 
     // Step 12: Verify update persisted
@@ -104,10 +117,12 @@ describe('Full E2E Workflow', () => {
     // Step 13: Admin bans marketer user
     cy.visit('/admin/users')
     cy.get('.table-row', { timeout: 15000 }).should('have.length.at.least', 2)
+    cy.log('STEP 9')
     cy.get('.btn-icon.ban').should('be.visible').click()
     cy.contains('.table-row', 'marketer').should('contain.text', 'Banned')
 
     // Step 14: Logout
+    cy.log('STEP 10')
     cy.get('.logout-btn').click()
     cy.url().should('include', '/login')
     cy.window().its('localStorage.token').should('not.exist')
@@ -115,6 +130,7 @@ describe('Full E2E Workflow', () => {
     // Step 15: Banned user login fails
     cy.get('#username').type('marketer')
     cy.get('#password').type('pass123')
+    cy.log('STEP 11')
     cy.get('.login-btn').click()
     cy.get('.error-message').should('be.visible')
 
@@ -125,14 +141,17 @@ describe('Full E2E Workflow', () => {
     // Step 16: Approve Post
     cy.get('#username').clear().type(users.admin.username)
     cy.get('#password').clear().type(users.admin.password)
+    cy.log('STEP 12')
     cy.get('.login-btn').click()
     cy.url().should('include', '/dashboard')
 
     cy.get('@postId').then((postId) => {
       cy.visit(`/posts/${postId}`)
     })
+    cy.log('STEP 13')
     cy.contains('Edit Post').click()
     cy.get('input[type="checkbox"]').check()
+    cy.log('STEP 14')
     cy.contains('Save Changes').click()
 
     // Step 17: Publish Post
@@ -140,6 +159,7 @@ describe('Full E2E Workflow', () => {
       cy.visit(`/campaigns/${campaignId}`)
     })
     cy.contains('.post-card', postTitle).within(() => {
+      cy.log('STEP 15')
       cy.get('button[aria-label="Publish post"]').click()
     })
 
