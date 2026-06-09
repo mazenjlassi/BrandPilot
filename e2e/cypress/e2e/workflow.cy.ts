@@ -118,7 +118,9 @@ describe('Full E2E Workflow', () => {
     cy.visit('/admin/users')
     cy.get('.table-row', { timeout: 15000 }).should('have.length.at.least', 2)
     cy.log('BEFORE CLICK: line 121')
-    cy.get('.btn-icon.ban').should('be.visible').click()
+    cy.contains('.table-row', 'marketer').within(() => {
+      cy.get('.btn-icon.ban').click()
+    })
     cy.contains('.table-row', 'marketer').should('contain.text', 'Banned')
 
     // Step 14: Logout
