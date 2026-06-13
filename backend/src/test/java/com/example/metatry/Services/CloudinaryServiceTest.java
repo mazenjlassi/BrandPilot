@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -30,12 +31,38 @@ class CloudinaryServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(cloudinary.uploader()).thenReturn(uploader);
         cloudinaryService = new CloudinaryService(cloudinary);
     }
 
     @Test
+    void uploadImage_returnsSecureUrl() throws Exception {
+        when(cloudinary.uploader()).thenReturn(uploader);
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("test.png");
+        when(file.getBytes()).thenReturn("fake-image-bytes".getBytes());
+
+        Map<String, Object> uploadResult = Map.of("secure_url", "https://res.cloudinary.com/test/image/upload/v1/test.png");
+        when(uploader.upload(any(java.io.File.class), any(Map.class))).thenReturn(uploadResult);
+
+        String result = cloudinaryService.uploadImage(file);
+
+        assertThat(result).isEqualTo("https://res.cloudinary.com/test/image/upload/v1/test.png");
+    }
+
+    @Test
+    void uploadImage_throwsIOException_whenFileReadFails() throws Exception {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("test.png");
+        when(file.getBytes()).thenThrow(new IOException("File read error"));
+
+        assertThatThrownBy(() -> cloudinaryService.uploadImage(file))
+                .isInstanceOf(IOException.class)
+                .hasMessage("File read error");
+    }
+
+    @Test
     void uploadImageBytes_returnsSecureUrl() throws Exception {
+        when(cloudinary.uploader()).thenReturn(uploader);
         Map<String, Object> uploadResult = Map.of("secure_url", "https://res.cloudinary.com/test/image/upload/v1/test.png");
         when(uploader.upload((byte[]) any(), any(Map.class))).thenReturn(uploadResult);
 
@@ -47,6 +74,7 @@ class CloudinaryServiceTest {
 
     @Test
     void uploadWithOptions_returnsFullResult() throws IOException {
+        when(cloudinary.uploader()).thenReturn(uploader);
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("test.png");
         when(file.getBytes()).thenReturn("fake-image-bytes".getBytes());
@@ -59,5 +87,16 @@ class CloudinaryServiceTest {
 
         assertThat(result.get("secure_url")).isEqualTo("https://example.com/img.png");
         assertThat(result.get("public_id")).isEqualTo("abc123");
+    }
+
+    @Test
+    void uploadWithOptions_throwsIOException_whenFileReadFails() throws Exception {
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("test.png");
+        when(file.getBytes()).thenThrow(new IOException("File read error"));
+
+        assertThatThrownBy(() -> cloudinaryService.uploadWithOptions(file, Map.of()))
+                .isInstanceOf(IOException.class)
+                .hasMessage("File read error");
     }
 }

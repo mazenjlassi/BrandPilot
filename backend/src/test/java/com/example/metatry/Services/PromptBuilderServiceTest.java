@@ -136,4 +136,90 @@ class PromptBuilderServiceTest {
                 "AI", "Insights", "Conclusion", pattern, PlatformType.LINKEDIN, 2);
         assertThat(result).contains("LOW").containsPattern("0[.,]15");
     }
+
+    @Test
+    void buildPlatformPrompt_withNullAvgEngagement_skipsPerformanceData() {
+        ContentPattern pattern = ContentPattern.builder().tone("Professional").build();
+        String result = promptBuilderService.buildPlatformPrompt(
+                "AI", "Insights", "Conclusion", pattern, PlatformType.LINKEDIN, 2);
+        assertThat(result).doesNotContain("PAST PERFORMANCE DATA");
+    }
+
+    @Test
+    void buildPlatformPrompt_withNullPattern_skipsPatternSection() {
+        String result = promptBuilderService.buildPlatformPrompt(
+                "AI", "Insights", "Conclusion", null, PlatformType.LINKEDIN, 2);
+        assertThat(result).contains("LINKEDIN");
+        assertThat(result).doesNotContain("CONTENT PATTERN");
+    }
+
+    @Test
+    void buildEstimatedPrompt_containsTopic() {
+        ContentPattern pattern = ContentPattern.builder().tone("Casual").build();
+        String result = promptBuilderService.buildEstimatedPrompt("AI", "Insights", "Conclusion", pattern);
+        assertThat(result).contains("AI");
+        assertThat(result).contains("Insights");
+        assertThat(result).contains("Conclusion");
+        assertThat(result).contains("decide how many posts");
+    }
+
+    @Test
+    void buildEstimatedPrompt_withNullPattern_returnsPrompt() {
+        String result = promptBuilderService.buildEstimatedPrompt("AI", "Insights", "Conclusion", null);
+        assertThat(result).contains("INPUT DATA");
+        assertThat(result).doesNotContain("CONTENT PATTERN");
+    }
+
+    @Test
+    void buildEstimatedPrompt_includesPlatformSections() {
+        String result = promptBuilderService.buildEstimatedPrompt("Topic", "Insights", "Conclusion", null);
+        assertThat(result).contains("LINKEDIN");
+        assertThat(result).contains("INSTAGRAM");
+        assertThat(result).contains("FACEBOOK");
+    }
+
+    @Test
+    void buildEstimatedPrompt_withPattern_includesPatternData() {
+        ContentPattern pattern = ContentPattern.builder()
+                .tone("Professional")
+                .postFrequency("Daily")
+                .contentLength("Medium")
+                .mediaType("Image")
+                .hashtagCount("3-5")
+                .timingPattern("Morning")
+                .ctaStyle("Question")
+                .build();
+        String result = promptBuilderService.buildEstimatedPrompt("Topic", "Insights", "Conclusion", pattern);
+        assertThat(result).contains("Professional");
+        assertThat(result).contains("Daily");
+        assertThat(result).contains("Medium");
+        assertThat(result).contains("Morning");
+        assertThat(result).contains("Question");
+    }
+
+    @Test
+    void buildPlatformPrompt_withPatternAndHighEngagement_showsHigh() {
+        ContentPattern pattern = ContentPattern.builder()
+                .tone("Professional")
+                .avgEngagementScore(0.75)
+                .totalPostsGenerated(100)
+                .build();
+        String result = promptBuilderService.buildPlatformPrompt(
+                "AI", "Insights", "Conclusion", pattern, PlatformType.LINKEDIN, 3);
+        assertThat(result).contains("HIGH");
+        assertThat(result).contains("100");
+    }
+
+    @Test
+    void buildPlatformPrompt_withPatternAndMediumEngagement_showsMedium() {
+        ContentPattern pattern = ContentPattern.builder()
+                .tone("Casual")
+                .avgEngagementScore(0.35)
+                .performanceAdvice("Try more videos")
+                .build();
+        String result = promptBuilderService.buildPlatformPrompt(
+                "AI", "Insights", "Conclusion", pattern, PlatformType.INSTAGRAM, 2);
+        assertThat(result).contains("MEDIUM");
+        assertThat(result).contains("Try more videos");
+    }
 }
