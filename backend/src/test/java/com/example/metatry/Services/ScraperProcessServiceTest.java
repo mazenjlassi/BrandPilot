@@ -24,4 +24,5 @@ class ScraperProcessServiceTest {
     void cleanup_doesNotThrow() {
         scraperProcessService.cleanup();
     }
+
 }
