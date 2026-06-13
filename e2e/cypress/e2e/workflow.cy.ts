@@ -64,7 +64,7 @@ describe('Full E2E Workflow', () => {
     cy.contains(campaignName).should('exist')
 
     // Step 8: Open campaign (save campaignId from URL)
-    cy.contains('.campaign-card', campaignName).contains('Open').click()
+    cy.contains('.campaign-card', campaignName).find('button').contains('Open').click()
     cy.url().should('match', /\/campaigns\/\d+/)
     cy.url().then((url) => {
       const match = url.match(/\/campaigns\/(\d+)/)
@@ -104,7 +104,9 @@ describe('Full E2E Workflow', () => {
     // Step 13: Admin bans marketer user
     cy.visit('/admin/users')
     cy.get('.table-row', { timeout: 15000 }).should('have.length.at.least', 2)
-    cy.get('.btn-icon.ban').should('be.visible').click()
+    cy.contains('.table-row', 'marketer').within(() => {
+      cy.get('.btn-icon.ban').click()
+    })
     cy.contains('.table-row', 'marketer').should('contain.text', 'Banned')
 
     // Step 14: Logout

@@ -141,6 +141,16 @@ public class PromptBuilderService {
         prompt.append("- Long walls of text\n");
         prompt.append("- Generic advice that applies to any industry\n\n");
 
+        // IMAGE PROMPT RULES
+        prompt.append("============================================\n");
+        prompt.append("IMAGE PROMPT RULES (Critical — read carefully)\n");
+        prompt.append("============================================\n\n");
+        prompt.append("The \"imagePrompt\" MUST:\n");
+        prompt.append("- Directly represent the given TOPIC (not generic IT imagery)\n");
+        prompt.append("- Describe a specific scene or visual concept tied to the topic\n");
+        prompt.append("- AVOID: server rooms, data centers, circuit boards, blue lights, generic tech\n");
+        prompt.append("- USE: subject matter relevant to the topic, professional style, cinematic lighting\n\n");
+
         // OUTPUT FORMAT
         prompt.append("============================================\n");
         prompt.append("OUTPUT FORMAT (JSON ONLY)\n");
@@ -155,7 +165,7 @@ public class PromptBuilderService {
         prompt.append("  \"facebookTitle\": \"Engaging title\",\n");
         prompt.append("  \"facebookPost\": \"Conversational, story-driven\",\n");
         prompt.append("  \"facebookHashtags\": [\"community\", \"topic\", \"engagement\"],\n\n");
-        prompt.append("  \"imagePrompt\": \"Short keyword prompt (8-15 words): subject, style, lighting — NO sentences\"\n");
+        prompt.append("  \"imagePrompt\": \"Short keyword prompt (8-15 words) representing the TOPIC: subject, style, composition — NO generic IT clichés\"\n");
         prompt.append("}\n\n");
 
         // QUALITY CHECK
@@ -168,6 +178,7 @@ public class PromptBuilderService {
         prompt.append("- Each platform sounds native to that platform\n");
         prompt.append("- CTAs are natural, not pushy\n");
         prompt.append("- No repetition across platforms\n");
+        prompt.append("- imagePrompt directly illustrates the TOPIC, not generic IT imagery\n");
         prompt.append("- JSON is valid and parseable\n");
         prompt.append("- Character limits are respected\n\n");
 
@@ -295,6 +306,16 @@ public class PromptBuilderService {
         prompt.append("- Long walls of text\n");
         prompt.append("- Generic advice that applies to any industry\n\n");
 
+        // IMAGE PROMPT RULES
+        prompt.append("============================================\n");
+        prompt.append("IMAGE PROMPT RULES (Critical — read carefully)\n");
+        prompt.append("============================================\n\n");
+        prompt.append("The \"imagePrompt\" for each post MUST:\n");
+        prompt.append("- Directly represent the given TOPIC (not generic IT imagery)\n");
+        prompt.append("- Describe a specific scene or visual concept tied to the topic\n");
+        prompt.append("- AVOID: server rooms, data centers, circuit boards, blue lights, generic tech\n");
+        prompt.append("- USE: subject matter relevant to the topic, professional style, cinematic lighting\n\n");
+
         // OUTPUT FORMAT
         prompt.append("============================================\n");
         prompt.append("OUTPUT FORMAT (JSON ONLY)\n");
@@ -308,21 +329,21 @@ public class PromptBuilderService {
         prompt.append("      \"title\": \"Bold statement or question\",\n");
         prompt.append("      \"content\": \"Full post with hook, value, CTA\",\n");
         prompt.append("      \"hashtags\": [\"industry\", \"topic\", \"value\"],\n");
-        prompt.append("      \"imagePrompt\": \"Short keyword image prompt for AI (8-15 words max): subject, style, lighting, composition — NO full sentences\"\n");
+        prompt.append("      \"imagePrompt\": \"Short keyword prompt (8-15 words) representing the TOPIC: subject, style, composition — NO generic IT imagery\"\n");
         prompt.append("    },\n");
         prompt.append("    {\n");
         prompt.append("      \"platform\": \"INSTAGRAM\",\n");
         prompt.append("      \"title\": \"Catchy title\",\n");
         prompt.append("      \"content\": \"Short, punchy content\",\n");
         prompt.append("      \"hashtags\": [\"brand\", \"niche1\", \"niche2\", \"niche3\", \"trending\"],\n");
-        prompt.append("      \"imagePrompt\": \"server room blue lights technology modern\"\n");
+        prompt.append("      \"imagePrompt\": \"topic representation visual metaphor modern professional style\"\n");
         prompt.append("    },\n");
         prompt.append("    {\n");
         prompt.append("      \"platform\": \"FACEBOOK\",\n");
         prompt.append("      \"title\": \"Engaging title\",\n");
         prompt.append("      \"content\": \"Conversational, story-driven\",\n");
         prompt.append("      \"hashtags\": [\"community\", \"topic\", \"engagement\"],\n");
-        prompt.append("      \"imagePrompt\": \"server room blue lights technology modern\"\n");
+        prompt.append("      \"imagePrompt\": \"topic visual concept modern professional clean style\"\n");
         prompt.append("    }\n");
         prompt.append("  ]\n");
         prompt.append("}\n\n");
@@ -339,6 +360,7 @@ public class PromptBuilderService {
         prompt.append("- CTAs are natural, not pushy\n");
         prompt.append("- No repetition across posts\n");
         prompt.append("- Each post has a valid platform field (LINKEDIN, INSTAGRAM, or FACEBOOK)\n");
+        prompt.append("- imagePrompt directly illustrates the TOPIC, not generic IT imagery\n");
         prompt.append("- JSON is valid and parseable\n");
         prompt.append("- Character limits are respected\n\n");
 
@@ -492,6 +514,16 @@ public class PromptBuilderService {
         prompt.append("- Long walls of text\n");
         prompt.append("- Generic advice that applies to any industry\n\n");
 
+        // IMAGE PROMPT RULES
+        prompt.append("============================================\n");
+        prompt.append("IMAGE PROMPT RULES (Critical — read carefully)\n");
+        prompt.append("============================================\n\n");
+        prompt.append("The \"imagePrompt\" for each post MUST:\n");
+        prompt.append("- Directly represent the given TOPIC (not generic IT imagery)\n");
+        prompt.append("- Describe a specific scene or visual concept tied to the topic\n");
+        prompt.append("- AVOID: server rooms, data centers, circuit boards, blue lights, generic tech\n");
+        prompt.append("- USE: subject matter relevant to the topic, professional style, cinematic lighting\n\n");
+
         // OUTPUT FORMAT
         prompt.append("============================================\n");
         prompt.append("OUTPUT FORMAT (JSON ONLY)\n");
@@ -503,13 +535,13 @@ public class PromptBuilderService {
         prompt.append("      \"title\": \"Catchy/engaging title\",\n");
         prompt.append("      \"content\": \"Full post content respecting character limits\",\n");
         prompt.append("      \"hashtags\": [\"tag1\", \"tag2\", \"tag3\"],\n");
-        prompt.append("      \"imagePrompt\": \"Short keyword image prompt for AI (8-15 words max): subject, style, lighting, composition — NO full sentences\"\n");
+        prompt.append("      \"imagePrompt\": \"Short keyword prompt (8-15 words) representing the TOPIC: subject, style, composition — NO generic IT imagery\"\n");
         prompt.append("    },\n");
         prompt.append("    {\n");
         prompt.append("      \"title\": \"Another post title\",\n");
         prompt.append("      \"content\": \"Another post content\",\n");
         prompt.append("      \"hashtags\": [\"tag1\", \"tag2\"],\n");
-        prompt.append("      \"imagePrompt\": \"server room blue lights technology modern\"\n");
+        prompt.append("      \"imagePrompt\": \"topic visual concept modern professional style cinematic lighting\"\n");
         prompt.append("    }\n");
         prompt.append("  ]\n");
         prompt.append("}\n\n");
@@ -525,6 +557,7 @@ public class PromptBuilderService {
         prompt.append("- The platform tone is native to ").append(platform.name()).append("\n");
         prompt.append("- CTAs are natural, not pushy\n");
         prompt.append("- No repetition across posts\n");
+        prompt.append("- imagePrompt directly illustrates the TOPIC, not generic IT imagery\n");
         prompt.append("- JSON is valid and parseable\n");
         prompt.append("- Character limits are respected\n\n");
 

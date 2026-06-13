@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -15,12 +16,16 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
 
     @Mock
     private JavaMailSender mailSender;
+
+    @Mock
+    private ObjectProvider<JavaMailSender> mailSenderProvider;
 
     @Captor
     private ArgumentCaptor<SimpleMailMessage> messageCaptor;
@@ -29,7 +34,8 @@ class EmailServiceTest {
 
     @BeforeEach
     void setUp() {
-        emailService = new EmailService(mailSender);
+        when(mailSenderProvider.getIfAvailable()).thenReturn(mailSender);
+        emailService = new EmailService(mailSenderProvider);
     }
 
     @Test

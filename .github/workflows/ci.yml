@@ -53,21 +53,113 @@ jobs:
       - run: npm test
 
   e2e:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [backend, frontend, scraper]
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: metatry
+          MYSQL_ROOT_PASSWORD: rootpassword
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose up -d --build
-      - name: Wait for frontend
-        run: timeout 120 sh -c 'until curl -s http://localhost:4200 > /dev/null 2>&1; do sleep 5; done'
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - run: mvn package -DskipTests -B
+        working-directory: ./backend
+      - name: Start backend
+        shell: bash
+        run: |
+          set +e
+          mkdir -p /tmp/javatmp
+          java \
+            --add-opens java.base/java.lang=ALL-UNNAMED \
+            --add-opens java.base/java.util=ALL-UNNAMED \
+            --add-opens java.base/java.io=ALL-UNNAMED \
+            --add-opens java.base/java.net=ALL-UNNAMED \
+            --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+            --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
+            --add-opens java.base/java.util.concurrent=ALL-UNNAMED \
+            -Djava.io.tmpdir=/tmp/javatmp \
+            -Dspring.jpa.hibernate.ddl-auto=update \
+            -Dserver.port=8081 \
+            -jar target/metaTry-0.0.1-SNAPSHOT.jar > /tmp/backend.log 2>&1 &
+          JPID=$!
+          sleep 5
+          if [ -f /tmp/metatry-crash.log ]; then
+            c=$(grep -c "^--- Cause\[" /tmp/metatry-crash.log || true)
+            s=$(grep -c "^--- Suppressed\[" /tmp/metatry-crash.log || true)
+            echo "::error::Backend crash log found C:$c S:$s"
+            awk '/^--- Cause\[/{h=$0; getline; print h " -> " $0}' /tmp/metatry-crash.log | while IFS= read -r line; do echo "::error::$line"; done
+          fi
+          if ! kill -0 $JPID 2>/dev/null; then
+            echo "::error::Backend process exited early (PID $JPID)"
+            wait $JPID 2>/dev/null
+            EC=$?
+            echo "::error::Exit code: $EC"
+            echo "=== Full backend log ==="
+            cat /tmp/backend.log
+            exit 1
+          fi
+          echo "Backend PID=$JPID started successfully"
+          echo "=== Java processes ==="
+          ps aux | grep -i java | head -5 || true
+          echo "=== Listening on port 8081 ==="
+          ss -tlnp 2>/dev/null | grep 8081 || true
+          echo "=== Backend log (last 50 lines) ==="
+          tail -50 /tmp/backend.log
+        working-directory: ./backend
+      - name: Wait for backend readiness
+        run: |
+          echo "Polling http://localhost:8081/api/health ..."
+          echo "=== Diagnostic curls (8080 vs 8081) ==="
+          curl -v http://localhost:8080/ 2>&1 || true
+          curl -v http://localhost:8080/api/health 2>&1 || true
+          curl -v http://localhost:8081/ 2>&1 || true
+          curl -v http://localhost:8081/api/health 2>&1 || true
+          echo "=== Starting health poll ==="
+          timeout 120 sh -c '
+            i=0
+            while ! curl -sf http://localhost:8081/api/health > /dev/null 2>&1; do
+              i=$((i + 1))
+              if [ $i -ge 40 ]; then
+                echo "::error::Backend not ready after 120s"
+                echo "=== Backend log ==="
+                cat /tmp/backend.log
+                exit 1
+              fi
+              printf "."
+              sleep 3
+            done
+            echo ""
+            echo "Backend is ready!"
+            echo "Health response: $(curl -sf http://localhost:8081/api/health)"
+          '
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: ./e2e/package-lock.json
       - run: npm ci
+        working-directory: ./frontend
+      - name: Start frontend
+        run: |
+          nohup npx ng serve --port 4200 --host 0.0.0.0 --disable-host-check > frontend.log 2>&1 &
+          echo "Frontend PID: $!"
+        working-directory: ./frontend
+      - name: Wait for frontend
+        run: timeout 120 sh -c 'until curl -s http://localhost:4200 > /dev/null 2>&1; do sleep 3; done'
+      - run: npm ci
         working-directory: ./e2e
       - run: npm test
         working-directory: ./e2e
-      - run: docker compose down -v

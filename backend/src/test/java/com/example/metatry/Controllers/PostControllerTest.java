@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -261,6 +262,25 @@ class PostControllerTest {
 
         mockMvc.perform(post("/posts/99/generate-image"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN", "MARKETING"})
+    void generateImage_withCustomPromptAndExistingImage_updatesPrompt() throws Exception {
+        PostImage existingImage = PostImage.builder()
+                .imagePrompt("old prompt").imageUrl("https://old.url").build();
+        Post post = new Post();
+        post.setId(1L);
+        post.setImage(existingImage);
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(aiImageService.generateImageForPost(post)).thenReturn(existingImage);
+
+        mockMvc.perform(post("/posts/1/generate-image")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("prompt", "new prompt"))))
+                .andExpect(status().isOk());
+
+        assertThat(existingImage.getImagePrompt()).isEqualTo("new prompt");
     }
 
     // ================= CLEANUP =================

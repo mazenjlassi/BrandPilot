@@ -8,13 +8,13 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class LinkedInConfig {
 
-    @Value("${linkedin.client-id}")
+    @Value("${linkedin.client-id:}")
     private String clientId;
 
-    @Value("${linkedin.client-secret}")
+    @Value("${linkedin.client-secret:}")
     private String clientSecret;
 
-    @Value("${linkedin.redirect-uri}")
+    @Value("${linkedin.redirect-uri:}")
     private String redirectUri;
 
     @Bean

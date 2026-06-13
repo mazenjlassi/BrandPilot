@@ -206,29 +206,53 @@ public class AiImageService {
         }
 
         String styleTag = switch (size){
-            case SQUARE -> "square 1:1 instagram";
-            case LANDSCAPE -> "landscape 16:9 linkedin facebook";
-            case PORTRAIT -> "portrait 9:16 vertical";
+            case SQUARE -> "square 1:1";
+            case LANDSCAPE -> "landscape 16:9";
+            case PORTRAIT -> "portrait 9:16";
         };
 
+        Set<String> words = new LinkedHashSet<>();
         String title = post.getTitle() != null
                 ? post.getTitle().replaceAll("[^a-zA-Z0-9 ]", " ").trim()
                 : "";
-
-        String[] titleWords = title.split("\\s+");
-        StringBuilder keywords = new StringBuilder();
-        for (int i = 0; i < Math.min(titleWords.length, 8); i++) {
-            String w = titleWords[i].toLowerCase();
-            if (w.length() > 2) {
-                if (keywords.length() > 0) keywords.append(" ");
-                keywords.append(w);
-            }
+        for (String w : title.split("\\s+")) {
+            w = w.toLowerCase();
+            if (w.length() > 2) words.add(w);
         }
 
-        String result = keywords.length() > 0
+        String content = post.getContent() != null
+                ? post.getContent().replaceAll("[^a-zA-Z0-9 ]", " ").trim()
+                : "";
+        for (String w : content.split("\\s+")) {
+            w = w.toLowerCase();
+            if (w.length() > 2) words.add(w);
+        }
+
+        Set<String> stopWords = Set.of(
+                "the", "and", "for", "are", "but", "not", "you", "all", "can",
+                "has", "had", "was", "our", "its", "that", "this", "with", "from", "have",
+                "been", "will", "more", "than", "what", "about", "into", "over", "also",
+                "just", "like", "make", "made", "very", "your", "some", "each", "them",
+                "when", "then", "here", "there", "only", "even", "does", "doing", "done",
+                "well", "much", "many", "such", "which", "their", "would", "could",
+                "should", "after", "before", "because", "really", "going", "people",
+                "post", "title", "content", "new", "latest", "great", "good", "best");
+
+        List<String> filtered = words.stream()
+                .filter(w -> !stopWords.contains(w))
+                .limit(10)
+                .toList();
+
+        StringBuilder keywords = new StringBuilder();
+        for (String w : filtered) {
+            if (keywords.length() > 0) keywords.append(" ");
+            keywords.append(w);
+        }
+
+        String result = keywords.length() > 4
                 ? keywords.toString().trim() + " " + styleTag
                 : styleTag;
 
-        return result + " professional business technology cinematic lighting photorealistic 4k clean minimalist";
+        return result + " professional cinematic lighting photorealistic 4k clean minimalist";
     }
 }

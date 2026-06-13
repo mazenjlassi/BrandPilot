@@ -20,10 +20,10 @@ public class InstagramService {
     private final RestTemplate restTemplate;
     private final CloudinaryService cloudinaryService;
 
-    @Value("${facebook.page-access-token}")
+    @Value("${facebook.page-access-token:}")
     private String token;
 
-    @Value("${instagram.business-id}")
+    @Value("${instagram.business-id:}")
     private String igId;
 
     private static final String GRAPH_API_URL = "https://graph.facebook.com/v19.0/";

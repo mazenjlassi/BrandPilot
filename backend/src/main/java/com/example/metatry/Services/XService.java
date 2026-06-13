@@ -14,27 +14,35 @@ import java.util.Map;
 @Service
 public class XService {
 
-    private final OAuth10aService service;
-    private final OAuth1AccessToken accessToken;
+    private final XConfig.XCredentials credentials;
     private final ObjectMapper objectMapper;
+    private OAuth10aService service;
+    private OAuth1AccessToken accessToken;
 
     public XService(XConfig.XCredentials credentials) {
-
-        this.service = new ServiceBuilder(credentials.apiKey())
-                .apiSecret(credentials.apiSecret())
-                .build(TwitterApi.instance());
-
-        this.accessToken = new OAuth1AccessToken(
-                credentials.accessToken(),
-                credentials.accessTokenSecret()
-        );
-
+        this.credentials = credentials;
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * Post a text tweet using v1.1 endpoint (OAuth 1.0a compatible)
-     */
+    private OAuth10aService getService() {
+        if (service == null) {
+            service = new ServiceBuilder(credentials.apiKey())
+                    .apiSecret(credentials.apiSecret())
+                    .build(TwitterApi.instance());
+        }
+        return service;
+    }
+
+    private OAuth1AccessToken getAccessToken() {
+        if (accessToken == null) {
+            accessToken = new OAuth1AccessToken(
+                    credentials.accessToken(),
+                    credentials.accessTokenSecret()
+            );
+        }
+        return accessToken;
+    }
+
     public Map<String, Object> postText(String text) {
 
         try {
@@ -43,12 +51,11 @@ public class XService {
 
             OAuthRequest request = new OAuthRequest(Verb.POST, url);
 
-            // v1.1 uses form parameters (NOT JSON)
             request.addBodyParameter("status", text);
 
-            service.signRequest(accessToken, request);
+            getService().signRequest(getAccessToken(), request);
 
-            Response response = service.execute(request);
+            Response response = getService().execute(request);
 
             int code = response.getCode();
             String body = response.getBody();
@@ -84,9 +91,6 @@ public class XService {
         }
     }
 
-    /**
-     * Test authentication (GET users/me)
-     */
     public Map<String, Object> test() {
 
         try {
@@ -94,9 +98,9 @@ public class XService {
             String url = "https://api.twitter.com/2/users/me";
 
             OAuthRequest request = new OAuthRequest(Verb.GET, url);
-            service.signRequest(accessToken, request);
+            getService().signRequest(getAccessToken(), request);
 
-            Response response = service.execute(request);
+            Response response = getService().execute(request);
 
             return Map.of(
                     "success", true,
@@ -113,9 +117,6 @@ public class XService {
         }
     }
 
-    /**
-     * API Limits info
-     */
     public Map<String, Object> getLimits() {
 
         return Map.of(
@@ -126,9 +127,6 @@ public class XService {
         );
     }
 
-    /**
-     * Health check
-     */
     public Map<String, Object> health() {
 
         return Map.of(

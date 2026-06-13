@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CloudflareConfig {
 
-    @Value("${cloudflare.api.token}")
+    @Value("${cloudflare.api.token:}")
     private String apiToken;
 
-    @Value("${cloudflare.account.id}")
+    @Value("${cloudflare.account.id:}")
     private String accountId;
 
     public String getApiToken() {
