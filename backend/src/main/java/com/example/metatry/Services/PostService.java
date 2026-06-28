@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,9 @@ public class PostService {
             if(post.getImage() != null) {
                 post.getImage().setImageUrl(request.getImageUrl());
             } else {
+                if(post.getImages() == null) {
+                    post.setImages(new ArrayList<>());
+                }
                 PostImage newImage = PostImage.builder()
                         .imageUrl(request.getImageUrl())
                         .post(post)
