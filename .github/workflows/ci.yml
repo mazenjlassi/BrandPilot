@@ -31,8 +31,17 @@ jobs:
           jwt.secret=ci-test-secret-key
           gemini.api.key=ci-test-key
           EOF
-      - run: mvn clean verify
+      - run: mvn clean verify -B
         timeout-minutes: 30
+        continue-on-error: true
+      - name: Print test failures on error
+        if: failure()
+        run: |
+          echo "=== Surefire Test Failures ==="
+          find target/surefire-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -200 "$1"' _ {} \;
+          echo "=== Failsafe Test Failures ==="
+          find target/failsafe-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -200 "$1"' _ {} \;
+          exit 1
 
   frontend:
     runs-on: ubuntu-latest
