@@ -33,7 +33,13 @@ jobs:
           EOF
       - run: mvn clean verify
         timeout-minutes: 30
-
+      - name: Print test failures
+        if: always()
+        run: |
+          echo "=== Surefire Test Reports ==="
+          find target/surefire-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -200 "$1"' _ {} \; 2>/dev/null || echo "(no surefire reports)"
+          echo "=== Failsafe Test Reports ==="
+          find target/failsafe-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -200 "$1"' _ {} \; 2>/dev/null || echo "(no failsafe reports)"
   frontend:
     runs-on: ubuntu-latest
     defaults:
