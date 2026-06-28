@@ -174,7 +174,7 @@ public class PostService {
                 PostImage postImage = new PostImage();
                 postImage.setImageUrl(imageUrl);
                 postImage.setPost(post);
-                post.setImage(postImage);
+                post.getImages().add(postImage);
             } catch (Exception e) {
                 throw new RuntimeException("Image upload failed: " + e.getMessage());
             }

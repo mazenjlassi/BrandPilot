@@ -132,7 +132,7 @@ public class CampaignService {
             PostImage postImage = new PostImage();
             postImage.setImageUrl(imageUrl);
             postImage.setPost(post);
-            post.setImage(postImage);
+            post.getImages().add(postImage);
         }
 
         return postRepository.save(post);
