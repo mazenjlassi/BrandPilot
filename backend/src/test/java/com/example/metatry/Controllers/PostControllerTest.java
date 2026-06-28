@@ -8,6 +8,7 @@ import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.AiImageService;
+import com.example.metatry.Services.CloudinaryService;
 import com.example.metatry.Services.JwtService;
 import com.example.metatry.Services.PostService;
 import com.example.metatry.Services.PostTimingService;
@@ -58,6 +59,9 @@ class PostControllerTest {
 
     @MockitoBean
     private PostTimingService postTimingService;
+
+    @MockitoBean
+    private CloudinaryService cloudinaryService;
 
     @MockitoBean
     private JwtService jwtService;
