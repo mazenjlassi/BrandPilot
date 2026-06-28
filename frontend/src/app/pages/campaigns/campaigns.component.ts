@@ -64,10 +64,13 @@ export class CampaignsComponent implements OnInit {
   savingPostId: number | null = null;
   publishingPostId: number | null = null;
 
-  // ================= IMAGE =================
+  // ================= MEDIA =================
+
+  mediaMode: 'generate' | 'image' | 'video' = 'image';
 
   previewUrl: string | null = null;
   selectedFile!: File;
+  selectedVideoFile: File | null = null;
 
   // ================= MANUAL POST =================
 
@@ -79,7 +82,8 @@ export class CampaignsComponent implements OnInit {
     scheduledAt: null,
     permanent: false,
     approved: true,
-    link: ''
+    link: '',
+    imagePrompt: ''
   };
 
   constructor(
@@ -124,13 +128,20 @@ export class CampaignsComponent implements OnInit {
 
   loadCampaignPosts(campaignId: number) {
     this.campaignService.getCampaignPosts(campaignId).subscribe({
-      next: (res) => {
-        this.posts = res;
+      next: (res: any) => {
+        this.posts = Array.isArray(res) ? res.map((p: any) => ({ ...p, imagePrompt: p.image?.imagePrompt || '', mediaMode: 'generate' })) : [];
       },
       error: () => {
         this.posts = [];
       }
     });
+  }
+
+  switchMediaMode(mode: 'generate' | 'image' | 'video') {
+    this.mediaMode = mode;
+    this.previewUrl = null;
+    this.selectedFile = null as any;
+    this.selectedVideoFile = null;
   }
 
   enableExistingMode() {
@@ -189,8 +200,18 @@ export class CampaignsComponent implements OnInit {
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
+    this.selectedVideoFile = null;
     if (this.selectedFile) {
       this.previewUrl = URL.createObjectURL(this.selectedFile);
+    }
+  }
+
+  onVideoSelected(event: any) {
+    this.selectedVideoFile = event.target.files[0];
+    this.selectedFile = null as any;
+    this.previewUrl = null;
+    if (this.selectedVideoFile) {
+      this.previewUrl = URL.createObjectURL(this.selectedVideoFile);
     }
   }
 
@@ -208,26 +229,43 @@ export class CampaignsComponent implements OnInit {
         : null
     };
 
+    if (this.mediaMode === 'generate' && this.manualPost.imagePrompt) {
+      this.postService.createPostWithImage(this.campaignId, data).subscribe({
+        next: (res: any) => {
+          const newPost = { ...res, imagePrompt: res.image?.imagePrompt || '', mediaMode: 'generate' };
+          this.postService.generateImage(res.id, this.manualPost.imagePrompt).subscribe({
+            next: (imgRes: any) => {
+              newPost.imageUrl = imgRes.imageUrl || imgRes.url;
+              this.posts.push(newPost);
+              this.resetManualForm();
+              this.loading = false;
+            },
+            error: () => {
+              this.posts.push(newPost);
+              this.resetManualForm();
+              this.loading = false;
+            }
+          });
+        },
+        error: () => {
+          this.loading = false;
+          this.toast.error('Failed to create post');
+        }
+      });
+      return;
+    }
+
     this.postService
       .createPostWithImage(
         this.campaignId,
         data,
-        this.selectedFile
+        this.mediaMode === 'image' ? this.selectedFile : undefined,
+        this.mediaMode === 'video' ? this.selectedVideoFile ?? undefined : undefined
       )
       .subscribe({
         next: (res: any) => {
-          this.posts.push(res);
-          this.manualPost = {
-            title: '',
-            content: '',
-            hashtags: '',
-            platform: 'LINKEDIN',
-            scheduledAt: null,
-            permanent: false,
-            approved: true,
-            link: ''
-          };
-          this.previewUrl = null;
+          this.posts.push({ ...res, imagePrompt: res.image?.imagePrompt || '' });
+          this.resetManualForm();
           this.loading = false;
         },
         error: (err) => {
@@ -236,6 +274,23 @@ export class CampaignsComponent implements OnInit {
           this.toast.error('Failed to create post');
         }
       });
+  }
+
+  private resetManualForm() {
+    this.manualPost = {
+      title: '',
+      content: '',
+      hashtags: '',
+      platform: 'LINKEDIN',
+      scheduledAt: null,
+      permanent: false,
+      approved: true,
+      link: '',
+      imagePrompt: ''
+    };
+    this.previewUrl = null;
+    this.selectedFile = null as any;
+    this.selectedVideoFile = null;
   }
 
   // ================= DELETE =================
@@ -255,6 +310,115 @@ export class CampaignsComponent implements OnInit {
 
   editPost(post: any) {
     post.editing = !post.editing;
+  }
+
+  // ================= UPLOAD MEDIA (EDIT MODE) =================
+
+  editMediaMode: 'generate' | 'image' | 'video' | null = null;
+  editSelectedFile: File | null = null;
+  editSelectedVideoFile: File | null = null;
+  editPreviewUrl: string | null = null;
+
+  switchEditMediaMode(post: any, mode: 'generate' | 'image' | 'video') {
+    this.editMediaMode = mode;
+    this.editSelectedFile = null;
+    this.editSelectedVideoFile = null;
+    this.editPreviewUrl = null;
+    if (mode === 'generate') {
+      post.editImagePrompt = post.editImagePrompt || post.imagePrompt || '';
+    }
+  }
+
+  onEditFileSelected(event: any) {
+    this.editSelectedFile = event.target.files[0];
+    this.editSelectedVideoFile = null;
+    if (this.editSelectedFile) {
+      this.editPreviewUrl = URL.createObjectURL(this.editSelectedFile);
+    }
+  }
+
+  onEditVideoSelected(event: any) {
+    this.editSelectedVideoFile = event.target.files[0];
+    this.editSelectedFile = null;
+    if (this.editSelectedVideoFile) {
+      this.editPreviewUrl = URL.createObjectURL(this.editSelectedVideoFile);
+    }
+  }
+
+  uploadEditMedia(post: any) {
+    const file = this.editSelectedFile || this.editSelectedVideoFile;
+    if (!file) return;
+
+    post.uploadingMedia = true;
+    this.postService.uploadFile(file).subscribe({
+      next: (res) => {
+        if (this.editSelectedFile) {
+          post.imageUrl = res.url;
+        } else {
+          post.videoUrl = res.url;
+        }
+        post.uploadingMedia = false;
+        this.editPreviewUrl = null;
+        this.editSelectedFile = null;
+        this.editSelectedVideoFile = null;
+        this.toast.success('Media uploaded');
+      },
+      error: () => {
+        post.uploadingMedia = false;
+        this.toast.error('Failed to upload media');
+      }
+    });
+  }
+
+  // ================= POST MEDIA (DISPLAY MODE) =================
+
+  switchPostMediaMode(post: any, mode: 'generate' | 'image' | 'video') {
+    post.mediaMode = mode;
+    post.previewUrl = null;
+    post.selectedFile = null;
+    post.selectedVideoFile = null;
+  }
+
+  onPostFileSelected(event: any, post: any) {
+    post.selectedFile = event.target.files[0];
+    post.selectedVideoFile = null;
+    if (post.selectedFile) {
+      post.previewUrl = URL.createObjectURL(post.selectedFile);
+    }
+  }
+
+  onPostVideoSelected(event: any, post: any) {
+    post.selectedVideoFile = event.target.files[0];
+    post.selectedFile = null;
+    post.previewUrl = null;
+    if (post.selectedVideoFile) {
+      post.previewUrl = URL.createObjectURL(post.selectedVideoFile);
+    }
+  }
+
+  uploadPostMedia(post: any) {
+    const file = post.selectedFile || post.selectedVideoFile;
+    if (!file) return;
+
+    post.uploadingMedia = true;
+    this.postService.uploadFile(file).subscribe({
+      next: (res) => {
+        if (post.selectedFile) {
+          post.imageUrl = res.url;
+        } else {
+          post.videoUrl = res.url;
+        }
+        post.uploadingMedia = false;
+        post.previewUrl = null;
+        post.selectedFile = null;
+        post.selectedVideoFile = null;
+        this.toast.success('Media uploaded');
+      },
+      error: () => {
+        post.uploadingMedia = false;
+        this.toast.error('Failed to upload media');
+      }
+    });
   }
 
   // ================= GENERATE IMAGE =================
@@ -296,7 +460,8 @@ export class CampaignsComponent implements OnInit {
       permanent: post.permanent,
       approved: post.approved,
       link: post.link,
-      imageUrl: post.imageUrl
+      imageUrl: post.imageUrl,
+      videoUrl: post.videoUrl
     }).subscribe({
       next: () => {
         this.savingPostId = null;
@@ -335,12 +500,13 @@ export class CampaignsComponent implements OnInit {
       this.loading = true;
       this.campaignService.generateForExisting(this.campaignId).subscribe({
         next: (res: any) => {
-          this.posts = [...this.posts, ...res];
+          const arr = Array.isArray(res) ? res : [];
+          this.posts = [...this.posts, ...arr.map((p: any) => ({ ...p, imagePrompt: p.image?.imagePrompt || '', mediaMode: 'generate' }))];
           this.loading = false;
         },
-        error: () => {
+        error: (err) => {
           this.loading = false;
-          this.toast.error('Failed to generate posts');
+          this.toast.error(err.error || 'Failed to generate posts');
         }
       });
       return;
@@ -348,16 +514,17 @@ export class CampaignsComponent implements OnInit {
 
     this.loading = true;
 
-    this.campaignService.generateCampaign({
-      name: this.name,
-      topic: this.topic
-    }).subscribe({
-      next: (res: any) => {
-        this.posts = res;
+      this.campaignService.generateCampaign({
+        name: this.name,
+        topic: this.topic
+      }).subscribe({
+        next: (res: any) => {
+          this.posts = Array.isArray(res) ? res.map((p: any) => ({ ...p, imagePrompt: p.image?.imagePrompt || '', mediaMode: 'generate' })) : [];
+          this.loading = false;
+        },
+      error: (err) => {
         this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
+        this.toast.error(err.error || 'Failed to generate posts');
       }
     });
   }

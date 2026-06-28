@@ -205,4 +205,4 @@ async function extractFacebookPosts(page) {
   return postsData;
 }
 
-module.exports = { scrapeFacebook, PLATFORMS: PLATFORMS.FACEBOOK };
+module.exports = { scrapeFacebook, filterAndLimitPosts, PLATFORMS: PLATFORMS.FACEBOOK };

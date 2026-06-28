@@ -55,6 +55,7 @@ export class PostDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (res: any) => {
           this.post = res;
           this.scheduledDate = this.formatDatetimeLocal(this.post.scheduledAt);
+          this.imagePrompt = this.post.image?.imagePrompt || '';
           this.loading = false;
 
           if (this.post.status === 'PUBLISHED') {

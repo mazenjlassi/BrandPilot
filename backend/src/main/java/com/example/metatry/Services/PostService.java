@@ -127,7 +127,8 @@ public class PostService {
     public Post createPostForCampaign(
             Long campaignId,
             CreatePostRequest request,
-            MultipartFile file
+            MultipartFile image,
+            MultipartFile video
     ) {
 
         Campaign campaign = campaignRepository.findById(campaignId)
@@ -160,17 +161,20 @@ public class PostService {
         }
         post.setLink(link);
 
-        //  USE  CLOUDINARY SERVICE
-        if (file != null && !file.isEmpty()) {
+        if (video != null && !video.isEmpty()) {
             try {
-                String imageUrl = cloudinaryService.uploadImage(file);
-
-                PostImage image = new PostImage();
-                image.setImageUrl(imageUrl);
-                image.setPost(post);
-
-                post.setImage(image);
-
+                String videoUrl = cloudinaryService.uploadVideo(video);
+                post.setVideoUrl(videoUrl);
+            } catch (Exception e) {
+                throw new RuntimeException("Video upload failed: " + e.getMessage());
+            }
+        } else if (image != null && !image.isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(image);
+                PostImage postImage = new PostImage();
+                postImage.setImageUrl(imageUrl);
+                postImage.setPost(post);
+                post.setImage(postImage);
             } catch (Exception e) {
                 throw new RuntimeException("Image upload failed: " + e.getMessage());
             }

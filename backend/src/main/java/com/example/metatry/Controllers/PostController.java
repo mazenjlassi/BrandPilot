@@ -14,6 +14,7 @@ import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.AiImageService;
+import com.example.metatry.Services.CloudinaryService;
 import com.example.metatry.Services.PostService;
 import com.example.metatry.Services.PostTimingService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class PostController {
     private final AiImageService aiImageService;
     private final PostImageRepository postImageRepository;
     private final PostTimingService postTimingService;
+    private final CloudinaryService cloudinaryService;
 
     // ================= BASIC =================
 
@@ -131,9 +133,10 @@ public class PostController {
     public Post createPost(
             @PathVariable Long campaignId,
             @RequestPart("data") CreatePostRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "video", required = false) MultipartFile video
     ) {
-        return postService.createPostForCampaign(campaignId, request, image);
+        return postService.createPostForCampaign(campaignId, request, image, video);
     }
     // ================= STATS =================
 
@@ -170,6 +173,23 @@ public class PostController {
         PostImage image = aiImageService.generateImageForPost(post);
 
         return ResponseEntity.ok(image);
+    }
+
+    // ================= GENERIC UPLOAD =================
+
+    @PostMapping("/upload")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    public ResponseEntity<Map<String, String>> uploadFile(
+            @RequestParam("file") MultipartFile file
+    ) throws java.io.IOException {
+        String contentType = file.getContentType();
+        String url;
+        if (contentType != null && contentType.startsWith("video/")) {
+            url = cloudinaryService.uploadVideo(file);
+        } else {
+            url = cloudinaryService.uploadImage(file);
+        }
+        return ResponseEntity.ok(Map.of("url", url));
     }
 
     // ================= CLEANUP =================

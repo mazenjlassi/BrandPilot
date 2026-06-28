@@ -57,4 +57,49 @@ describe('CampaignService', () => {
     expect(req.request.method).toBe('DELETE');
     req.flush('');
   });
+
+  it('getCampaignPosts_callsWithCampaignId', () => {
+    const mockPosts: any[] = [{ id: 1, content: 'post1' }];
+    service.getCampaignPosts(2).subscribe((posts) => {
+      expect(posts).toEqual(mockPosts);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/2/posts');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPosts);
+  });
+
+  it('getCampaignInsights_callsWithCampaignId', () => {
+    const mockInsights = { likes: 100, shares: 20 };
+    service.getCampaignInsights(3).subscribe((insights) => {
+      expect(insights).toEqual(mockInsights);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/insights/campaign/3');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockInsights);
+  });
+
+  it('getRecent_usesDefaultLimit', () => {
+    service.getRecent().subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/recent?limit=5');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('getRecent_usesCustomLimit', () => {
+    service.getRecent(10).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/recent?limit=10');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('generateForExisting_callsPostOnCampaign', () => {
+    const mockPosts: any[] = [{ id: 1 }];
+    service.generateForExisting(4).subscribe((posts) => {
+      expect(posts).toEqual(mockPosts);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/4/generate');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush(mockPosts);
+  });
 });

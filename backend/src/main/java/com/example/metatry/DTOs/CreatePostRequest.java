@@ -21,4 +21,6 @@ public class CreatePostRequest {
     private boolean permanent; // ✅ keep your business logic
 
     private String link;
+
+    private String videoUrl;
 }

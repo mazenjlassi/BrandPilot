@@ -23,7 +23,11 @@ function parseRelativeTime(text) {
     const sec = parseInt(lower.replace(/\D/g, '')) || 1;
     return new Date(now - sec * 1000).toISOString();
   }
-  if (lower.includes('m') && !lower.includes('more') && !lower.includes('month')) {
+  if (lower.includes('mo')) {
+    const mo = parseInt(lower.replace(/\D/g, '')) || 1;
+    return new Date(now - mo * 2592000000).toISOString();
+  }
+  if (lower.includes('m') && !lower.includes('more')) {
     const min = parseInt(lower.replace(/\D/g, '')) || 1;
     return new Date(now - min * 60000).toISOString();
   }

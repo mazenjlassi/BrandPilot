@@ -69,6 +69,28 @@ describe('parseRelativeTime', () => {
         expect(new Date(result).getTime()).toBe(new Date('2024-01-08T12:00:00Z').getTime());
     });
 
+    test('parses months', () => {
+        const result = parseRelativeTime('2mo');
+        expect(new Date(result).getTime()).toBe(new Date('2023-11-16T12:00:00Z').getTime());
+    });
+
+    test('parses years', () => {
+        const result = parseRelativeTime('1y');
+        expect(new Date(result).getTime()).toBe(new Date('2023-01-15T12:00:00Z').getTime());
+    });
+
+    test('returns current time for null input', () => {
+        const result = parseRelativeTime(null);
+        expect(new Date(result).getTime()).toBe(new Date('2024-01-15T12:00:00Z').getTime());
+    });
+
+    test('parses with Edited suffix', () => {
+        const result1 = parseRelativeTime('5m Edited');
+        expect(new Date(result1).getTime()).toBe(new Date('2024-01-15T11:55:00Z').getTime());
+        const result2 = parseRelativeTime('2h Edited');
+        expect(new Date(result2).getTime()).toBe(new Date('2024-01-15T10:00:00Z').getTime());
+    });
+
     test('returns current time for empty input', () => {
         const result = parseRelativeTime('');
         expect(new Date(result).getTime()).toBe(new Date('2024-01-15T12:00:00Z').getTime());

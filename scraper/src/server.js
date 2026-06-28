@@ -45,6 +45,7 @@ app.use((err, req, res, next) => {
 
 const PORT = settings.serverPort;
 
+if (process.env.NODE_ENV !== 'test') {
 app.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════╗
@@ -66,5 +67,6 @@ Input format:
 }
 `);
 });
+}
 
 module.exports = app;

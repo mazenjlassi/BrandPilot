@@ -77,4 +77,128 @@ describe('PostService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
+
+  it('getTopPosts_usesDefaultLimit', () => {
+    service.getTopPosts().subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/top?limit=5');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('getTopPosts_usesCustomLimit', () => {
+    service.getTopPosts(10).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/top?limit=10');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('getPermanent_callsCorrectUrl', () => {
+    service.getPermanent().subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/permanent');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('getByCampaign_callsWithCampaignId', () => {
+    const mockPosts: any[] = [{ id: 1 }];
+    service.getByCampaign(5).subscribe((posts) => {
+      expect(posts).toEqual(mockPosts);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/5/posts');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPosts);
+  });
+
+  it('publishPost_callsPost', () => {
+    service.publishPost(7).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/publish/7');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({});
+  });
+
+  it('getById_callsWithId', () => {
+    const mockPost = { id: 3, title: 'Test Post' };
+    service.getById(3).subscribe((post) => {
+      expect(post).toEqual(mockPost);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/posts/3');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockPost);
+  });
+
+  it('generateImage_callsPost', () => {
+    service.generateImage(2).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/2/generate-image');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({});
+  });
+
+  it('generateImage_callsWithPrompt', () => {
+    service.generateImage(2, 'sunset').subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/2/generate-image');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ prompt: 'sunset' });
+    req.flush({});
+  });
+
+  it('createPostWithImage_sendsFormData', () => {
+    const data = { title: 'New Post', content: 'Hello' };
+    const image = new File([''], 'test.png', { type: 'image/png' });
+
+    service.createPostWithImage(1, data, image).subscribe();
+
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/1/posts/with-image');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBeTrue();
+    expect(req.request.body.has('data')).toBeTrue();
+    expect(req.request.body.has('image')).toBeTrue();
+    req.flush({});
+  });
+
+  it('createPostWithImage_withoutImage', () => {
+    service.createPostWithImage(1, { title: 'No Image' }).subscribe();
+
+    const req = httpMock.expectOne('http://localhost:8081/campaigns/1/posts/with-image');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBeTrue();
+    expect(req.request.body.has('data')).toBeTrue();
+    expect(req.request.body.has('image')).toBeFalse();
+    req.flush({});
+  });
+
+  it('getTimingAnalysis_callsCorrectUrl', () => {
+    const mockData = { bestTimes: ['09:00'] };
+    service.getTimingAnalysis().subscribe((data) => {
+      expect(data).toEqual(mockData);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/posts/timing-analysis');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockData);
+  });
+
+  it('getWeeklyComparison_callsCorrectUrl', () => {
+    const mockData = { thisWeek: 10, lastWeek: 7 };
+    service.getWeeklyComparison().subscribe((data) => {
+      expect(data).toEqual(mockData);
+    });
+    const req = httpMock.expectOne('http://localhost:8081/posts/weekly-comparison');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockData);
+  });
+
+  it('getUpcomingScheduled_usesDefaultLimit', () => {
+    service.getUpcomingScheduled().subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/upcoming-scheduled?limit=3');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it('getUpcomingScheduled_usesCustomLimit', () => {
+    service.getUpcomingScheduled(5).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/upcoming-scheduled?limit=5');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
 });

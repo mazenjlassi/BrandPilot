@@ -44,10 +44,11 @@ public class CampaignController {
     public Post createPostWithImage(
             @PathVariable Long campaignId,
             @RequestPart("data") CreatePostRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "video", required = false) MultipartFile video
     ) throws IOException, java.io.IOException {
 
-        return campaignService.createPostForCampaign(campaignId, request, image);
+        return campaignService.createPostForCampaign(campaignId, request, image, video);
     }
 
     // 📊 Get all campaigns

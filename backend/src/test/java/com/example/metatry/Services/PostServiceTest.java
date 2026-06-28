@@ -172,7 +172,7 @@ class PostServiceTest {
         request.setScheduledAt(LocalDateTime.of(2024, 7, 1, 9, 0));
         request.setPermanent(false);
 
-        Post result = postService.createPostForCampaign(1L, request, file);
+        Post result = postService.createPostForCampaign(1L, request, file, null);
 
         assertThat(result.getTitle()).isEqualTo("Manual Post");
         assertThat(result.getGeneratedByAI()).isFalse();
@@ -197,7 +197,7 @@ class PostServiceTest {
         request.setScheduledAt(LocalDateTime.of(2024, 7, 1, 9, 0));
         request.setPermanent(false);
 
-        Post result = postService.createPostForCampaign(1L, request, null);
+        Post result = postService.createPostForCampaign(1L, request, null, null);
 
         assertThat(result.getLink()).isEqualTo("https://3lm-solutions2.odoo.com/contactus");
     }
