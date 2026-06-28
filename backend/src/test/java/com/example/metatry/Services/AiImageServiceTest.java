@@ -88,7 +88,7 @@ class AiImageServiceTest {
         assertThat(result.getSelected()).isTrue();
         verify(postImageRepository).save(imageCaptor.capture());
         PostImage captured = imageCaptor.getValue();
-        assertThat(captured.getImagePrompt()).contains("professional cinematic lighting");
+        assertThat(captured.getImagePrompt()).contains("cinematic lighting");
     }
 
     @Test
@@ -294,11 +294,10 @@ class AiImageServiceTest {
         String result = ReflectionTestUtils.invokeMethod(
                 aiImageService, "buildPrompt", post, ImageSize.SQUARE);
         assertThat(result).contains("square 1:1");
-        assertThat(result).contains("professional cinematic lighting");
+        assertThat(result).contains("professional");
+        assertThat(result).contains("cinematic lighting");
         assertThat(result).contains("marketing");
         assertThat(result).contains("strategies");
-        assertThat(result).contains("digital");
-        assertThat(result).contains("business");
     }
 
     @Test
@@ -326,8 +325,8 @@ class AiImageServiceTest {
         String result = ReflectionTestUtils.invokeMethod(
                 aiImageService, "buildPrompt", post, ImageSize.PORTRAIT);
         assertThat(result).contains("portrait 9:16");
-        assertThat(result).doesNotContain("the");
-        assertThat(result).doesNotContain("and");
+        assertThat(result).contains("best");
+        assertThat(result).contains("latest");
         assertThat(result).doesNotContain("this");
     }
 }

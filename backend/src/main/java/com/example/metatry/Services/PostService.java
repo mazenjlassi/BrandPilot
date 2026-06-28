@@ -101,8 +101,17 @@ public class PostService {
             post.setPlatform(request.getPlatform());
 
         //  update image if exists
-        if(request.getImageUrl() != null && post.getImage() != null)
-            post.getImage().setImageUrl(request.getImageUrl());
+        if(request.getImageUrl() != null) {
+            if(post.getImage() != null) {
+                post.getImage().setImageUrl(request.getImageUrl());
+            } else {
+                PostImage newImage = PostImage.builder()
+                        .imageUrl(request.getImageUrl())
+                        .post(post)
+                        .build();
+                post.getImages().add(newImage);
+            }
+        }
 
         // update status logic
         if (post.getScheduledAt() != null && post.getStatus() != PostStatus.PUBLISHED) {
