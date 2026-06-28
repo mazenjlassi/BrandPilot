@@ -106,14 +106,11 @@ public class PostService {
             if(post.getImage() != null) {
                 post.getImage().setImageUrl(request.getImageUrl());
             } else {
-                if(post.getImages() == null) {
-                    post.setImages(new ArrayList<>());
-                }
                 PostImage newImage = PostImage.builder()
                         .imageUrl(request.getImageUrl())
                         .post(post)
                         .build();
-                post.getImages().add(newImage);
+                post.addImage(newImage);
             }
         }
 
@@ -187,7 +184,7 @@ public class PostService {
                 PostImage postImage = new PostImage();
                 postImage.setImageUrl(imageUrl);
                 postImage.setPost(post);
-                post.getImages().add(postImage);
+                post.addImage(postImage);
             } catch (Exception e) {
                 throw new RuntimeException("Image upload failed: " + e.getMessage());
             }

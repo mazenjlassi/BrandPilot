@@ -92,6 +92,13 @@ public class Post {
         return (images != null && !images.isEmpty()) ? images.get(0) : null;
     }
 
+    public void addImage(PostImage image) {
+        if (this.images == null) {
+            this.images = new ArrayList<>();
+        }
+        this.images.add(image);
+    }
+
     private boolean notificationSent = false;
 
 }

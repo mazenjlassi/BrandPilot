@@ -130,10 +130,7 @@ public class AiImageService {
             image = createImage(post, size);
             image.setSelected(true);
             image = postImageRepository.save(image);
-            if (post.getImages() == null) {
-                post.setImages(new ArrayList<>());
-            }
-            post.getImages().add(image);
+            post.addImage(image);
             return image;
         }
 
