@@ -42,6 +42,9 @@ jobs:
           linkedin.redirect-uri=http://localhost:8081/callback/linkedin
           cloudflare.api.token=dummy
           cloudflare.account.id=dummy
+          facebook.page-access-token=dummy
+          facebook.page-id=dummy
+          instagram.business-id=dummy
           EOF
       - run: mvn clean verify
         timeout-minutes: 30
@@ -122,6 +125,9 @@ jobs:
           linkedin.redirect-uri=http://localhost:8081/callback/linkedin
           cloudflare.api.token=dummy
           cloudflare.account.id=dummy
+          facebook.page-access-token=dummy
+          facebook.page-id=dummy
+          instagram.business-id=dummy
           EOF
         working-directory: ./backend
       - run: mvn package -DskipTests -B
