@@ -31,17 +31,20 @@ jobs:
           jwt.secret=ci-test-secret-key
           gemini.api.key=ci-test-key
           EOF
-      - run: mvn clean verify -B
+      - run: mvn clean verify -B 2>&1 | tee mvn-output.txt; exit ${PIPESTATUS[0]}
         timeout-minutes: 30
-        continue-on-error: true
-      - name: Print test failures on error
-        if: failure()
+        shell: bash
+      - name: Print maven errors
+        if: always()
         run: |
-          echo "=== Surefire Test Failures ==="
-          find target/surefire-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -200 "$1"' _ {} \;
-          echo "=== Failsafe Test Failures ==="
-          find target/failsafe-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -200 "$1"' _ {} \;
-          exit 1
+          echo "=== ERROR lines ==="
+          grep -E "^\[ERROR\]|^Error:" mvn-output.txt || true
+          echo "=== Test summary ==="
+          grep -E "^\[INFO\] Tests run:" mvn-output.txt | grep -v "Failures: 0, Errors: 0" || true
+          echo "=== Surefire TXT reports ==="
+          find target/surefire-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -100 "$1"' _ {} \; 2>/dev/null || true
+          echo "=== Failsafe TXT reports ==="
+          find target/failsafe-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -100 "$1"' _ {} \; 2>/dev/null || true
 
   frontend:
     runs-on: ubuntu-latest
