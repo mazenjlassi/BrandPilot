@@ -58,6 +58,7 @@ public class InstagramService {
             );
 
         } catch (Exception e) {
+            System.out.println("❌ Instagram postPhotoFromUrl failed: " + e.getMessage());
             return Map.of("success", false, "error", e.getMessage());
         }
     }
@@ -68,6 +69,69 @@ public class InstagramService {
             String imageUrl = cloudinaryService.uploadImage(file);
             return postPhotoFromUrl(imageUrl, caption);
         } catch (Exception e) {
+            return Map.of("success", false, "error", e.getMessage());
+        }
+    }
+
+    public Map<String, Object> postVideoFromUrl(String videoUrl, String caption) {
+
+        try {
+            String createUrl = GRAPH_API_URL + igId + "/media";
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("media_type", "REELS");
+            body.add("video_url", videoUrl);
+            body.add("caption", caption != null ? caption : "");
+            body.add("access_token", token);
+
+            Map createRes = restTemplate.postForObject(createUrl, body, Map.class);
+
+            String creationId = (String) createRes.get("id");
+
+            // Poll media status until ready
+            String statusUrl = GRAPH_API_URL + igId + "/media/" + creationId + "?fields=status_code&access_token=" + token;
+            int attempts = 0;
+            while (attempts < 20) {
+                attempts++;
+                Thread.sleep(10000);
+                Map statusRes;
+                try {
+                    statusRes = restTemplate.getForObject(statusUrl, Map.class);
+                } catch (Exception e) {
+                    System.out.println("Status check failed (attempt " + attempts + "): " + e.getMessage());
+                    continue;
+                }
+                String statusCode = (String) statusRes.get("status_code");
+                System.out.println("Media status check " + attempts + "/20: " + statusCode);
+                if ("FINISHED".equals(statusCode)) {
+                    System.out.println("Media is ready!");
+                    break;
+                }
+                if ("ERROR".equals(statusCode)) {
+                    System.out.println("Media processing failed with status ERROR");
+                    return Map.of("success", false, "error", "Media processing failed: " + statusRes);
+                }
+            }
+
+            System.out.println("Attempting publish...");
+            String publishUrl = GRAPH_API_URL + igId + "/media_publish";
+
+            MultiValueMap<String, String> publishBody = new LinkedMultiValueMap<>();
+            publishBody.add("creation_id", creationId);
+            publishBody.add("access_token", token);
+
+            Map publishRes = restTemplate.postForObject(publishUrl, publishBody, Map.class);
+
+            return Map.of(
+                    "success", true,
+                    "mediaId", publishRes.get("id")
+            );
+
+        } catch (Exception e) {
+            System.out.println("❌ Instagram postVideoFromUrl failed for URL: " + videoUrl);
+            System.out.println("Error type: " + e.getClass().getName());
+            System.out.println("Error message: " + e.getMessage());
+            e.printStackTrace(System.out);
             return Map.of("success", false, "error", e.getMessage());
         }
     }

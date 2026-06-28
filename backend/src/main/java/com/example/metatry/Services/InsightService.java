@@ -1,8 +1,10 @@
 package com.example.metatry.Services;
 
 import com.example.metatry.DTO.PostInsightDTO;
+import com.example.metatry.Models.Post;
 import com.example.metatry.Models.PostComment;
 import com.example.metatry.Repositories.PostCommentRepository;
+import com.example.metatry.Repositories.PostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import static org.aspectj.util.LangUtil.safeList;
 public class InsightService {
 
     private final PostCommentRepository commentRepository;
+    private final PostRepository postRepository;
     private final AiInsightService aiInsightService;
     private final ObjectMapper objectMapper;
 
@@ -37,9 +40,30 @@ public class InsightService {
     public PostInsightDTO generateCampaignInsights(Long campaignId){
 
         List<PostComment> comments = commentRepository.findByPostCampaignId(campaignId);
+        List<Post> posts = postRepository.findByCampaignId(campaignId);
+
+        int totalLikes = posts.stream().mapToInt(p -> p.getLikes() != null ? p.getLikes() : 0).sum();
+        int totalComments = posts.stream().mapToInt(p -> p.getCommentsCount() != null ? p.getCommentsCount() : 0).sum();
+        int reach = posts.stream().mapToInt(p -> p.getImpressions() != null ? p.getImpressions() : 0).sum();
+        int postCount = posts.size();
+        double engagementRate = postCount > 0 ? (double) (totalLikes + totalComments) / postCount : 0;
 
         if(comments.isEmpty()){
-            return emptyInsight();
+            return PostInsightDTO.builder()
+                    .overallSentiment("NEUTRAL")
+                    .positiveRatio(0)
+                    .negativeRatio(0)
+                    .neutralRatio(1)
+                    .topComplaints(List.of())
+                    .topPositives(List.of())
+                    .summary("No comments available")
+                    .advice("No data available yet")
+                    .ideas(List.of("Start engaging your audience"))
+                    .totalLikes(totalLikes)
+                    .totalComments(totalComments)
+                    .engagementRate(engagementRate)
+                    .reach(reach)
+                    .build();
         }
 
         // ✅ 1. CALCULATE RATIOS FROM DB
@@ -67,11 +91,20 @@ public class InsightService {
             aiInsight.setPositiveRatio(posRatio);
             aiInsight.setNegativeRatio(negRatio);
             aiInsight.setNeutralRatio(neuRatio);
+            aiInsight.setTotalLikes(totalLikes);
+            aiInsight.setTotalComments(totalComments);
+            aiInsight.setEngagementRate(engagementRate);
+            aiInsight.setReach(reach);
 
             return aiInsight;
 
         } catch (Exception e){
-            return buildInsightFromComments(comments);
+            PostInsightDTO fallback = buildInsightFromComments(comments);
+            fallback.setTotalLikes(totalLikes);
+            fallback.setTotalComments(totalComments);
+            fallback.setEngagementRate(engagementRate);
+            fallback.setReach(reach);
+            return fallback;
         }
     }
 

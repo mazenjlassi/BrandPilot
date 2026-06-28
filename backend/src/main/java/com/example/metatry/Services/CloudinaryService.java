@@ -48,6 +48,10 @@ public class CloudinaryService {
             convFile.delete();
         }
     }
+    public String uploadVideo(MultipartFile file) throws IOException {
+        return uploadImage(file);
+    }
+
     public String uploadImageBytes(byte[] imageBytes) throws Exception {
 
         Map uploadResult = cloudinary.uploader().upload(

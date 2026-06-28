@@ -1,9 +1,11 @@
 package com.example.metatry.Services;
 
 import com.example.metatry.Config.GeminiConfig;
+import com.example.metatry.Exceptions.GeminiUnavailableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -45,6 +47,13 @@ public class GeminiService {
 
             return cleanJson(rawText);
 
+        } catch (HttpServerErrorException e) {
+            System.out.println("Gemini API error: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace(System.out);
+            if (e.getStatusCode().is5xxServerError()) {
+                throw new GeminiUnavailableException("AI generation service is temporarily unavailable. Please try again later.");
+            }
+            throw new RuntimeException("Gemini API failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Gemini API error: " + e.getClass().getName() + " - " + e.getMessage());
             e.printStackTrace(System.out);

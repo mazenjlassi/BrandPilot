@@ -195,7 +195,7 @@ class PostControllerTest {
         MockMultipartFile jsonPart = new MockMultipartFile("data", "",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(data));
 
-        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any()))
+        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any(), any()))
                 .thenReturn(new Post());
 
         mockMvc.perform(multipart("/posts/campaigns/1/posts")
@@ -214,7 +214,7 @@ class PostControllerTest {
         MockMultipartFile jsonPart = new MockMultipartFile("data", "",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(data));
 
-        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any()))
+        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any(), any()))
                 .thenReturn(new Post());
 
         mockMvc.perform(multipart("/posts/campaigns/1/posts")

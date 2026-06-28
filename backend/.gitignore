@@ -34,6 +34,5 @@ build/
 
 
 application.properties
-!src/test/resources/application.properties
 
 AGENTS.md

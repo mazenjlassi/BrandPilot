@@ -22,4 +22,9 @@ public class PostInsightDTO {
     private String summary;
     private String advice;
     private List<String> ideas;
+
+    private int totalLikes;
+    private int totalComments;
+    private double engagementRate;
+    private int reach;
 }

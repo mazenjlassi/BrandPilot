@@ -95,7 +95,8 @@ public class CampaignService {
     public Post createPostForCampaign(
             Long campaignId,
             CreatePostRequest request,
-            MultipartFile image
+            MultipartFile image,
+            MultipartFile video
     ) throws IOException, java.io.IOException {
 
         Campaign campaign = campaignRepository.findById(campaignId)
@@ -123,14 +124,14 @@ public class CampaignService {
         post.setCampaign(campaign);
 
         // ✅ USE YOUR CLOUDINARY SERVICE HERE
-        if (image != null && !image.isEmpty()) {
-
+        if (video != null && !video.isEmpty()) {
+            String videoUrl = cloudinaryService.uploadVideo(video);
+            post.setVideoUrl(videoUrl);
+        } else if (image != null && !image.isEmpty()) {
             String imageUrl = cloudinaryService.uploadImage(image);
-
             PostImage postImage = new PostImage();
             postImage.setImageUrl(imageUrl);
             postImage.setPost(post);
-
             post.setImage(postImage);
         }
 
