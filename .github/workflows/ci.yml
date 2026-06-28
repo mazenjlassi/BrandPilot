@@ -26,25 +26,13 @@ jobs:
           server.port=8081
           spring.datasource.url=jdbc:mysql://localhost:3306/metatry
           spring.datasource.username=root
-          spring.datasource.password=test
+          spring.datasource.password=rootpassword
           spring.jpa.hibernate.ddl-auto=update
           jwt.secret=ci-test-secret-key
           gemini.api.key=ci-test-key
           EOF
-      - run: mvn clean verify -B 2>&1 | tee mvn-output.txt; exit ${PIPESTATUS[0]}
+      - run: mvn clean verify
         timeout-minutes: 30
-        shell: bash
-      - name: Print maven errors
-        if: always()
-        run: |
-          echo "=== ERROR lines ==="
-          grep -E "^\[ERROR\]|^Error:" mvn-output.txt || true
-          echo "=== Test summary ==="
-          grep -E "^\[INFO\] Tests run:" mvn-output.txt | grep -v "Failures: 0, Errors: 0" || true
-          echo "=== Surefire TXT reports ==="
-          find target/surefire-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -100 "$1"' _ {} \; 2>/dev/null || true
-          echo "=== Failsafe TXT reports ==="
-          find target/failsafe-reports -name "*.txt" -exec sh -c 'echo "--- $1 ---"; head -100 "$1"' _ {} \; 2>/dev/null || true
 
   frontend:
     runs-on: ubuntu-latest
@@ -107,7 +95,7 @@ jobs:
           server.port=8081
           spring.datasource.url=jdbc:mysql://localhost:3306/metatry
           spring.datasource.username=root
-          spring.datasource.password=test
+          spring.datasource.password=rootpassword
           spring.jpa.hibernate.ddl-auto=update
           jwt.secret=ci-test-secret-key
           gemini.api.key=ci-test-key
