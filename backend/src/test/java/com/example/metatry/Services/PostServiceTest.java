@@ -333,7 +333,7 @@ class PostServiceTest {
                 .scheduledAt(LocalDateTime.of(2024, 8, 1, 10, 0))
                 .publishedAt(LocalDateTime.of(2024, 8, 1, 10, 0))
                 .status(PostStatus.SCHEDULED).platform(PlatformType.LINKEDIN)
-                .campaign(campaign).image(image).build();
+                .campaign(campaign).images(List.of(image)).build();
         when(postRepository.findByStatusAndScheduledAtBetween(
                 eq(PostStatus.SCHEDULED), any(), any()))
                 .thenReturn(List.of(post));
