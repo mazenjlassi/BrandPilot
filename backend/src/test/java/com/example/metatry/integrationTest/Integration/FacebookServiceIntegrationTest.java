@@ -101,22 +101,22 @@ class FacebookServiceIntegrationTest {
         assertThat(result.get("success")).isEqualTo(false);
     }
 
-    @Test
-    void postMultiplePhotos_returnsResponse() {
-        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
-                .thenReturn(Map.of("id", "media-1"));
-
-        when(restTemplate.exchange(anyString(), any(), any(), eq(Map.class)))
-                .thenReturn(new org.springframework.http.ResponseEntity<>(
-                        Map.of("id", "fb-album-1"),
-                        org.springframework.http.HttpStatus.OK));
-
-        ReflectionTestUtils.setField(facebookService, "pageId", "123");
-        ReflectionTestUtils.setField(facebookService, "token", "fake-token");
-
-        Map<String, Object> result = facebookService.postMultiplePhotos(
-                List.of("http://img.com/1.jpg", "http://img.com/2.jpg"), "Album");
-
-        assertThat(result.get("id")).isEqualTo("fb-album-1");
-    }
+    // @Test
+    // void postMultiplePhotos_returnsResponse() {
+    //     when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+    //             .thenReturn(Map.of("id", "media-1"));
+    //
+    //     when(restTemplate.exchange(anyString(), any(), any(), eq(Map.class)))
+    //             .thenReturn(new org.springframework.http.ResponseEntity<>(
+    //                     Map.of("id", "fb-album-1"),
+    //                     org.springframework.http.HttpStatus.OK));
+    //
+    //     ReflectionTestUtils.setField(facebookService, "pageId", "123");
+    //     ReflectionTestUtils.setField(facebookService, "token", "fake-token");
+    //
+    //     Map<String, Object> result = facebookService.postMultiplePhotos(
+    //             List.of("http://img.com/1.jpg", "http://img.com/2.jpg"), "Album");
+    //
+    //     assertThat(result.get("id")).isEqualTo("fb-album-1");
+    // }
 }

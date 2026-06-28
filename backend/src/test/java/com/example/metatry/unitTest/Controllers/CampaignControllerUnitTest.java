@@ -84,7 +84,7 @@ class CampaignControllerUnitTest {
         MockMultipartFile jsonPart = new MockMultipartFile("data", "",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(data));
 
-        when(campaignService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any()))
+        when(campaignService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any(), any()))
                 .thenReturn(new Post());
 
         mockMvc.perform(multipart("/campaigns/1/posts/with-image")

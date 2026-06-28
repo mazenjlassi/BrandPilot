@@ -271,7 +271,7 @@ class PostControllerTest {
                 .imagePrompt("old prompt").imageUrl("https://old.url").build();
         Post post = new Post();
         post.setId(1L);
-        post.setImage(existingImage);
+        post.getImages().add(existingImage);
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(aiImageService.generateImageForPost(post)).thenReturn(existingImage);
 

@@ -3,6 +3,7 @@ package com.example.metatry.Services;
 import com.example.metatry.DTO.PostInsightDTO;
 import com.example.metatry.Models.PostComment;
 import com.example.metatry.Repositories.PostCommentRepository;
+import com.example.metatry.Repositories.PostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,9 @@ class InsightServiceTest {
     private PostCommentRepository commentRepository;
 
     @Mock
+    private PostRepository postRepository;
+
+    @Mock
     private AiInsightService aiInsightService;
 
     private ObjectMapper objectMapper;
@@ -32,7 +36,7 @@ class InsightServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        insightService = new InsightService(commentRepository, aiInsightService, objectMapper);
+        insightService = new InsightService(commentRepository, postRepository, aiInsightService, objectMapper);
     }
 
     @Test

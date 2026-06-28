@@ -338,7 +338,7 @@ class CampaignServiceIntegrationTest {
                 new org.springframework.mock.web.MockMultipartFile("file", "img.jpg",
                         "image/jpeg", "content".getBytes());
 
-        Post result = campaignService.createPostForCampaign(campaign.getId(), request, List.of(file));
+        Post result = campaignService.createPostForCampaign(campaign.getId(), request, file, null);
 
         assertThat(result.getId()).isNotNull();
         assertThat(result.getTitle()).isEqualTo("Image Post");
@@ -356,7 +356,7 @@ class CampaignServiceIntegrationTest {
         request.setPermanent(false);
         request.setLink("");
 
-        Post result = campaignService.createPostForCampaign(campaign.getId(), request, null);
+        Post result = campaignService.createPostForCampaign(campaign.getId(), request, null, null);
 
         assertThat(result.getLink()).isEqualTo("https://3lm-solutions2.odoo.com/contactus");
     }
@@ -365,7 +365,7 @@ class CampaignServiceIntegrationTest {
     void createPostForCampaign_campaignNotFound_throws() {
         CreatePostRequest request = new CreatePostRequest();
 
-        assertThatThrownBy(() -> campaignService.createPostForCampaign(99999L, request, null))
+        assertThatThrownBy(() -> campaignService.createPostForCampaign(99999L, request, null, null))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Campaign not found");
     }

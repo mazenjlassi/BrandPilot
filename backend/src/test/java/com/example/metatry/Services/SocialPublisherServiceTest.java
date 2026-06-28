@@ -48,7 +48,7 @@ class SocialPublisherServiceTest {
                 .approved(true)
                 .platform(PlatformType.INSTAGRAM)
                 .content("Test post")
-                .image(image)
+                .images(List.of(image))
                 .build();
         when(instagramService.postPhotoFromUrl(anyString(), anyString()))
                 .thenReturn(Map.of("success", true, "mediaId", "ig-123"));
@@ -82,7 +82,7 @@ class SocialPublisherServiceTest {
                 .approved(true)
                 .platform(PlatformType.LINKEDIN)
                 .content("Test post")
-                .image(image)
+                .images(List.of(image))
                 .build();
         when(linkedInService.postArticleWithImage(anyString(), anyString(), anyString()))
                 .thenReturn(Map.of("success", true, "postId", "li-123"));
@@ -101,7 +101,7 @@ class SocialPublisherServiceTest {
                 .platform(PlatformType.INSTAGRAM)
                 .content("Test post")
                 .platformPostId("ig-123")
-                .image(image)
+                .images(List.of(image))
                 .build();
         when(instagramService.postPhotoFromUrl(anyString(), anyString()))
                 .thenReturn(Map.of("success", true, "mediaId", "ig-123"));

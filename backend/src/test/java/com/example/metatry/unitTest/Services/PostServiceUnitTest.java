@@ -173,7 +173,7 @@ class PostServiceUnitTest {
         request.setScheduledAt(LocalDateTime.of(2024, 7, 1, 9, 0));
         request.setPermanent(false);
 
-        Post result = postService.createPostForCampaign(1L, request, List.of(file), null);
+        Post result = postService.createPostForCampaign(1L, request, file, null);
 
         assertThat(result.getTitle()).isEqualTo("Manual Post");
         assertThat(result.getGeneratedByAI()).isFalse();
@@ -523,7 +523,7 @@ class PostServiceUnitTest {
         request.setPlatform(PlatformType.LINKEDIN);
         request.setPermanent(false);
 
-        assertThatThrownBy(() -> postService.createPostForCampaign(1L, request, List.of(file), null))
+        assertThatThrownBy(() -> postService.createPostForCampaign(1L, request, file, null))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Image upload failed");
     }

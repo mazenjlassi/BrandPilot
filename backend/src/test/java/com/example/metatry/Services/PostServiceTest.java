@@ -65,7 +65,7 @@ class PostServiceTest {
                 .platform(PlatformType.LINKEDIN).scheduledAt(LocalDateTime.of(2024, 1, 1, 10, 0))
                 .publishedAt(LocalDateTime.of(2024, 1, 2, 10, 0))
                 .permanent(false).link("https://link.com").likes(10).commentsCount(5).shares(2)
-                .campaign(campaign).image(image)
+                .campaign(campaign).images(List.of(image))
                 .status(PostStatus.PUBLISHED).build();
 
         PostDto dto = postService.mapToDto(post);

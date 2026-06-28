@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -24,9 +23,6 @@ class EmailServiceTest {
     @Mock
     private JavaMailSender mailSender;
 
-    @Mock
-    private ObjectProvider<JavaMailSender> mailSenderProvider;
-
     @Captor
     private ArgumentCaptor<SimpleMailMessage> messageCaptor;
 
@@ -34,8 +30,7 @@ class EmailServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(mailSenderProvider.getIfAvailable()).thenReturn(mailSender);
-        emailService = new EmailService(mailSenderProvider);
+        emailService = new EmailService(mailSender);
     }
 
     @Test

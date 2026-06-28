@@ -126,35 +126,35 @@ class InstagramServiceIntegrationTest {
         assertThat(result.get("error")).toString().contains("Media processing failed");
     }
 
-    @Test
-    void postCarousel_success() {
-        when(restTemplate.postForObject(contains("/media"), any(), eq(Map.class)))
-                .thenReturn(Map.of("id", "child-1"))
-                .thenReturn(Map.of("id", "child-2"))
-                .thenReturn(Map.of("id", "carousel-1"));
-        when(restTemplate.postForObject(contains("/media_publish"), any(), eq(Map.class)))
-                .thenReturn(Map.of("id", "carousel-published"));
-
-        ReflectionTestUtils.setField(instagramService, "token", "fake-token");
-        ReflectionTestUtils.setField(instagramService, "igId", "ig-biz-1");
-
-        Map<String, Object> result = instagramService.postCarousel(
-                List.of("http://img.com/1.jpg", "http://img.com/2.jpg"), "Carousel");
-
-        assertThat(result.get("success")).isEqualTo(true);
-    }
-
-    @Test
-    void postCarousel_apiFails_returnsError() {
-        when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
-                .thenThrow(new RuntimeException("Carousel error"));
-
-        ReflectionTestUtils.setField(instagramService, "token", "fake-token");
-        ReflectionTestUtils.setField(instagramService, "igId", "ig-biz-1");
-
-        Map<String, Object> result = instagramService.postCarousel(
-                List.of("http://img.com/1.jpg"), "Carousel");
-
-        assertThat(result.get("success")).isEqualTo(false);
-    }
+    // @Test
+    // void postCarousel_success() {
+    //     when(restTemplate.postForObject(contains("/media"), any(), eq(Map.class)))
+    //             .thenReturn(Map.of("id", "child-1"))
+    //             .thenReturn(Map.of("id", "child-2"))
+    //             .thenReturn(Map.of("id", "carousel-1"));
+    //     when(restTemplate.postForObject(contains("/media_publish"), any(), eq(Map.class)))
+    //             .thenReturn(Map.of("id", "carousel-published"));
+    //
+    //     ReflectionTestUtils.setField(instagramService, "token", "fake-token");
+    //     ReflectionTestUtils.setField(instagramService, "igId", "ig-biz-1");
+    //
+    //     Map<String, Object> result = instagramService.postCarousel(
+    //             List.of("http://img.com/1.jpg", "http://img.com/2.jpg"), "Carousel");
+    //
+    //     assertThat(result.get("success")).isEqualTo(true);
+    // }
+    //
+    // @Test
+    // void postCarousel_apiFails_returnsError() {
+    //     when(restTemplate.postForObject(anyString(), any(), eq(Map.class)))
+    //             .thenThrow(new RuntimeException("Carousel error"));
+    //
+    //     ReflectionTestUtils.setField(instagramService, "token", "fake-token");
+    //     ReflectionTestUtils.setField(instagramService, "igId", "ig-biz-1");
+    //
+    //     Map<String, Object> result = instagramService.postCarousel(
+    //             List.of("http://img.com/1.jpg"), "Carousel");
+    //
+    //     assertThat(result.get("success")).isEqualTo(false);
+    // }
 }

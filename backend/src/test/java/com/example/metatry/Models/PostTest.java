@@ -39,7 +39,7 @@ class PostTest {
                 .platformPostId("fp_123")
                 .approved(true)
                 .campaign(campaign)
-                .image(image)
+                .images(List.of(image))
                 .notificationSent(true)
                 .build();
 

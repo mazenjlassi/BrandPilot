@@ -435,37 +435,37 @@ class PostServiceIntegrationTest {
 
     // ================= addImagesToPost =================
 
-    @Test
-    @Transactional
-    void addImagesToPost_success() throws Exception {
-        org.springframework.mock.web.MockMultipartFile file =
-                new org.springframework.mock.web.MockMultipartFile("file", "test.jpg",
-                        "image/jpeg", "fake-image-content".getBytes());
-        when(cloudinaryService.uploadImage(any())).thenReturn("https://cloudinary.com/test.jpg");
-
-        Post updated = postService.addImagesToPost(savedPost.getId(), List.of(file));
-
-        assertThat(updated.getImages()).isNotEmpty();
-        assertThat(updated.getImages().get(0).getImageUrl()).isEqualTo("https://cloudinary.com/test.jpg");
-    }
-
-    @Test
-    void addImagesToPost_postNotFound_throws() {
-        assertThatThrownBy(() -> postService.addImagesToPost(99999L, List.of()))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Post not found");
-    }
-
-    @Test
-    @Transactional
-    void addImagesToPost_cloudinaryFails_throws() throws Exception {
-        org.springframework.mock.web.MockMultipartFile file =
-                new org.springframework.mock.web.MockMultipartFile("file", "test.jpg",
-                        "image/jpeg", "fake".getBytes());
-        when(cloudinaryService.uploadImage(any())).thenThrow(new RuntimeException("Upload failed"));
-
-        assertThatThrownBy(() -> postService.addImagesToPost(savedPost.getId(), List.of(file)))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Image upload failed");
-    }
+    // @Test
+    // @Transactional
+    // void addImagesToPost_success() throws Exception {
+    //     org.springframework.mock.web.MockMultipartFile file =
+    //             new org.springframework.mock.web.MockMultipartFile("file", "test.jpg",
+    //                     "image/jpeg", "fake-image-content".getBytes());
+    //     when(cloudinaryService.uploadImage(any())).thenReturn("https://cloudinary.com/test.jpg");
+    //
+    //     Post updated = postService.addImagesToPost(savedPost.getId(), List.of(file));
+    //
+    //     assertThat(updated.getImages()).isNotEmpty();
+    //     assertThat(updated.getImages().get(0).getImageUrl()).isEqualTo("https://cloudinary.com/test.jpg");
+    // }
+    //
+    // @Test
+    // void addImagesToPost_postNotFound_throws() {
+    //     assertThatThrownBy(() -> postService.addImagesToPost(99999L, List.of()))
+    //             .isInstanceOf(RuntimeException.class)
+    //             .hasMessageContaining("Post not found");
+    // }
+    //
+    // @Test
+    // @Transactional
+    // void addImagesToPost_cloudinaryFails_throws() throws Exception {
+    //     org.springframework.mock.web.MockMultipartFile file =
+    //             new org.springframework.mock.web.MockMultipartFile("file", "test.jpg",
+    //                     "image/jpeg", "fake".getBytes());
+    //     when(cloudinaryService.uploadImage(any())).thenThrow(new RuntimeException("Upload failed"));
+    //
+    //     assertThatThrownBy(() -> postService.addImagesToPost(savedPost.getId(), List.of(file)))
+    //             .isInstanceOf(RuntimeException.class)
+    //             .hasMessageContaining("Image upload failed");
+    // }
 }

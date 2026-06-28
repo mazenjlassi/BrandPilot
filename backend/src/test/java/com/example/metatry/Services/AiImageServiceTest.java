@@ -68,7 +68,7 @@ class AiImageServiceTest {
                 .title("Test Title Marketing")
                 .content("Great content about marketing strategies")
                 .platform(PlatformType.LINKEDIN)
-                .image(null)
+                .images(null)
                 .build();
 
         PostImage savedImage = PostImage.builder()
@@ -109,7 +109,7 @@ class AiImageServiceTest {
                 .title("Title")
                 .content("Content")
                 .platform(PlatformType.INSTAGRAM)
-                .image(existingImage)
+                .images(List.of(existingImage))
                 .build();
 
         PostImage result = aiImageService.generateImageForPost(post);
@@ -137,7 +137,7 @@ class AiImageServiceTest {
                 .title("AI Technology")
                 .content("Latest AI trends")
                 .platform(PlatformType.FACEBOOK)
-                .image(existingImage)
+                .images(List.of(existingImage))
                 .build();
 
         PostImage result = aiImageService.generateImageForPost(post);
@@ -274,7 +274,7 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("Whatever")
                 .content("Content")
-                .image(image)
+                .images(List.of(image))
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
@@ -287,7 +287,7 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("Top Marketing Strategies for 2026")
                 .content("Learn how to grow your business with digital marketing")
-                .image(null)
+                .images(null)
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
@@ -305,7 +305,7 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("Innovation")
                 .content(null)
-                .image(null)
+                .images(null)
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
@@ -319,7 +319,7 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("The best and the latest new post title")
                 .content("This is just a test content here")
-                .image(null)
+                .images(null)
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
