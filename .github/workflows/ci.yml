@@ -46,7 +46,7 @@ jobs:
           facebook.page-id=dummy
           instagram.business-id=dummy
           EOF
-      - run: mvn clean test -B
+      - run: mvn clean verify -B
         timeout-minutes: 30
   frontend:
     runs-on: ubuntu-latest
