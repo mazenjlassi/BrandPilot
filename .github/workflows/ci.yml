@@ -19,35 +19,29 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Generate application.properties
-        run: |
-          mkdir -p src/main/resources
-          cat > src/main/resources/application.properties << 'EOF'
-          server.port=8081
-          spring.datasource.url=jdbc:mysql://localhost:3306/metatry
-          spring.datasource.username=root
-          spring.datasource.password=rootpassword
-          spring.jpa.hibernate.ddl-auto=update
-          jwt.secret=ci-test-secret-key
-          gemini.api.key=ci-test-key
-          cloudinary.cloud-name=dummy
-          cloudinary.api-key=dummy
-          cloudinary.api-secret=dummy
-          x.api-key=dummy
-          x.api-key-secret=dummy
-          x.access-token=dummy
-          x.access-token-secret=dummy
-          linkedin.client-id=dummy
-          linkedin.client-secret=dummy
-          linkedin.redirect-uri=http://localhost:8081/callback/linkedin
-          cloudflare.api.token=dummy
-          cloudflare.account.id=dummy
-          facebook.page-access-token=dummy
-          facebook.page-id=dummy
-          instagram.business-id=dummy
-          EOF
       - run: mvn clean verify -B
         timeout-minutes: 30
+        env:
+          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb
+          JWT_SECRET: ci-test-secret-key
+          GEMINI_API_KEY: ci-test-key
+          CLOUDINARY_CLOUD_NAME: dummy
+          CLOUDINARY_API_KEY: dummy
+          CLOUDINARY_API_SECRET: dummy
+          X_API_KEY: dummy
+          X_API_KEY_SECRET: dummy
+          X_ACCESS_TOKEN: dummy
+          X_ACCESS_TOKEN_SECRET: dummy
+          LINKEDIN_CLIENT_ID: dummy
+          LINKEDIN_CLIENT_SECRET: dummy
+          LINKEDIN_REDIRECT_URI: http://localhost:8081/api/linkedin/callback
+          CLOUDFLARE_API_TOKEN: dummy
+          CLOUDFLARE_ACCOUNT_ID: dummy
+          FACEBOOK_PAGE_ACCESS_TOKEN: dummy
+          FACEBOOK_PAGE_ID: dummy
+          INSTAGRAM_BUSINESS_ID: dummy
+          SPRING_MAIL_HOST: dummy
+          SPRING_MAIL_PORT: 1025
       - name: Print test failures
         if: failure()
         run: |
@@ -119,38 +113,31 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - name: Generate application.properties
-        run: |
-          mkdir -p src/main/resources
-          cat > src/main/resources/application.properties << 'EOF'
-          server.port=8081
-          spring.datasource.url=jdbc:mysql://localhost:3306/metatry
-          spring.datasource.username=root
-          spring.datasource.password=rootpassword
-          spring.jpa.hibernate.ddl-auto=update
-          jwt.secret=ci-test-secret-key
-          gemini.api.key=ci-test-key
-          cloudinary.cloud-name=dummy
-          cloudinary.api-key=dummy
-          cloudinary.api-secret=dummy
-          x.api-key=dummy
-          x.api-key-secret=dummy
-          x.access-token=dummy
-          x.access-token-secret=dummy
-          linkedin.client-id=dummy
-          linkedin.client-secret=dummy
-          linkedin.redirect-uri=http://localhost:8081/callback/linkedin
-          cloudflare.api.token=dummy
-          cloudflare.account.id=dummy
-          facebook.page-access-token=dummy
-          facebook.page-id=dummy
-          instagram.business-id=dummy
-          EOF
-        working-directory: ./backend
       - run: mvn package -DskipTests -B
         working-directory: ./backend
       - name: Start backend
         shell: bash
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/metatry
+          JWT_SECRET: ci-test-secret-key
+          GEMINI_API_KEY: ci-test-key
+          CLOUDINARY_CLOUD_NAME: dummy
+          CLOUDINARY_API_KEY: dummy
+          CLOUDINARY_API_SECRET: dummy
+          X_API_KEY: dummy
+          X_API_KEY_SECRET: dummy
+          X_ACCESS_TOKEN: dummy
+          X_ACCESS_TOKEN_SECRET: dummy
+          LINKEDIN_CLIENT_ID: dummy
+          LINKEDIN_CLIENT_SECRET: dummy
+          LINKEDIN_REDIRECT_URI: http://localhost:8081/api/linkedin/callback
+          CLOUDFLARE_API_TOKEN: dummy
+          CLOUDFLARE_ACCOUNT_ID: dummy
+          FACEBOOK_PAGE_ACCESS_TOKEN: dummy
+          FACEBOOK_PAGE_ID: dummy
+          INSTAGRAM_BUSINESS_ID: dummy
+          SPRING_MAIL_HOST: dummy
+          SPRING_MAIL_PORT: 1025
         run: |
           set +e
           mkdir -p /tmp/javatmp

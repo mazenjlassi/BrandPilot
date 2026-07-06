@@ -6,12 +6,14 @@ import com.example.metatry.Enums.Role;
 import com.example.metatry.Models.*;
 import com.example.metatry.Repositories.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
+@Profile("!test")
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;

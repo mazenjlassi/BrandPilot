@@ -1,10 +1,12 @@
 package com.example.metatry.Services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!test")
 @RequiredArgsConstructor
 public class ScraperScheduler {
 

@@ -33,6 +33,7 @@ build/
 .vscode/
 
 
-application.properties
-
+.env
 AGENTS.md
+*.log
+*.err
