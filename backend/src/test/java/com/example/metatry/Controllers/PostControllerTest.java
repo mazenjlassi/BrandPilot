@@ -8,6 +8,7 @@ import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.AiImageService;
+import com.example.metatry.Services.CloudinaryService;
 import com.example.metatry.Services.JwtService;
 import com.example.metatry.Services.PostService;
 import com.example.metatry.Services.PostTimingService;
@@ -58,6 +59,9 @@ class PostControllerTest {
 
     @MockitoBean
     private PostTimingService postTimingService;
+
+    @MockitoBean
+    private CloudinaryService cloudinaryService;
 
     @MockitoBean
     private JwtService jwtService;
@@ -195,7 +199,7 @@ class PostControllerTest {
         MockMultipartFile jsonPart = new MockMultipartFile("data", "",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(data));
 
-        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any()))
+        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any(), any()))
                 .thenReturn(new Post());
 
         mockMvc.perform(multipart("/posts/campaigns/1/posts")
@@ -214,7 +218,7 @@ class PostControllerTest {
         MockMultipartFile jsonPart = new MockMultipartFile("data", "",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(data));
 
-        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any()))
+        when(postService.createPostForCampaign(eq(1L), any(CreatePostRequest.class), any(), any()))
                 .thenReturn(new Post());
 
         mockMvc.perform(multipart("/posts/campaigns/1/posts")
@@ -271,7 +275,7 @@ class PostControllerTest {
                 .imagePrompt("old prompt").imageUrl("https://old.url").build();
         Post post = new Post();
         post.setId(1L);
-        post.setImage(existingImage);
+        post.getImages().add(existingImage);
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(aiImageService.generateImageForPost(post)).thenReturn(existingImage);
 

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,8 +102,17 @@ public class PostService {
             post.setPlatform(request.getPlatform());
 
         //  update image if exists
-        if(request.getImageUrl() != null && post.getImage() != null)
-            post.getImage().setImageUrl(request.getImageUrl());
+        if(request.getImageUrl() != null) {
+            if(post.getImage() != null) {
+                post.getImage().setImageUrl(request.getImageUrl());
+            } else {
+                PostImage newImage = PostImage.builder()
+                        .imageUrl(request.getImageUrl())
+                        .post(post)
+                        .build();
+                post.addImage(newImage);
+            }
+        }
 
         // update status logic
         if (post.getScheduledAt() != null && post.getStatus() != PostStatus.PUBLISHED) {
@@ -127,7 +137,8 @@ public class PostService {
     public Post createPostForCampaign(
             Long campaignId,
             CreatePostRequest request,
-            MultipartFile file
+            MultipartFile image,
+            MultipartFile video
     ) {
 
         Campaign campaign = campaignRepository.findById(campaignId)
@@ -160,17 +171,20 @@ public class PostService {
         }
         post.setLink(link);
 
-        //  USE  CLOUDINARY SERVICE
-        if (file != null && !file.isEmpty()) {
+        if (video != null && !video.isEmpty()) {
             try {
-                String imageUrl = cloudinaryService.uploadImage(file);
-
-                PostImage image = new PostImage();
-                image.setImageUrl(imageUrl);
-                image.setPost(post);
-
-                post.setImage(image);
-
+                String videoUrl = cloudinaryService.uploadVideo(video);
+                post.setVideoUrl(videoUrl);
+            } catch (Exception e) {
+                throw new RuntimeException("Video upload failed: " + e.getMessage());
+            }
+        } else if (image != null && !image.isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(image);
+                PostImage postImage = new PostImage();
+                postImage.setImageUrl(imageUrl);
+                postImage.setPost(post);
+                post.addImage(postImage);
             } catch (Exception e) {
                 throw new RuntimeException("Image upload failed: " + e.getMessage());
             }

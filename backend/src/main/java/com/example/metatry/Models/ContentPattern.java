@@ -81,13 +81,13 @@ public class ContentPattern {
     private LocalDateTime lastUpdatedAt;
 
     @PrePersist
-    protected void onCreate() {
+    public void onCreate() {
         extractedAt = LocalDateTime.now();
         lastUpdatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    protected void onUpdate() {
+    public void onUpdate() {
         lastUpdatedAt = LocalDateTime.now();
     }
 }

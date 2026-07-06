@@ -28,6 +28,8 @@ services:
       - "8081:8081"
     volumes:
       - ./uploads:/app/uploads  # ← Ajoute cette ligne
+    env_file:
+      - .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/metatry?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: metatryuser
@@ -35,7 +37,6 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
-      JWT_SECRET: my-super-secret-key-for-docker-environment
     depends_on:
       mysql:
         condition: service_healthy

@@ -19,8 +19,46 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      - run: mvn clean verify
-
+      - run: mvn clean verify -B
+        timeout-minutes: 30
+        env:
+          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb
+          JWT_SECRET: ci-test-secret-key
+          GEMINI_API_KEY: ci-test-key
+          CLOUDINARY_CLOUD_NAME: dummy
+          CLOUDINARY_API_KEY: dummy
+          CLOUDINARY_API_SECRET: dummy
+          X_API_KEY: dummy
+          X_API_KEY_SECRET: dummy
+          X_ACCESS_TOKEN: dummy
+          X_ACCESS_TOKEN_SECRET: dummy
+          LINKEDIN_CLIENT_ID: dummy
+          LINKEDIN_CLIENT_SECRET: dummy
+          LINKEDIN_REDIRECT_URI: http://localhost:8081/api/linkedin/callback
+          CLOUDFLARE_API_TOKEN: dummy
+          CLOUDFLARE_ACCOUNT_ID: dummy
+          FACEBOOK_PAGE_ACCESS_TOKEN: dummy
+          FACEBOOK_PAGE_ID: dummy
+          INSTAGRAM_BUSINESS_ID: dummy
+          SPRING_MAIL_HOST: dummy
+          SPRING_MAIL_PORT: 1025
+      - name: Print test failures
+        if: failure()
+        run: |
+          for f in target/surefire-reports/*.txt; do
+            if grep -q "FAILURE\|ERROR\|<<<" "$f" 2>/dev/null; then
+              echo "::group::$(basename $f)"
+              head -100 "$f"
+              echo "::endgroup::"
+            fi
+          done
+          for f in target/failsafe-reports/*.txt; do
+            if grep -q "FAILURE\|ERROR\|<<<" "$f" 2>/dev/null; then
+              echo "::group::$(basename $f)"
+              head -100 "$f"
+              echo "::endgroup::"
+            fi
+          done
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -79,6 +117,27 @@ jobs:
         working-directory: ./backend
       - name: Start backend
         shell: bash
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/metatry
+          JWT_SECRET: ci-test-secret-key
+          GEMINI_API_KEY: ci-test-key
+          CLOUDINARY_CLOUD_NAME: dummy
+          CLOUDINARY_API_KEY: dummy
+          CLOUDINARY_API_SECRET: dummy
+          X_API_KEY: dummy
+          X_API_KEY_SECRET: dummy
+          X_ACCESS_TOKEN: dummy
+          X_ACCESS_TOKEN_SECRET: dummy
+          LINKEDIN_CLIENT_ID: dummy
+          LINKEDIN_CLIENT_SECRET: dummy
+          LINKEDIN_REDIRECT_URI: http://localhost:8081/api/linkedin/callback
+          CLOUDFLARE_API_TOKEN: dummy
+          CLOUDFLARE_ACCOUNT_ID: dummy
+          FACEBOOK_PAGE_ACCESS_TOKEN: dummy
+          FACEBOOK_PAGE_ID: dummy
+          INSTAGRAM_BUSINESS_ID: dummy
+          SPRING_MAIL_HOST: dummy
+          SPRING_MAIL_PORT: 1025
         run: |
           set +e
           mkdir -p /tmp/javatmp

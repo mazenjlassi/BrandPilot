@@ -33,7 +33,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 🔥 ENABLE CORS HERE
+                //  ENABLE CORS HERE
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .csrf(csrf -> csrf.disable())
@@ -72,7 +72,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔥 CORS CONFIGURATION (THIS FIXES YOUR ISSUE)
+    // CORS CONFIGURATION (THIS FIXES YOUR ISSUE)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

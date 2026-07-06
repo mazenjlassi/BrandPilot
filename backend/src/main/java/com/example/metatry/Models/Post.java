@@ -47,7 +47,7 @@ public class Post {
     private LocalDateTime createdAt;
 
     @PrePersist
-    protected void onCreate() {
+    public void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
@@ -55,9 +55,6 @@ public class Post {
 
     private String link = "https://3lm-solutions2.odoo.com/contactus";
 
-    /*
-     Latest metrics snapshot
-    */
     private Integer likes;
 
     private Integer commentsCount;
@@ -68,9 +65,6 @@ public class Post {
 
     private Double engagementScore;
 
-    /*
-     Platform ID after publishing
-    */
     private String platformPostId;
 
     private Boolean approved = false;
@@ -80,32 +74,31 @@ public class Post {
     @JoinColumn(name = "campaign_id")
     private Campaign campaign;
 
-    /*
-     Metrics history
-    */
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PostMetric> metrics;
 
-    /*
-     Comments fetched from APIs
-    */
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PostComment> comments;
 
-    /*
- Image for this post
-*/
-    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private PostImage image;
+    @Builder.Default
+    private List<PostImage> images = new ArrayList<>();
 
-     /*
-    Image for this post
-   */
-     private boolean notificationSent = false;
+    @Transient
+    public PostImage getImage() {
+        return (images != null && !images.isEmpty()) ? images.get(0) : null;
+    }
 
+    public void addImage(PostImage image) {
+        if (this.images == null) {
+            this.images = new ArrayList<>();
+        }
+        this.images.add(image);
+    }
 
+    private boolean notificationSent = false;
 
 }

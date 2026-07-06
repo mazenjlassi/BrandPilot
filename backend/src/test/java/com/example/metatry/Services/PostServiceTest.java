@@ -65,7 +65,7 @@ class PostServiceTest {
                 .platform(PlatformType.LINKEDIN).scheduledAt(LocalDateTime.of(2024, 1, 1, 10, 0))
                 .publishedAt(LocalDateTime.of(2024, 1, 2, 10, 0))
                 .permanent(false).link("https://link.com").likes(10).commentsCount(5).shares(2)
-                .campaign(campaign).image(image)
+                .campaign(campaign).images(List.of(image))
                 .status(PostStatus.PUBLISHED).build();
 
         PostDto dto = postService.mapToDto(post);
@@ -172,7 +172,7 @@ class PostServiceTest {
         request.setScheduledAt(LocalDateTime.of(2024, 7, 1, 9, 0));
         request.setPermanent(false);
 
-        Post result = postService.createPostForCampaign(1L, request, file);
+        Post result = postService.createPostForCampaign(1L, request, file, null);
 
         assertThat(result.getTitle()).isEqualTo("Manual Post");
         assertThat(result.getGeneratedByAI()).isFalse();
@@ -197,7 +197,7 @@ class PostServiceTest {
         request.setScheduledAt(LocalDateTime.of(2024, 7, 1, 9, 0));
         request.setPermanent(false);
 
-        Post result = postService.createPostForCampaign(1L, request, null);
+        Post result = postService.createPostForCampaign(1L, request, null, null);
 
         assertThat(result.getLink()).isEqualTo("https://3lm-solutions2.odoo.com/contactus");
     }
@@ -333,7 +333,7 @@ class PostServiceTest {
                 .scheduledAt(LocalDateTime.of(2024, 8, 1, 10, 0))
                 .publishedAt(LocalDateTime.of(2024, 8, 1, 10, 0))
                 .status(PostStatus.SCHEDULED).platform(PlatformType.LINKEDIN)
-                .campaign(campaign).image(image).build();
+                .campaign(campaign).images(List.of(image)).build();
         when(postRepository.findByStatusAndScheduledAtBetween(
                 eq(PostStatus.SCHEDULED), any(), any()))
                 .thenReturn(List.of(post));

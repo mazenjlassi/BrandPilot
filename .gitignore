@@ -39,6 +39,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Backend env
+backend/.env
+
 # IDE
 .vscode/
 .idea/

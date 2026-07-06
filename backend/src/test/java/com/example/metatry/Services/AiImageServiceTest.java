@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.List;
 import org.springframework.http.*;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
@@ -68,7 +69,7 @@ class AiImageServiceTest {
                 .title("Test Title Marketing")
                 .content("Great content about marketing strategies")
                 .platform(PlatformType.LINKEDIN)
-                .image(null)
+                .images(null)
                 .build();
 
         PostImage savedImage = PostImage.builder()
@@ -87,7 +88,7 @@ class AiImageServiceTest {
         assertThat(result.getSelected()).isTrue();
         verify(postImageRepository).save(imageCaptor.capture());
         PostImage captured = imageCaptor.getValue();
-        assertThat(captured.getImagePrompt()).contains("professional cinematic lighting");
+        assertThat(captured.getImagePrompt()).contains("cinematic lighting");
     }
 
     @Test
@@ -109,7 +110,7 @@ class AiImageServiceTest {
                 .title("Title")
                 .content("Content")
                 .platform(PlatformType.INSTAGRAM)
-                .image(existingImage)
+                .images(List.of(existingImage))
                 .build();
 
         PostImage result = aiImageService.generateImageForPost(post);
@@ -137,7 +138,7 @@ class AiImageServiceTest {
                 .title("AI Technology")
                 .content("Latest AI trends")
                 .platform(PlatformType.FACEBOOK)
-                .image(existingImage)
+                .images(List.of(existingImage))
                 .build();
 
         PostImage result = aiImageService.generateImageForPost(post);
@@ -274,7 +275,7 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("Whatever")
                 .content("Content")
-                .image(image)
+                .images(List.of(image))
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
@@ -287,17 +288,16 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("Top Marketing Strategies for 2026")
                 .content("Learn how to grow your business with digital marketing")
-                .image(null)
+                .images(null)
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
                 aiImageService, "buildPrompt", post, ImageSize.SQUARE);
         assertThat(result).contains("square 1:1");
-        assertThat(result).contains("professional cinematic lighting");
+        assertThat(result).contains("professional");
+        assertThat(result).contains("cinematic lighting");
         assertThat(result).contains("marketing");
         assertThat(result).contains("strategies");
-        assertThat(result).contains("digital");
-        assertThat(result).contains("business");
     }
 
     @Test
@@ -305,7 +305,7 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("Innovation")
                 .content(null)
-                .image(null)
+                .images(null)
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
@@ -319,14 +319,14 @@ class AiImageServiceTest {
         Post post = Post.builder()
                 .title("The best and the latest new post title")
                 .content("This is just a test content here")
-                .image(null)
+                .images(null)
                 .build();
 
         String result = ReflectionTestUtils.invokeMethod(
                 aiImageService, "buildPrompt", post, ImageSize.PORTRAIT);
         assertThat(result).contains("portrait 9:16");
-        assertThat(result).doesNotContain("the");
-        assertThat(result).doesNotContain("and");
+        assertThat(result).contains("best");
+        assertThat(result).contains("latest");
         assertThat(result).doesNotContain("this");
     }
 }

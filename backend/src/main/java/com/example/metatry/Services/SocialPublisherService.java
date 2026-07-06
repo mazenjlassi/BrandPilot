@@ -91,19 +91,25 @@ public class SocialPublisherService {
     }
 
     /**
-     * Instagram publishing (image required)
+     * Instagram publishing (image or video)
      */
     private void publishInstagram(Post post, PostImage image, String caption){
 
-        if(image == null || image.getImageUrl() == null){
-            throw new RuntimeException("Instagram requires an image to publish");
-        }
+        Map<String,Object> response;
 
-        Map<String,Object> response =
-                instagramService.postPhotoFromUrl(
-                        image.getImageUrl(),
-                        caption
-                );
+        String videoUrl = post.getVideoUrl();
+
+        if(videoUrl != null && !videoUrl.isBlank()){
+            response = instagramService.postVideoFromUrl(videoUrl, caption);
+        } else if(image != null && image.getImageUrl() != null){
+            response = instagramService.postPhotoFromUrl(
+                    image.getImageUrl(),
+                    caption
+            );
+        } else {
+            System.out.println("❌ Skipping Instagram post " + post.getId() + ": no image or video");
+            return;
+        }
 
         if(Boolean.TRUE.equals(response.get("success"))){
             post.setPlatformPostId((String) response.get("mediaId"));
@@ -111,13 +117,17 @@ public class SocialPublisherService {
     }
 
     /**
-     * Facebook publishing
+     * Facebook publishing (image, video, or text)
      */
     private void publishFacebook(Post post, PostImage image, String caption){
 
         Map<String,Object> response;
 
-        if(image != null && image.getImageUrl() != null){
+        String videoUrl = post.getVideoUrl();
+
+        if(videoUrl != null && !videoUrl.isBlank()){
+            response = facebookService.postVideoFromUrl(videoUrl, caption);
+        } else if(image != null && image.getImageUrl() != null){
             response = facebookService.postPhotoFromUrl(
                     image.getImageUrl(),
                     caption

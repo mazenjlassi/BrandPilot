@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,6 +24,8 @@ public class PostDto {
     private String campaignName;
 
     private String imageUrl;
+
+    private List<String> imageUrls;
 
     private boolean permanent;
     private String status;

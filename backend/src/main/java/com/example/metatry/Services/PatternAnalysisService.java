@@ -121,8 +121,8 @@ public class PatternAnalysisService {
             that share the same topic/theme.
 
             For each campaign found, extract:
-            - campaignName: descriptive name for the campaign
-            - topic: main theme/topic
+            - topic: 1-2 word short label only (e.g., "innovation", "event", "security", "connectivity", "cloud", "ai", "network", "broadband", "wireless")
+            - campaignName: 1-2 word short label only (e.g., "product-launch", "industry-event", "tech-spotlight", "global-expansion", "regional-showcase")
             - postIndices: array of post indices that belong to this campaign
             - platformBreakdown: count of posts per platform (e.g., {"linkedin": 2, "instagram": 3, "facebook": 2})
             - tone: e.g., Technical/educational, casual/friendly
@@ -139,8 +139,8 @@ public class PatternAnalysisService {
             Example format:
             [
               {
-                "campaignName": "AI Awareness Series",
-                "topic": "AI",
+                "topic": "innovation",
+                "campaignName": "industry-event",
                 "postIndices": [0, 2, 5, 8, 12],
                 "platformBreakdown": {"linkedin": 2, "instagram": 2, "facebook": 1},
                 "tone": "Educational/technical",

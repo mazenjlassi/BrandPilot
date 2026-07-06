@@ -59,4 +59,16 @@ public class FacebookService {
             return Map.of("success", false, "error", e.getMessage());
         }
     }
+
+    public Map<String, Object> postVideoFromUrl(String videoUrl, String caption) {
+
+        String url = GRAPH_API_URL + pageId + "/videos";
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("file_url", videoUrl);
+        body.add("description", caption != null ? caption : "");
+        body.add("access_token", token);
+
+        return restTemplate.postForObject(url, body, Map.class);
+    }
 }

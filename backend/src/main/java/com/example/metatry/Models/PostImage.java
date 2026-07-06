@@ -26,8 +26,10 @@ public class PostImage {
 
     private Boolean selected = true;
 
-    @OneToOne
-    @JoinColumn(name = "post_id", unique = true)
+    private Integer sortOrder;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id")
     @JsonBackReference
     private Post post;
 

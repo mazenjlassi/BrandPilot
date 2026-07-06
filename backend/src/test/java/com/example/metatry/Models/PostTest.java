@@ -39,7 +39,7 @@ class PostTest {
                 .platformPostId("fp_123")
                 .approved(true)
                 .campaign(campaign)
-                .image(image)
+                .images(List.of(image))
                 .notificationSent(true)
                 .build();
 
@@ -91,7 +91,7 @@ class PostTest {
                 PlatformType.FACEBOOK, true, PostStatus.SCHEDULED,
                 now, now, now, true, "https://link.com",
                 50, 5, 2, 500, 0.75, "fp_456", true,
-                campaign, new ArrayList<>(), new ArrayList<>(), image, false
+                campaign, new ArrayList<>(), new ArrayList<>(), List.of(image), false
         );
 
         assertThat(post.getId()).isEqualTo(1L);

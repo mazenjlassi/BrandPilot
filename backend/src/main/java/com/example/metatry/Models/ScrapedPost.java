@@ -45,7 +45,7 @@ public class ScrapedPost {
     private Boolean usedForPattern;
 
     @PrePersist
-    protected void onCreate() {
+    public void onCreate() {
         scrapedAt = LocalDateTime.now();
         if (usedForPattern == null) usedForPattern = false;
     }

@@ -111,7 +111,7 @@ class CampaignServiceTest {
                 com.example.metatry.Enums.PlatformType.LINKEDIN,
                 LocalDateTime.of(2024, 6, 1, 10, 0), false, "https://link.com");
 
-        Post result = campaignService.createPostForCampaign(1L, request, null);
+        Post result = campaignService.createPostForCampaign(1L, request, null, null);
 
         assertThat(result.getTitle()).isEqualTo("Post");
         assertThat(result.getStatus()).isEqualTo(PostStatus.SCHEDULED);
@@ -123,7 +123,7 @@ class CampaignServiceTest {
         when(campaignRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> campaignService.createPostForCampaign(
-                99L, new CreatePostRequest(), null))
+                99L, new CreatePostRequest(), null, null))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Campaign not found");
     }
