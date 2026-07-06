@@ -45,7 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         if (path.contains("/auth/") ||
                 path.contains("/public-test") ||
-                path.contains("/api/linkedin/callback")) {  // ← AJOUTÉ
+                path.contains("/api/linkedin/callback") ||
+                path.equals("/api/health")) {
             System.out.println("🚀 Public endpoint - passage direct: " + path);
             filterChain.doFilter(request, response);
             return;
