@@ -33,7 +33,7 @@ class CampaignTest {
         Post post = Post.builder().title("Test").build();
         List<Post> posts = List.of(post);
 
-        Campaign campaign = new Campaign(1L, "Campaign", "Topic", null, posts);
+        Campaign campaign = new Campaign(1L, "Campaign", "Topic", null, null, posts);
 
         assertThat(campaign.getId()).isEqualTo(1L);
         assertThat(campaign.getName()).isEqualTo("Campaign");

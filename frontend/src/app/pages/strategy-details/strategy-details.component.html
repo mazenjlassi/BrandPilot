@@ -1,0 +1,143 @@
+<div class="strategy-details">
+  <a routerLink="/marketing-strategies" class="back-link">
+    <lucide-icon [img]="icons.arrowLeft" [size]="18"></lucide-icon>
+    Back to Strategies
+  </a>
+
+  <div class="loading" *ngIf="loading">Loading strategy...</div>
+
+  <div *ngIf="!loading && strategy">
+    <div class="header">
+      <div>
+        <span class="status-badge" [class]="statusClass(strategy.status)">{{ strategy.status }}</span>
+        <h1 *ngIf="!editing">{{ strategy.title }}</h1>
+      </div>
+      <div class="header-actions">
+        <button *ngIf="!editing && strategy.status === 'PENDING'" class="btn-primary" (click)="startEdit()">
+          <lucide-icon [img]="icons.penLine" [size]="16"></lucide-icon>
+          Edit
+        </button>
+        <button *ngIf="!editing && strategy.status === 'PENDING'" class="btn-success" (click)="approve()">
+          <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
+          Approve
+        </button>
+        <button *ngIf="!editing && strategy.status === 'ACTIVE'" class="btn-danger" (click)="deactivate()">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+          Deactivate
+        </button>
+      </div>
+    </div>
+
+    <div class="edit-card" *ngIf="editing">
+      <h3>Edit Strategy</h3>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" [(ngModel)]="editTitle" />
+      </div>
+      <div class="form-group">
+        <label>Summary</label>
+        <textarea [(ngModel)]="editSummary" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="editDescription" rows="6"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Duration (weeks)</label>
+        <input type="number" [(ngModel)]="editDurationWeeks" min="4" max="52" />
+      </div>
+      <div class="form-group">
+        <label>Manager Notes</label>
+        <textarea [(ngModel)]="editManagerNotes" rows="3" placeholder="Add your notes..."></textarea>
+      </div>
+      <div class="error" *ngIf="error">{{ error }}</div>
+      <div class="form-actions">
+        <button class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button class="btn-primary" (click)="save()" [disabled]="saving">
+          <lucide-icon *ngIf="saving" [img]="icons.loader" [size]="16" class="spin"></lucide-icon>
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="content" *ngIf="!editing">
+      <div class="section">
+        <h3>Summary</h3>
+        <p>{{ strategy.summary }}</p>
+      </div>
+      <div class="section">
+        <h3>Description</h3>
+        <p>{{ strategy.description }}</p>
+      </div>
+      <div class="section" *ngIf="strategy.aiReasoning">
+        <h3>AI Reasoning</h3>
+        <p class="ai-reasoning">{{ strategy.aiReasoning }}</p>
+      </div>
+      <div class="section" *ngIf="strategy.managerNotes">
+        <h3>Manager Notes</h3>
+        <p>{{ strategy.managerNotes }}</p>
+      </div>
+      <!-- Campaign preview for PENDING strategies -->
+      <div class="campaign-preview" *ngIf="strategy.status === 'PENDING' && strategy.campaignPlanPreviews?.length > 0">
+        <h3>Campaign Plan</h3>
+        <div class="campaign-plan-list">
+          <div class="campaign-plan-card" *ngFor="let cp of strategy.campaignPlanPreviews; let i = index">
+            <div class="plan-card-header">
+              <span class="plan-number">#{{ i + 1 }}</span>
+              <h4>{{ cp.name || 'Campaign' }}</h4>
+            </div>
+            <p class="plan-topic" *ngIf="cp.topic"><strong>Topic:</strong> {{ cp.topic }}</p>
+            <p class="plan-objective" *ngIf="cp.objective"><strong>Objective:</strong> {{ cp.objective }}</p>
+            <div class="plan-stats" *ngIf="cp.totalPosts || cp.durationWeeks">
+              <span *ngIf="cp.totalPosts"><strong>Posts:</strong> {{ cp.totalPosts }}</span>
+              <span *ngIf="cp.durationWeeks" class="stat-sep"><strong>Duration:</strong> {{ cp.durationWeeks }} weeks</span>
+            </div>
+            <div class="plan-distribution" *ngIf="cp.weeklyPostDistribution">
+              <strong>Posts per week:</strong>
+              <div class="platform-chips">
+                <span class="platform-chip" *ngFor="let entry of getMapEntries(cp.weeklyPostDistribution)">
+                  {{ entry.key | uppercase }}: {{ entry.value }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <label>Duration</label>
+          <span>{{ strategy.durationWeeks || 'N/A' }} weeks</span>
+        </div>
+        <div class="meta-item">
+          <label>Start Date</label>
+          <span>{{ strategy.startDate ? (strategy.startDate | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>End Date</label>
+          <span>{{ strategy.expectedEndDate ? (strategy.expectedEndDate | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Campaigns</label>
+          <span>{{ strategy.campaignCount || 0 }}</span>
+        </div>
+        <div class="meta-item" *ngIf="strategy.estimatedWeeklyPosts != null">
+          <label>Posts/Week</label>
+          <span>{{ strategy.estimatedWeeklyPosts }}</span>
+        </div>
+        <div class="meta-item" *ngIf="strategy.estimatedTotalPosts != null">
+          <label>Total Posts</label>
+          <span>{{ strategy.estimatedTotalPosts }}</span>
+        </div>
+        <div class="meta-item">
+          <label>Created</label>
+          <span>{{ strategy.createdAt ? (strategy.createdAt | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+        <div class="meta-item" *ngIf="strategy.approvedAt">
+          <label>Approved</label>
+          <span>{{ strategy.approvedAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

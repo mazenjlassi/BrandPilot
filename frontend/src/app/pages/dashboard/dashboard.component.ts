@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, FileText, Send, Lightbulb, MessageSquare, TrendingUp, Users, PenTool, Rocket, Clock, Calendar, BarChart3, Activity, ArrowRight } from 'lucide-angular';
+import { LucideAngularModule, FileText, Send, Lightbulb, MessageSquare, TrendingUp, Users, PenTool, Rocket, Clock, Calendar, BarChart3, Activity, ArrowRight, Bell, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-angular';
 import { PostsChartComponent } from './components/posts-chart/posts-chart.component';
 
 import { PostService } from '../../services/post.service';
@@ -10,6 +10,8 @@ import { CampaignService } from '../../services/campaign.service';
 import { AuthService } from '../../services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { PatternService } from '../../services/pattern.service';
+import { StrategyService } from '../../services/strategy.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,6 +56,14 @@ export class DashboardComponent implements OnInit {
     bestScore: 0
   };
 
+  // Auto-generate & notifications
+  activeStrategy: any = null;
+  notifications: any[] = [];
+  unreadCount = 0;
+  showNotificationsPanel = false;
+  togglingAutoGenerate = false;
+  generatingStrategy = false;
+
   icons = {
     fileText: FileText,
     send: Send,
@@ -67,7 +77,11 @@ export class DashboardComponent implements OnInit {
     calendar: Calendar,
     barChart: BarChart3,
     activity: Activity,
-    arrowRight: ArrowRight
+    arrowRight: ArrowRight,
+    bell: Bell,
+    toggleLeft: ToggleLeft,
+    toggleRight: ToggleRight,
+    refreshCw: RefreshCw
   };
 
   constructor(
@@ -75,7 +89,9 @@ export class DashboardComponent implements OnInit {
     private campaignService: CampaignService,
     private authService: AuthService,
     private adminService: AdminService,
-    private patternService: PatternService
+    private patternService: PatternService,
+    private strategyService: StrategyService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -90,6 +106,8 @@ export class DashboardComponent implements OnInit {
     if (this.isMarketingUser) {
       this.showMarketing = true;
       this.loadMarketingFeatures();
+      this.loadActiveStrategy();
+      this.loadNotifications();
     }
 
     if (isAdminUser) {
@@ -234,6 +252,88 @@ export class DashboardComponent implements OnInit {
     }
 
     return 'Engagement levels are low. Focus on clearer messaging and more engaging content.';
+  }
+
+  loadActiveStrategy() {
+    this.strategyService.getAll().subscribe({
+      next: (res) => {
+        this.activeStrategy = res.length > 0 ? res[0] : null;
+      },
+      error: () => { this.activeStrategy = null; }
+    });
+  }
+
+  loadNotifications() {
+    this.notificationService.getAll().subscribe({
+      next: (res) => {
+        this.notifications = res.slice(0, 10);
+      },
+      error: () => { this.notifications = []; }
+    });
+    this.notificationService.getUnreadCount().subscribe({
+      next: (res) => { this.unreadCount = res.count || 0; },
+      error: () => { this.unreadCount = 0; }
+    });
+  }
+
+  toggleNotificationsPanel() {
+    this.showNotificationsPanel = !this.showNotificationsPanel;
+  }
+
+  generateFullStrategy() {
+    this.generatingStrategy = true;
+    this.strategyService.generateAuto().subscribe({
+      next: () => {
+        this.generatingStrategy = false;
+        this.loadActiveStrategy();
+        this.loadNotifications();
+      },
+      error: () => {
+        this.generatingStrategy = false;
+        alert('Failed to generate AI strategy. Please try again.');
+      }
+    });
+  }
+
+  toggleAutoGenerate() {
+    if (!this.activeStrategy || this.togglingAutoGenerate) return;
+    this.togglingAutoGenerate = true;
+    const current = this.activeStrategy.autoGenerate || false;
+    this.strategyService.setAutoGenerate(this.activeStrategy.id, !current).subscribe({
+      next: (res) => {
+        this.activeStrategy.autoGenerate = res.autoGenerate;
+        this.togglingAutoGenerate = false;
+      },
+      error: () => { this.togglingAutoGenerate = false; }
+    });
+  }
+
+  markNotificationRead(notification: any) {
+    if (notification.read) return;
+    this.notificationService.markAsRead(notification.id).subscribe({
+      next: () => {
+        notification.read = true;
+        this.unreadCount = Math.max(0, this.unreadCount - 1);
+      }
+    });
+  }
+
+  markAllNotificationsRead() {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.forEach(n => n.read = true);
+        this.unreadCount = 0;
+      }
+    });
+  }
+
+  getNotificationIcon(type: string): string {
+    switch (type?.toUpperCase()) {
+      case 'ERROR': return 'alert-circle';
+      case 'WARNING': return 'alert-triangle';
+      case 'SUCCESS': return 'check-circle';
+      default: return 'info';
+    }
   }
 
   get userName(): string {

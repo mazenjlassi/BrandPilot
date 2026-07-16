@@ -8,8 +8,10 @@ import com.example.metatry.Models.Post;
 import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
+import com.example.metatry.Services.AiContentService;
 import com.example.metatry.Services.AiImageService;
 import com.example.metatry.Services.CloudinaryService;
+import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.JwtService;
 import com.example.metatry.Services.PostService;
 import com.example.metatry.Services.PostTimingService;
@@ -68,6 +70,12 @@ class PostControllerUnitTest {
 
     @MockitoBean
     private UserDetailsService userDetailsService;
+
+    @MockitoBean
+    private GeminiService geminiService;
+
+    @MockitoBean
+    private AiContentService aiContentService;
 
     // ================= BASIC =================
 

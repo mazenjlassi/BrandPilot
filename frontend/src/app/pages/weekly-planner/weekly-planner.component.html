@@ -1,0 +1,50 @@
+<div class="weekly-planner">
+  <h1>Weekly Planner</h1>
+
+  <div class="loading" *ngIf="loading">Loading active strategy...</div>
+
+  <div class="no-strategy" *ngIf="!loading && !activeStrategy">
+    <h3>No Active Strategy</h3>
+    <p>There is no active marketing strategy. Please create and approve a strategy first.</p>
+    <a routerLink="/marketing-strategies" class="btn-primary">Go to Strategies</a>
+  </div>
+
+  <div *ngIf="!loading && activeStrategy">
+    <div class="strategy-info">
+      <h3>{{ activeStrategy.title }}</h3>
+      <div class="progress">
+        <span>Week {{ calculateWeek() }} of {{ activeStrategy.durationWeeks }}</span>
+        <span class="status-badge active">{{ activeStrategy.status }}</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary btn-lg" (click)="generateWeek()" [disabled]="generating">
+        <lucide-icon *ngIf="generating" [img]="icons.loader" [size]="18" class="spin"></lucide-icon>
+        {{ generating ? 'Generating...' : 'Generate This Week\'s Content' }}
+      </button>
+    </div>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+
+    <div class="result-card" *ngIf="lastResult">
+      <lucide-icon [img]="icons.check" [size]="24" class="success-icon"></lucide-icon>
+      <h3>Content Generated Successfully!</h3>
+      <div class="result-stats">
+        <div class="stat">
+          <span class="stat-value">{{ lastResult.campaigns }}</span>
+          <span class="stat-label">Campaigns</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ lastResult.posts }}</span>
+          <span class="stat-label">Posts</span>
+        </div>
+      </div>
+      <p class="result-note">Posts are saved as DRAFT and await your approval.</p>
+      <div class="result-actions">
+        <a routerLink="/posts" class="btn-outline">Review Posts</a>
+        <a routerLink="/campaign-list" class="btn-outline">View Campaigns</a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -132,4 +132,16 @@ export class PostService {
   getUpcomingScheduled(limit: number = 3) {
     return this.http.get<any[]>(`${this.api}/upcoming-scheduled?limit=${limit}`);
   }
+
+  approvePost(id: number) {
+    return this.http.post<any>(`${this.api}/${id}/approve`, {});
+  }
+
+  approveAllPosts() {
+    return this.http.post<any>(`${this.api}/approve-all`, {});
+  }
+
+  regeneratePost(id: number) {
+    return this.http.post<any>(`${this.api}/${id}/regenerate`, {});
+  }
 }

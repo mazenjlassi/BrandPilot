@@ -15,6 +15,8 @@ import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.AiImageService;
 import com.example.metatry.Services.CloudinaryService;
+import com.example.metatry.Services.AiContentService;
+import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.PostService;
 import com.example.metatry.Services.PostTimingService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,8 @@ public class PostController {
     private final PostImageRepository postImageRepository;
     private final PostTimingService postTimingService;
     private final CloudinaryService cloudinaryService;
+    private final GeminiService geminiService;
+    private final AiContentService aiContentService;
 
     // ================= BASIC =================
 
@@ -257,5 +261,56 @@ public class PostController {
             @RequestParam(defaultValue = "3") int limit
     ) {
         return postService.getUpcomingScheduledPosts(limit);
+    }
+
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    public ResponseEntity<?> approvePost(@PathVariable Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setApproved(true);
+        if (post.getScheduledAt() != null) {
+            post.setStatus(PostStatus.SCHEDULED);
+        }
+        postRepository.save(post);
+        return ResponseEntity.ok(Map.of("message", "Post approved"));
+    }
+
+    @PostMapping("/approve-all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    public ResponseEntity<?> approveAllPosts() {
+        List<Post> unapproved = postRepository.findByApprovedTrue();
+        List<Post> allPosts = postRepository.findAll();
+        int count = 0;
+        for (Post post : allPosts) {
+            if (!Boolean.TRUE.equals(post.getApproved())) {
+                post.setApproved(true);
+                if (post.getScheduledAt() != null) {
+                    post.setStatus(PostStatus.SCHEDULED);
+                }
+                postRepository.save(post);
+                count++;
+            }
+        }
+        return ResponseEntity.ok(Map.of("message", count + " posts approved"));
+    }
+
+    @PostMapping("/{id}/regenerate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    public ResponseEntity<?> regeneratePost(@PathVariable Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        String prompt = "Rewrite this social media post for " + post.getPlatform()
+                + " keep the same topic but improve the content:\n\n"
+                + "Title: " + post.getTitle() + "\n"
+                + "Content: " + post.getContent();
+
+        String newContent = geminiService.generate(prompt);
+
+        post.setContent(newContent);
+        postRepository.save(post);
+
+        return ResponseEntity.ok(Map.of("message", "Post regenerated", "content", newContent));
     }
 }

@@ -12,6 +12,14 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    public void sendStrategyNotification(String subject, String bodyText) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo("mazenjl323@gmail.com");
+        message.setSubject(subject);
+        message.setText(bodyText);
+        mailSender.send(message);
+    }
+
     public void sendPostPublishedEmail(Post post) {
         SimpleMailMessage message = new SimpleMailMessage();
 

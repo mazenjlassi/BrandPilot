@@ -1,0 +1,41 @@
+<div class="strategy-dashboard">
+  <div class="header">
+    <h1>Marketing Strategies</h1>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading strategies...</div>
+
+  <div class="error-banner" *ngIf="loadError">{{ loadError }}</div>
+
+  <div class="strategy-list" *ngIf="!loading">
+    <div class="strategy-card" *ngFor="let s of strategies" [class.active]="s.status === 'ACTIVE'">
+      <div class="card-header">
+        <span class="status-badge" [class]="statusClass(s.status)">{{ s.status }}</span>
+        <span class="date">{{ s.createdAt | date:'mediumDate' }}</span>
+      </div>
+      <h3>{{ s.title }}</h3>
+      <p class="summary">{{ s.summary }}</p>
+      <div class="meta">
+        <span *ngIf="s.durationWeeks">{{ s.durationWeeks }} weeks</span>
+        <span *ngIf="s.campaignCount != null">{{ s.campaignCount }} campaigns</span>
+        <span *ngIf="s.estimatedWeeklyPosts">~{{ s.estimatedWeeklyPosts }}/wk · {{ s.estimatedTotalPosts }} total</span>
+        <span *ngIf="s.autoGenerate" class="auto-badge">Auto-renew</span>
+      </div>
+      <div class="card-actions">
+        <a [routerLink]="['/marketing-strategies', s.id]" class="btn-outline">View</a>
+        <button *ngIf="s.status === 'PENDING'" class="btn-success" (click)="approve(s.id)">
+          <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
+          Approve
+        </button>
+        <button *ngIf="s.status === 'ACTIVE'" class="btn-danger" (click)="deactivate(s.id)">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+          Deactivate
+        </button>
+      </div>
+    </div>
+    <div class="empty" *ngIf="strategies.length === 0">
+      <lucide-icon [img]="icons.triangleAlert" [size]="32"></lucide-icon>
+      <p>No strategies yet. Use the dashboard to generate your first AI strategy.</p>
+    </div>
+  </div>
+</div>

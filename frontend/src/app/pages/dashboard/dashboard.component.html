@@ -6,10 +6,51 @@
       <h1>Dashboard</h1>
       <p>Welcome back, <strong>{{ userName }}</strong></p>
     </div>
-    <button class="primary-btn" routerLink="/campaigns">
-      <lucide-icon [img]="icons.penTool" [size]="18"></lucide-icon>
-      Create Campaign
-    </button>
+    <div class="top-actions">
+      <!-- Auto-generate toggle -->
+      <div class="auto-toggle" *ngIf="isMarketingUser && activeStrategy" (click)="toggleAutoGenerate()" [class.active]="activeStrategy.autoGenerate">
+        <lucide-icon [img]="activeStrategy.autoGenerate ? icons.toggleRight : icons.toggleLeft" [size]="22"></lucide-icon>
+        <span>Auto-generate {{ activeStrategy.autoGenerate ? 'ON' : 'OFF' }}</span>
+      </div>
+      <!-- Notifications bell -->
+      <button class="icon-btn" (click)="toggleNotificationsPanel()">
+        <lucide-icon [img]="icons.bell" [size]="20"></lucide-icon>
+        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+      <button class="primary-btn" routerLink="/campaigns">
+        <lucide-icon [img]="icons.penTool" [size]="18"></lucide-icon>
+        Create Campaign
+      </button>
+      <button class="primary-btn" *ngIf="isMarketingUser" (click)="generateFullStrategy()" [disabled]="generatingStrategy">
+        <lucide-icon [img]="icons.rocket" [size]="18"></lucide-icon>
+        {{ generatingStrategy ? 'Generating...' : 'Generate AI Strategy' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifications Panel -->
+  <div class="notifications-panel" *ngIf="showNotificationsPanel">
+    <div class="notif-header">
+      <h3>Notifications</h3>
+      <button class="text-btn" (click)="markAllNotificationsRead()" *ngIf="unreadCount > 0">Mark all read</button>
+      <button class="icon-btn close-btn" (click)="showNotificationsPanel = false">&times;</button>
+    </div>
+    <div class="notif-list">
+      <div class="notif-item" *ngFor="let n of notifications"
+           [class.unread]="!n.read"
+           (click)="markNotificationRead(n)">
+        <div class="notif-icon" [class.error]="n.type === 'ERROR'" [class.warning]="n.type === 'WARNING'" [class.success]="n.type === 'SUCCESS'">
+          <lucide-icon [img]="icons.bell" [size]="14"></lucide-icon>
+        </div>
+        <div class="notif-body">
+          <p>{{ n.message }}</p>
+          <span class="notif-time">{{ n.createdAt | date:'MMM d, h:mm a' }}</span>
+        </div>
+      </div>
+      <div class="notif-empty" *ngIf="notifications.length === 0">
+        <p>No notifications yet</p>
+      </div>
+    </div>
   </div>
 
   <!-- KPI Cards -->
