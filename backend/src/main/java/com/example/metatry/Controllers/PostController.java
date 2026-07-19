@@ -110,7 +110,7 @@ public class PostController {
     // ================= UPDATE =================
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updatePost(
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request){
@@ -123,7 +123,7 @@ public class PostController {
     // ================= DELETE =================
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deletePost(@PathVariable Long id){
 
         postService.deletePost(id);
@@ -133,7 +133,7 @@ public class PostController {
 
     // ================= CREATE MANUALLY =================
     @PostMapping(value = "/campaigns/{campaignId}/posts", consumes = "multipart/form-data")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public Post createPost(
             @PathVariable Long campaignId,
             @RequestPart("data") CreatePostRequest request,
@@ -155,7 +155,7 @@ public class PostController {
     // ================= AI IMAGE =================
 
     @PostMapping("/{id}/generate-image")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostImage> generateImage(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> body
@@ -182,7 +182,7 @@ public class PostController {
     // ================= GENERIC UPLOAD =================
 
     @PostMapping("/upload")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, String>> uploadFile(
             @RequestParam("file") MultipartFile file
     ) throws java.io.IOException {
@@ -199,7 +199,7 @@ public class PostController {
     // ================= CLEANUP =================
 
     @DeleteMapping("/cleanup-images")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> cleanDuplicateImages(){
 
         postService.cleanDuplicateImages();
@@ -233,7 +233,7 @@ public class PostController {
     }
 
     @GetMapping("/calendar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<CalendarEventDTO> getCalendarEvents(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end
@@ -244,19 +244,19 @@ public class PostController {
     }
 
     @GetMapping("/timing-analysis")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public TimingAnalysisDTO getTimingAnalysis() {
         return postTimingService.analyzeBestPostingTimes();
     }
 
     @GetMapping("/weekly-comparison")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public WeeklyComparisonDTO getWeeklyComparison() {
         return postService.getWeeklyComparison();
     }
 
     @GetMapping("/upcoming-scheduled")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<Post> getUpcomingScheduled(
             @RequestParam(defaultValue = "3") int limit
     ) {
@@ -264,7 +264,7 @@ public class PostController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> approvePost(@PathVariable Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -273,11 +273,20 @@ public class PostController {
             post.setStatus(PostStatus.SCHEDULED);
         }
         postRepository.save(post);
+
+        if (post.getNeedsImage() != null && post.getNeedsImage()) {
+            try {
+                aiImageService.generateImageForPost(post);
+            } catch (Exception e) {
+                return ResponseEntity.ok(Map.of("message", "Post approved but image generation failed: " + e.getMessage()));
+            }
+        }
+
         return ResponseEntity.ok(Map.of("message", "Post approved"));
     }
 
     @PostMapping("/approve-all")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> approveAllPosts() {
         List<Post> unapproved = postRepository.findByApprovedTrue();
         List<Post> allPosts = postRepository.findAll();
@@ -296,7 +305,7 @@ public class PostController {
     }
 
     @PostMapping("/{id}/regenerate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> regeneratePost(@PathVariable Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));

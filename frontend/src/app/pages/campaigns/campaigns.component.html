@@ -171,9 +171,15 @@
               </button>
             </div>
 
-            <!-- Image Preview -->
-            <div *ngIf="post.image?.imageUrl" class="post-image">
+            <!-- Media Preview -->
+            <div *ngIf="post.videoUrl" class="post-image">
+              <video [src]="post.videoUrl" controls class="video-player"></video>
+            </div>
+            <div *ngIf="!post.videoUrl && post.image?.imageUrl" class="post-image">
               <img [src]="post.image.imageUrl" [alt]="'Post image'" />
+            </div>
+            <div *ngIf="!post.videoUrl && post.imageUrl && !post.image?.imageUrl" class="post-image">
+              <img [src]="post.imageUrl" [alt]="'Post image'" />
             </div>
 
             <!-- Content -->
@@ -207,6 +213,73 @@
                 <lucide-icon [img]="icons.infinity" [size]="14"></lucide-icon>
                 Permanent
               </span>
+            </div>
+
+            <!-- Media Selector (Display Mode) -->
+            <div class="display-media-selector" *ngIf="post.mediaMode">
+              <div class="media-tabs">
+                <button type="button" class="media-tab" [class.active]="post.mediaMode === 'generate'" (click)="switchPostMediaMode(post, 'generate')">🎨 Generate</button>
+                <button type="button" class="media-tab" [class.active]="post.mediaMode === 'image'" (click)="switchPostMediaMode(post, 'image')">📷 Image</button>
+                <button type="button" class="media-tab" [class.active]="post.mediaMode === 'video'" (click)="switchPostMediaMode(post, 'video')">🎬 Video</button>
+              </div>
+
+              <!-- Generate Tab -->
+              <div *ngIf="post.mediaMode === 'generate'" class="media-tab-content">
+                <textarea
+                  [(ngModel)]="post.imagePrompt"
+                  (input)="post.riskyKeywordsWarning = checkRiskyKeywords(post.imagePrompt)"
+                  class="form-input prompt-input"
+                  rows="2"
+                  maxlength="500"
+                  placeholder="Image prompt: subject, style, lighting"
+                ></textarea>
+                <div class="warning-banner" *ngIf="post.riskyKeywordsWarning">
+                  <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
+                  <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+                </div>
+                <button
+                  type="button"
+                  class="action-btn primary gen-btn"
+                  (click)="generateImage(post)"
+                  [disabled]="post.generatingImage || !post.content"
+                >
+                  <lucide-icon *ngIf="!post.generatingImage" [img]="icons.image" [size]="14"></lucide-icon>
+                  <lucide-icon *ngIf="post.generatingImage" [img]="icons.loader2" [size]="14" class="spin"></lucide-icon>
+                  {{ post.generatingImage ? 'Generating...' : 'Generate Image' }}
+                </button>
+              </div>
+
+              <!-- Image Upload Tab -->
+              <div *ngIf="post.mediaMode === 'image'" class="media-tab-content">
+                <input type="file" (change)="onPostFileSelected($event, post)" accept="image/*" class="form-input file-input" />
+                <div *ngIf="post.previewUrl" class="image-preview">
+                  <img [src]="post.previewUrl" alt="Preview" />
+                </div>
+                <button
+                  type="button"
+                  class="action-btn primary upload-btn"
+                  (click)="uploadPostMedia(post)"
+                  [disabled]="!post.selectedFile || post.uploadingMedia"
+                >
+                  {{ post.uploadingMedia ? 'Uploading...' : 'Upload Image' }}
+                </button>
+              </div>
+
+              <!-- Video Upload Tab -->
+              <div *ngIf="post.mediaMode === 'video'" class="media-tab-content">
+                <input type="file" (change)="onPostVideoSelected($event, post)" accept="video/*" class="form-input file-input" />
+                <div *ngIf="post.previewUrl" class="video-preview">
+                  <video [src]="post.previewUrl" controls></video>
+                </div>
+                <button
+                  type="button"
+                  class="action-btn primary upload-btn"
+                  (click)="uploadPostMedia(post)"
+                  [disabled]="!post.selectedVideoFile || post.uploadingMedia"
+                >
+                  {{ post.uploadingMedia ? 'Uploading...' : 'Upload Video' }}
+                </button>
+              </div>
             </div>
 
             <!-- Actions -->
@@ -257,43 +330,94 @@
                 <textarea [(ngModel)]="post.content" class="form-input" rows="4"></textarea>
               </div>
 
-              <!-- Image Prompt -->
+              <!-- Media Tabs -->
               <div class="form-group">
-                <label>
-                  Image Prompt
-                  <span class="char-count">{{ (post.imagePrompt || '').length }}/500</span>
-                </label>
-                <textarea
-                  [(ngModel)]="post.imagePrompt"
-                  (input)="post.riskyKeywordsWarning = checkRiskyKeywords(post.imagePrompt)"
-                  class="form-input prompt-input"
-                  rows="2"
-                  maxlength="500"
-                  placeholder="Short keyword prompt: subject, style, lighting"
-                ></textarea>
-                <div class="warning-banner" *ngIf="post.riskyKeywordsWarning">
-                  <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
-                  <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+                <label>Media</label>
+                <div class="media-tabs">
+                  <button type="button" class="media-tab" [class.active]="editMediaMode === 'generate'" (click)="switchEditMediaMode(post, 'generate')">🎨 Generate</button>
+                  <button type="button" class="media-tab" [class.active]="editMediaMode === 'image'" (click)="switchEditMediaMode(post, 'image')">📷 Image</button>
+                  <button type="button" class="media-tab" [class.active]="editMediaMode === 'video'" (click)="switchEditMediaMode(post, 'video')">🎬 Video</button>
                 </div>
               </div>
 
-              <!-- Generate Image Button -->
-              <div class="form-group">
-                <button 
-                  type="button" 
-                  class="btn-secondary" 
-                  (click)="generateImage(post)"
-                  [disabled]="post.generatingImage || !post.content"
-                >
-                  <lucide-icon *ngIf="!post.generatingImage" [img]="icons.image" [size]="16"></lucide-icon>
-                  <lucide-icon *ngIf="post.generatingImage" [img]="icons.loader2" [size]="16" class="spin"></lucide-icon>
-                  {{ post.generatingImage ? 'Generating...' : 'Generate Image' }}
-                </button>
-              </div>
+              <!-- Generate Tab -->
+              <ng-container *ngIf="editMediaMode === 'generate'">
+                <div class="form-group">
+                  <label>
+                    Image Prompt
+                    <span class="char-count">{{ (post.imagePrompt || '').length }}/500</span>
+                  </label>
+                  <textarea
+                    [(ngModel)]="post.imagePrompt"
+                    (input)="post.riskyKeywordsWarning = checkRiskyKeywords(post.imagePrompt)"
+                    class="form-input prompt-input"
+                    rows="2"
+                    maxlength="500"
+                    placeholder="Short keyword prompt: subject, style, lighting"
+                  ></textarea>
+                  <div class="warning-banner" *ngIf="post.riskyKeywordsWarning">
+                    <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
+                    <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <button 
+                    type="button" 
+                    class="btn-secondary gen-btn" 
+                    (click)="generateImage(post)"
+                    [disabled]="post.generatingImage || !post.content"
+                  >
+                    <lucide-icon *ngIf="!post.generatingImage" [img]="icons.image" [size]="16"></lucide-icon>
+                    <lucide-icon *ngIf="post.generatingImage" [img]="icons.loader2" [size]="16" class="spin"></lucide-icon>
+                    {{ post.generatingImage ? 'Generating...' : 'Generate Image' }}
+                  </button>
+                </div>
+              </ng-container>
 
-              <!-- Image Preview -->
-              <div *ngIf="post.imageUrl" class="image-preview">
-                <img [src]="post.imageUrl" alt="Generated image" />
+              <!-- Image Upload Tab -->
+              <ng-container *ngIf="editMediaMode === 'image'">
+                <div class="form-group">
+                  <label>Upload Image</label>
+                  <input type="file" (change)="onEditFileSelected($event)" accept="image/*" class="form-input file-input" />
+                  <div *ngIf="editPreviewUrl" class="image-preview">
+                    <img [src]="editPreviewUrl" alt="Preview" />
+                  </div>
+                  <button 
+                    type="button" 
+                    class="btn-secondary upload-btn" 
+                    (click)="uploadEditMedia(post)" 
+                    [disabled]="!editSelectedFile || post.uploadingMedia"
+                  >
+                    {{ post.uploadingMedia ? 'Uploading...' : 'Upload to Cloudinary' }}
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Video Upload Tab -->
+              <ng-container *ngIf="editMediaMode === 'video'">
+                <div class="form-group">
+                  <label>Upload Video</label>
+                  <input type="file" (change)="onEditVideoSelected($event)" accept="video/*" class="form-input file-input" />
+                  <div *ngIf="editPreviewUrl" class="video-preview">
+                    <video [src]="editPreviewUrl" controls></video>
+                  </div>
+                  <button 
+                    type="button" 
+                    class="btn-secondary upload-btn" 
+                    (click)="uploadEditMedia(post)" 
+                    [disabled]="!editSelectedVideoFile || post.uploadingMedia"
+                  >
+                    {{ post.uploadingMedia ? 'Uploading...' : 'Upload to Cloudinary' }}
+                  </button>
+                </div>
+              </ng-container>
+
+              <!-- Current Media Preview -->
+              <div *ngIf="post.videoUrl && editMediaMode !== 'video' && editMediaMode !== 'image'" class="video-preview">
+                <video [src]="post.videoUrl" controls></video>
+              </div>
+              <div *ngIf="!post.videoUrl && (post.imageUrl || post.image?.imageUrl) && editMediaMode !== 'generate' && editMediaMode !== 'image' && editMediaMode !== 'video'" class="image-preview">
+                <img [src]="post.imageUrl || post.image?.imageUrl" alt="Current image" />
               </div>
 
               <div class="form-group">
@@ -413,19 +537,46 @@
           </label>
         </div>
 
-        <!-- Image Upload -->
+        <!-- Media Type Selector -->
         <div class="form-group">
-          <label for="post-image">Upload Image</label>
-          <input id="post-image" type="file" (change)="onFileSelected($event)" accept="image/*" class="form-input file-input" />
+          <label>Media</label>
+          <div class="media-tabs">
+            <button type="button" class="media-tab" [class.active]="mediaMode === 'image'" (click)="switchMediaMode('image')">📷 Image</button>
+            <button type="button" class="media-tab" [class.active]="mediaMode === 'generate'" (click)="switchMediaMode('generate')">🎨 Generate</button>
+            <button type="button" class="media-tab" [class.active]="mediaMode === 'video'" (click)="switchMediaMode('video')">🎬 Video</button>
+          </div>
         </div>
 
-        <!-- Preview -->
-        <div *ngIf="previewUrl" class="image-preview">
-          <img [src]="previewUrl" alt="Preview" />
+        <!-- Image Upload -->
+        <div *ngIf="mediaMode === 'image'" class="form-group">
+          <label for="post-image">Upload Image</label>
+          <input id="post-image" type="file" (change)="onFileSelected($event)" accept="image/*" class="form-input file-input" />
+          <div *ngIf="previewUrl" class="image-preview">
+            <img [src]="previewUrl" alt="Preview" />
+          </div>
+        </div>
+
+        <!-- Generate Image -->
+        <div *ngIf="mediaMode === 'generate'" class="form-group">
+          <label for="post-image-prompt">Image Prompt</label>
+          <textarea id="post-image-prompt" [(ngModel)]="manualPost.imagePrompt" name="imagePrompt" class="form-input prompt-input" rows="2" maxlength="500" placeholder="Short keyword prompt: subject, style, lighting"></textarea>
+          <div class="warning-banner" *ngIf="checkRiskyKeywords(manualPost.imagePrompt || '')">
+            <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
+            <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+          </div>
+        </div>
+
+        <!-- Video Upload -->
+        <div *ngIf="mediaMode === 'video'" class="form-group">
+          <label for="post-video">Upload Video</label>
+          <input id="post-video" type="file" (change)="onVideoSelected($event)" accept="video/*" class="form-input file-input" />
+          <div *ngIf="previewUrl" class="video-preview">
+            <video [src]="previewUrl" controls></video>
+          </div>
         </div>
 
         <!-- Warning -->
-        <div *ngIf="manualPost.platform === 'INSTAGRAM' && !previewUrl" class="warning-box">
+        <div *ngIf="mediaMode !== 'video' && manualPost.platform === 'INSTAGRAM' && (!previewUrl && (mediaMode !== 'generate' || !manualPost.imagePrompt))" class="warning-box">
           <lucide-icon [img]="icons.alertTriangle" [size]="16"></lucide-icon>
           Instagram requires an image
         </div>
@@ -435,7 +586,7 @@
           type="button"
           class="btn-primary full-width"
           (click)="createManualPost()"
-          [disabled]="loading || (manualPost.platform === 'INSTAGRAM' && !previewUrl)"
+          [disabled]="loading || (manualPost.platform === 'INSTAGRAM' && mediaMode !== 'video' && !previewUrl && (mediaMode !== 'generate' || !manualPost.imagePrompt))"
         >
           <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
           {{ loading ? 'Saving...' : 'Create Post' }}

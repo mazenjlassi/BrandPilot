@@ -18,14 +18,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class WeeklyPostPlanner {
+
+    private static final Map<PlatformType, Integer> PEAK_HOUR_BASE = Map.of(
+        PlatformType.LINKEDIN, 8,
+        PlatformType.FACEBOOK, 9,
+        PlatformType.INSTAGRAM, 11
+    );
 
     private final PostRepository postRepository;
     private final GeminiService geminiService;
@@ -71,6 +75,9 @@ public class WeeklyPostPlanner {
                 continue;
             }
 
+            boolean aiNeedsImage = data.get("needsImage") != null && (Boolean) data.get("needsImage");
+            boolean needsImage = platform == PlatformType.INSTAGRAM || aiNeedsImage;
+
             Post post = Post.builder()
                     .title((String) data.getOrDefault("title", ""))
                     .content((String) data.getOrDefault("content", ""))
@@ -83,6 +90,7 @@ public class WeeklyPostPlanner {
                     .status(PostStatus.DRAFT)
                     .permanent(data.get("permanent") != null && (Boolean) data.get("permanent"))
                     .link((String) data.getOrDefault("link", "https://3lm-solutions2.odoo.com/contactus"))
+                    .needsImage(needsImage)
                     .build();
 
             if (data.get("scheduledDay") != null && data.get("scheduledHour") != null) {
@@ -121,7 +129,8 @@ public class WeeklyPostPlanner {
                 Post post = posts.get(postIdx);
                 post.setCampaign(campaigns.get(c));
                 LocalDate date = weekStart.plusDays(Math.min(c * 2 + (i * 2 / Math.max(count, 1)), 6));
-                int hour = 9 + (i % 3) * 3;
+                int baseHour = PEAK_HOUR_BASE.getOrDefault(post.getPlatform(), 9);
+                int hour = baseHour + (i % 3);
                 post.setScheduledAt(LocalDateTime.of(date, LocalTime.of(hour, 0)));
                 postIdx++;
             }
@@ -129,12 +138,14 @@ public class WeeklyPostPlanner {
     }
 
     private LocalDate deriveWeekStart(List<Post> posts) {
+        LocalDate today = LocalDate.now();
         for (Post post : posts) {
             if (post.getScheduledAt() != null) {
                 LocalDate d = post.getScheduledAt().toLocalDate();
-                return d.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                LocalDate monday = d.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+                if (!monday.isBefore(today)) return monday;
             }
         }
-        return LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        return today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
     }
 }

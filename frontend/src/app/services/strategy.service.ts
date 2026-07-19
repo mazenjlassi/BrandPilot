@@ -40,6 +40,10 @@ export class StrategyService {
     return this.http.post<any>(`${this.api}/${id}/deactivate`, {});
   }
 
+  getStrategyCampaigns(id: number) {
+    return this.http.get<any[]>(`${this.api}/${id}/campaigns`);
+  }
+
   generateWeek(id: number) {
     return this.http.post<any>(`${this.api}/${id}/generate-week`, {});
   }

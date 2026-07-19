@@ -156,6 +156,13 @@
   box-shadow: var(--shadow-sm);
 }
 
+body.dark-mode .section {
+  background: rgba(18, 26, 47, 0.78);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.30);
+}
+
 .section h3 {
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
@@ -237,14 +244,29 @@
   color: #0A66C2;
 }
 
+body.dark-mode .platform-badge[data-platform="LINKEDIN"] {
+  background: rgba(10, 102, 194, 0.15);
+  color: #60A5FA;
+}
+
 .platform-badge[data-platform="INSTAGRAM"] {
   background: #FCE7F3;
   color: #E1304C;
 }
 
+body.dark-mode .platform-badge[data-platform="INSTAGRAM"] {
+  background: rgba(225, 48, 76, 0.15);
+  color: #FB7185;
+}
+
 .platform-badge[data-platform="FACEBOOK"] {
   background: #E8F0FE;
   color: #1877F2;
+}
+
+body.dark-mode .platform-badge[data-platform="FACEBOOK"] {
+  background: rgba(24, 119, 242, 0.15);
+  color: #60A5FA;
 }
 
 .post-card .status {

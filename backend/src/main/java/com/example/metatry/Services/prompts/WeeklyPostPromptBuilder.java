@@ -1,6 +1,7 @@
 package com.example.metatry.Services.prompts;
 
 import com.example.metatry.Models.MarketingStrategy;
+import com.example.metatry.Services.MemoryContextService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -8,9 +9,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class WeeklyPostPromptBuilder {
 
+    private final MemoryContextService memoryContextService;
+
     public String build(MarketingStrategy strategy, String campaignsContext, String previousPostsContext) {
+        String brandContext = memoryContextService.getRecentContext();
         return """
 You are an expert social media content creator. Generate weekly posts for the active marketing strategy.
+
+COMPANY / BRAND CONTEXT:
+%s
 
 STRATEGY TITLE: %s
 STRATEGY DESCRIPTION: %s
@@ -21,7 +28,7 @@ CAMPAIGNS FOR THIS WEEK:
 PREVIOUS POSTS (for context, DO NOT duplicate):
 %s
 
-INSTRUCTIONS:
+CRITICAL INSTRUCTIONS:
 - Generate posts that align with both the strategy and the weekly campaigns
 - Campaigns run SEQUENTIALLY — posts must be ordered by campaign priority
 - Each post must have a specific platform
@@ -30,6 +37,9 @@ INSTRUCTIONS:
 - Spread posts across the week (Monday to Friday), 1-2 posts per platform
 - Indicate if the post needs an AI-generated image
 - Return ONLY valid JSON with no markdown formatting
+- CRITICAL: Generate COMPLETE, READY-TO-PUBLISH posts. NEVER use placeholders, brackets, or generic text like "[Product Name]", "[Company]", "[Feature]", "[Industry]", etc.
+- CRITICAL: Use the actual company name "3LM Solutions" and specific details from the COMPANY / BRAND CONTEXT above
+- CRITICAL: Write specific, concrete content that can be posted immediately without any human editing
 
 Respond with this exact JSON structure:
 {
@@ -48,6 +58,6 @@ Respond with this exact JSON structure:
     }
   ]
 }
-""".formatted(strategy.getTitle(), strategy.getDescription(), campaignsContext, previousPostsContext);
+""".formatted(brandContext, strategy.getTitle(), strategy.getDescription(), campaignsContext, previousPostsContext);
     }
 }

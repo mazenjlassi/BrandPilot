@@ -29,7 +29,7 @@ CONTEXT (from recent activity):
 
 INSTRUCTIONS:
 - Analyze the topic and generate a detailed marketing strategy
-- Consider the platform mix (LinkedIn, Instagram, Facebook, X)
+- Consider the platform mix (LinkedIn, Instagram, Facebook)
 - Design 2-4 campaigns that will run sequentially (Campaign 1 finishes first, then Campaign 2, etc.)
 - The campaign list is ordered by priority — earlier campaigns execute first
 - For EACH campaign specify: totalPosts (all posts across its full duration), durationWeeks (how many weeks it runs), and weeklyPostDistribution (posts per platform per week)

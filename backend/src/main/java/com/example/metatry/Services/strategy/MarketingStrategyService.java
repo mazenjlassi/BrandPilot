@@ -38,7 +38,6 @@ public class MarketingStrategyService {
     private final MemoryContextService memoryContextService;
     private final MarketingStrategyMapper marketingStrategyMapper;
     private final WeeklyPostPlanner weeklyPostPlanner;
-    private final WeeklyImageDecisionService weeklyImageDecisionService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
@@ -185,18 +184,13 @@ public class MarketingStrategyService {
 
         try {
             List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(strategy, campaigns);
-            String strategyContext = strategy.getTitle() + ": " + strategy.getSummary();
-            weeklyImageDecisionService.decideAndGenerateImages(posts, strategyContext);
 
             strategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(strategy);
 
-            notificationService.createNotification(
-                    "Strategy \"" + strategy.getTitle() + "\" approved. Week 1 content generated: "
-                            + campaigns.size() + " campaigns, " + posts.size() + " posts ready for review.",
-                    "INFO",
-                    "/weekly-planner"
-            );
+            String msg = "Strategy \"" + strategy.getTitle() + "\" approved. Week 1 content generated: "
+                    + campaigns.size() + " campaigns, " + posts.size() + " posts ready for review.";
+            notificationService.createNotification(msg, "INFO", "/weekly-planner");
         } catch (Exception e) {
             notificationService.createNotification(
                     "Strategy \"" + strategy.getTitle() + "\" approved but week 1 generation failed: " + e.getMessage(),

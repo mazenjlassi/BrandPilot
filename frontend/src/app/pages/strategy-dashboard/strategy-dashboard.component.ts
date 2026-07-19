@@ -1,7 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, Check, X, TriangleAlert } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Check,
+  X,
+  TriangleAlert,
+  Eye,
+  Target,
+  ChevronRight,
+  Clock,
+  FolderOpen,
+  FileText,
+  RefreshCw
+} from 'lucide-angular';
 import { StrategyService } from '../../services/strategy.service';
 
 @Component({
@@ -18,7 +30,18 @@ export class StrategyDashboardComponent implements OnInit {
   error = '';
   loadError = '';
 
-  icons = { check: Check, x: X, triangleAlert: TriangleAlert };
+  icons = {
+    check: Check,
+    x: X,
+    alertTriangle: TriangleAlert,
+    eye: Eye,
+    target: Target,
+    chevronRight: ChevronRight,
+    clock: Clock,
+    folderOpen: FolderOpen,
+    fileText: FileText,
+    refreshCw: RefreshCw
+  };
 
   constructor(private strategyService: StrategyService) {}
 
@@ -48,9 +71,5 @@ export class StrategyDashboardComponent implements OnInit {
       next: () => this.loadStrategies(),
       error: (err) => { this.error = err.error?.message || 'Deactivation failed'; }
     });
-  }
-
-  statusClass(status: string): string {
-    return status?.toLowerCase() || '';
   }
 }

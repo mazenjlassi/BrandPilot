@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, FileText, Send, Lightbulb, MessageSquare, TrendingUp, Users, PenTool, Rocket, Clock, Calendar, BarChart3, Activity, ArrowRight, Bell, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-angular';
+import { LucideAngularModule, FileText, Send, Lightbulb, MessageSquare, TrendingUp, Users, PenTool, Rocket, Clock, Calendar, BarChart3, Activity, ArrowRight, Bell, ToggleLeft, ToggleRight, RefreshCw, CheckCircle, AlertTriangle, AlertCircle, X } from 'lucide-angular';
 import { PostsChartComponent } from './components/posts-chart/posts-chart.component';
 
 import { PostService } from '../../services/post.service';
@@ -81,7 +81,11 @@ export class DashboardComponent implements OnInit {
     bell: Bell,
     toggleLeft: ToggleLeft,
     toggleRight: ToggleRight,
-    refreshCw: RefreshCw
+    refreshCw: RefreshCw,
+    checkCircle: CheckCircle,
+    alertTriangle: AlertTriangle,
+    alertCircle: AlertCircle,
+    x: X
   };
 
   constructor(
@@ -327,12 +331,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  getNotificationIcon(type: string): string {
+  getNotificationIcon(type: string): any {
     switch (type?.toUpperCase()) {
-      case 'ERROR': return 'alert-circle';
-      case 'WARNING': return 'alert-triangle';
-      case 'SUCCESS': return 'check-circle';
-      default: return 'info';
+      case 'ERROR': return this.icons.alertCircle;
+      case 'WARNING': return this.icons.alertTriangle;
+      case 'SUCCESS': return this.icons.checkCircle;
+      default: return this.icons.bell;
     }
   }
 

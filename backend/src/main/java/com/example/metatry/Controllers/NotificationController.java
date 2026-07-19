@@ -18,32 +18,32 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<NotificationDTO> getAllNotifications() {
         return notificationService.getAllNotifications();
     }
 
     @GetMapping("/unread")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<NotificationDTO> getUnreadNotifications() {
         return notificationService.getUnreadNotifications();
     }
 
     @GetMapping("/unread-count")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Long>> getUnreadCount() {
         return ResponseEntity.ok(Map.of("count", notificationService.getUnreadCount()));
     }
 
     @PostMapping("/{id}/read")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/read-all")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> markAllAsRead() {
         notificationService.markAllAsRead();
         return ResponseEntity.ok().build();

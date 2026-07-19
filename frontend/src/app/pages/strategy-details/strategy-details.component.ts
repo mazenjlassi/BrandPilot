@@ -2,7 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, ArrowLeft, Check, X, Loader, PenLine } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  ArrowLeft,
+  Check,
+  X,
+  Loader,
+  PenLine,
+  Sparkles
+} from 'lucide-angular';
 import { StrategyService } from '../../services/strategy.service';
 
 @Component({
@@ -26,7 +34,14 @@ export class StrategyDetailsComponent implements OnInit {
   editDurationWeeks = 8;
   editManagerNotes = '';
 
-  icons = { arrowLeft: ArrowLeft, check: Check, x: X, loader: Loader, penLine: PenLine };
+  icons = {
+    arrowLeft: ArrowLeft,
+    check: Check,
+    x: X,
+    loader: Loader,
+    penLine: PenLine,
+    sparkles: Sparkles
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -92,10 +107,6 @@ export class StrategyDetailsComponent implements OnInit {
 
   deactivate() {
     this.strategyService.deactivate(this.strategy.id).subscribe(() => this.loadStrategy(this.strategy.id));
-  }
-
-  statusClass(status: string): string {
-    return status?.toLowerCase() || '';
   }
 
   getMapEntries(map: any): { key: string; value: any }[] {

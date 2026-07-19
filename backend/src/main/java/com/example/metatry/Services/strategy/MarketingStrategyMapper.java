@@ -32,20 +32,24 @@ public class MarketingStrategyMapper {
                 );
                 campaignCount = plans.size();
                 campaignPlanPreviews = plans;
-                int weeklySum = 0;
+                estimatedWeeklyPosts = 0;
+                estimatedTotalPosts = 0;
                 for (Map<String, Object> plan : plans) {
                     Object dist = plan.get("weeklyPostDistribution");
                     if (dist instanceof Map) {
+                        int weeklyForThisCampaign = 0;
                         for (Object val : ((Map<String, Object>) dist).values()) {
                             if (val instanceof Number) {
-                                weeklySum += ((Number) val).intValue();
+                                weeklyForThisCampaign += ((Number) val).intValue();
                             }
                         }
+                        if (weeklyForThisCampaign > estimatedWeeklyPosts) {
+                            estimatedWeeklyPosts = weeklyForThisCampaign;
+                        }
                     }
-                }
-                estimatedWeeklyPosts = weeklySum;
-                if (entity.getDurationWeeks() != null) {
-                    estimatedTotalPosts = weeklySum * entity.getDurationWeeks();
+                    if (plan.get("totalPosts") instanceof Number) {
+                        estimatedTotalPosts += ((Number) plan.get("totalPosts")).intValue();
+                    }
                 }
             } catch (Exception ignored) {}
         }
