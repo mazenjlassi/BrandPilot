@@ -86,6 +86,15 @@ describe('DashboardComponent', () => {
     const upcomingReq = httpMock.expectOne('http://localhost:8081/posts/upcoming-scheduled?limit=3');
     upcomingReq.flush([]);
 
+    const strategyReq = httpMock.expectOne('http://localhost:8081/marketing-strategies');
+    strategyReq.flush([]);
+
+    const notifReq = httpMock.expectOne('http://localhost:8081/notifications');
+    notifReq.flush([]);
+
+    const unreadReq = httpMock.expectOne('http://localhost:8081/notifications/unread-count');
+    unreadReq.flush({ count: 0 });
+
     expect(component.showMarketing).toBeTrue();
   });
 
@@ -224,7 +233,13 @@ describe('DashboardComponent', () => {
     const campaignsReq = httpMock.expectOne('http://localhost:8081/campaigns');
     campaignsReq.flush([]);
 
+    tick(200);
+
+    const chartReq = httpMock.expectOne('http://localhost:8081/posts/latestPublished?limit=20');
+    chartReq.flush([]);
+
     spyOn(component, 'loadActiveStrategy');
+    spyOn(component, 'loadNotifications');
 
     component.generateFullStrategy();
     tick();
@@ -234,6 +249,7 @@ describe('DashboardComponent', () => {
     genReq.flush({ id: 1 });
 
     expect(component.loadActiveStrategy).toHaveBeenCalled();
+    expect(component.loadNotifications).toHaveBeenCalled();
     expect(component.generatingStrategy).toBeFalse();
   }));
 
@@ -255,6 +271,10 @@ describe('DashboardComponent', () => {
 
     component.activeStrategy = { id: 1, autoGenerate: false };
     component.toggleAutoGenerate();
+
+    const req = httpMock.expectOne('http://localhost:8081/marketing-strategies/1/auto-generate');
+    expect(req.request.method).toBe('PUT');
+    req.flush({ autoGenerate: true });
 
     expect(strategyService.setAutoGenerate).toHaveBeenCalledWith(1, true);
   });
@@ -289,6 +309,9 @@ describe('DashboardComponent', () => {
       { id: 3, read: false }
     ]);
 
+    const unreadReq = httpMock.expectOne('http://localhost:8081/notifications/unread-count');
+    unreadReq.flush({ count: 2 });
+
     expect(component.notifications.length).toBe(3);
     expect(component.unreadCount).toBe(2);
   });
@@ -300,10 +323,10 @@ describe('DashboardComponent', () => {
     ];
     component.unreadCount = 2;
 
-    component.markNotificationRead(1);
+    component.markNotificationRead(component.notifications[0]);
 
     const req = httpMock.expectOne('http://localhost:8081/notifications/1/read');
-    expect(req.request.method).toBe('PUT');
+    expect(req.request.method).toBe('POST');
     req.flush({});
 
     expect(component.notifications[0].read).toBeTrue();
@@ -311,12 +334,9 @@ describe('DashboardComponent', () => {
   });
 
   it('getNotificationIcon_returnsCorrectIconPerType', () => {
-    expect(component.getNotificationIcon('STRATEGY_GENERATED')).toBe('checkCircle');
-    expect(component.getNotificationIcon('WEEK_POSTS_GENERATED')).toBe('checkCircle');
-    expect(component.getNotificationIcon('STRATEGY_COMPLETED')).toBe('alertTriangle');
-    expect(component.getNotificationIcon('AUTO_GENERATE_ENABLED')).toBe('alertCircle');
-    expect(component.getNotificationIcon('AUTO_GENERATE_DISABLED')).toBe('alertCircle');
-    expect(component.getNotificationIcon('STRATEGY_EXPIRED')).toBe('X');
-    expect(component.getNotificationIcon('UNKNOWN')).toBe('bell');
+    expect(component.getNotificationIcon('SUCCESS')).toBe(component.icons.checkCircle);
+    expect(component.getNotificationIcon('WARNING')).toBe(component.icons.alertTriangle);
+    expect(component.getNotificationIcon('ERROR')).toBe(component.icons.alertCircle);
+    expect(component.getNotificationIcon('UNKNOWN')).toBe(component.icons.bell);
   });
 });

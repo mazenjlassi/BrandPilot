@@ -145,7 +145,7 @@ describe('PostDetailsComponent', () => {
     expect(component.successMessage).toBe('');
   });
 
-  it('updatePost should send PUT request', () => {
+  it('updatePost should send PUT request', fakeAsync(() => {
     component.post = { ...mockPost };
     component.scheduledDate = '2026-06-10T14:30';
     component.updatePost();
@@ -154,10 +154,15 @@ describe('PostDetailsComponent', () => {
     expect(req.request.method).toBe('PUT');
     req.flush('Updated');
 
+    tick();
+
+    const reloadReq = httpMock.expectOne('http://localhost:8081/posts/1');
+    reloadReq.flush(mockPost);
+
     expect(component.successMessage).toBe('Post updated successfully');
     expect(component.editMode).toBeFalse();
     expect(component.saving).toBeFalse();
-  });
+  }));
 
   it('updatePost should handle error', () => {
     component.post = { ...mockPost, id: 1 };
