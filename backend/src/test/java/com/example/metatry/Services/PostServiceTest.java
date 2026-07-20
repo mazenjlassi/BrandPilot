@@ -26,6 +26,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -394,5 +395,82 @@ class PostServiceTest {
         List<Post> result = postService.getUpcomingScheduledPosts(2);
 
         assertThat(result).hasSize(2);
+    }
+
+    // ================= updatePost promotion tests =================
+
+    @Test
+    void updatePost_promotesDraftToScheduled_whenApprovedAndScheduledAtSet() {
+        Post post = Post.builder()
+                .id(1L).title("Old").status(PostStatus.DRAFT).approved(false).build();
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest();
+        req.setApproved(true);
+        req.setScheduledAt(LocalDateTime.now().plusDays(1));
+
+        Post result = postService.updatePost(1L, req);
+
+        assertThat(result.getApproved()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(PostStatus.SCHEDULED);
+    }
+
+    @Test
+    void updatePost_keepsDraft_whenNotApproved() {
+        Post post = Post.builder()
+                .id(1L).title("Old").status(PostStatus.DRAFT).approved(false).build();
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest();
+        req.setApproved(false);
+        req.setScheduledAt(LocalDateTime.now().plusDays(1));
+
+        Post result = postService.updatePost(1L, req);
+
+        assertThat(result.getApproved()).isFalse();
+        assertThat(result.getStatus()).isEqualTo(PostStatus.DRAFT);
+    }
+
+    @Test
+    void updatePost_keepsDraft_whenScheduledAtNull() {
+        Post post = Post.builder()
+                .id(1L).title("Old").status(PostStatus.DRAFT).approved(false).build();
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest();
+        req.setApproved(true);
+        req.setScheduledAt(null);
+
+        Post result = postService.updatePost(1L, req);
+
+        assertThat(result.getApproved()).isTrue();
+        assertThat(result.getStatus()).isEqualTo(PostStatus.DRAFT);
+    }
+
+    // ================= scheduler timing tests =================
+
+    @Test
+    void getAllScheduledPosts_usesNow_notPlusHours() {
+        when(postRepository.findByStatusAndScheduledAtAfterOrderByScheduledAtAsc(
+                any(), any())).thenReturn(List.of());
+
+        postService.getAllScheduledPosts();
+
+        verify(postRepository).findByStatusAndScheduledAtAfterOrderByScheduledAtAsc(
+                eq(PostStatus.SCHEDULED), any());
+    }
+
+    @Test
+    void getScheduledPostsToPublish_usesNow_notPlusHours() {
+        when(postRepository.findByApprovedTrueAndStatusAndScheduledAtBefore(
+                any(), any())).thenReturn(List.of());
+
+        postService.getScheduledPostsToPublish();
+
+        verify(postRepository).findByApprovedTrueAndStatusAndScheduledAtBefore(
+                eq(PostStatus.SCHEDULED), any());
     }
 }

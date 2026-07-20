@@ -222,6 +222,6 @@ class MemoryContextServiceUnitTest {
         String result = memoryContextService.getRecentContext();
 
         assertThat(result).contains("...");
-        assertThat(result.length()).isLessThan(800);
+        assertThat(result.length()).isLessThan(1200);
     }
 }

@@ -435,6 +435,7 @@ class PostServiceUnitTest {
         when(postRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         UpdatePostRequest request = new UpdatePostRequest();
+        request.setApproved(true);
         request.setScheduledAt(LocalDateTime.now().plusDays(1));
 
         Post result = postService.updatePost(1L, request);

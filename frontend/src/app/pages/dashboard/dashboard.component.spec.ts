@@ -8,6 +8,7 @@ import { CampaignService } from '../../services/campaign.service';
 import { AuthService } from '../../services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { PatternService } from '../../services/pattern.service';
+import { StrategyService } from '../../services/strategy.service';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -26,7 +27,8 @@ describe('DashboardComponent', () => {
         CampaignService,
         AuthService,
         AdminService,
-        PatternService
+        PatternService,
+        StrategyService
       ]
     }).compileComponents();
 
@@ -209,5 +211,112 @@ describe('DashboardComponent', () => {
   it('userName_returns_from_authService', () => {
     spyOn(authService, 'getName').and.returnValue('TestUser');
     expect(component.userName).toBe('TestUser');
+  });
+
+  // ================= STRATEGY / AUTO-GENERATE =================
+
+  it('generateFullStrategy_callsGenerateAuto_andReloads', fakeAsync(() => {
+    fixture.detectChanges();
+    const postsReq = httpMock.expectOne('http://localhost:8081/posts/top?limit=5');
+    postsReq.flush([]);
+    const statsReq = httpMock.expectOne('http://localhost:8081/posts/stats');
+    statsReq.flush({});
+    const campaignsReq = httpMock.expectOne('http://localhost:8081/campaigns');
+    campaignsReq.flush([]);
+
+    spyOn(component, 'loadActiveStrategy');
+
+    component.generateFullStrategy();
+    tick();
+
+    const genReq = httpMock.expectOne('http://localhost:8081/marketing-strategies/generate-auto');
+    expect(genReq.request.method).toBe('POST');
+    genReq.flush({ id: 1 });
+
+    expect(component.loadActiveStrategy).toHaveBeenCalled();
+    expect(component.generatingStrategy).toBeFalse();
+  }));
+
+  it('generateFullStrategy_showsAlert_onError', fakeAsync(() => {
+    spyOn(window, 'alert');
+    component.generateFullStrategy();
+    tick();
+
+    const req = httpMock.expectOne('http://localhost:8081/marketing-strategies/generate-auto');
+    req.flush('Error', { status: 400, statusText: 'Bad Request' });
+
+    expect(window.alert).toHaveBeenCalled();
+    expect(component.generatingStrategy).toBeFalse();
+  }));
+
+  it('toggleAutoGenerate_callsSetAutoGenerate', () => {
+    const strategyService = TestBed.inject(StrategyService);
+    spyOn(strategyService, 'setAutoGenerate').and.callThrough();
+
+    component.activeStrategy = { id: 1, autoGenerate: false };
+    component.toggleAutoGenerate();
+
+    expect(strategyService.setAutoGenerate).toHaveBeenCalledWith(1, true);
+  });
+
+  it('toggleAutoGenerate_guards_whenAlreadyToggling', () => {
+    component.isTogglingAutoGenerate = true;
+    const strategyService = TestBed.inject(StrategyService);
+    spyOn(strategyService, 'setAutoGenerate');
+
+    component.toggleAutoGenerate();
+
+    expect(strategyService.setAutoGenerate).not.toHaveBeenCalled();
+  });
+
+  // ================= NOTIFICATIONS =================
+
+  it('toggleNotificationsPanel_togglesPanel', () => {
+    expect(component.showNotifications).toBeFalse();
+    component.toggleNotificationsPanel();
+    expect(component.showNotifications).toBeTrue();
+    component.toggleNotificationsPanel();
+    expect(component.showNotifications).toBeFalse();
+  });
+
+  it('loadNotifications_fetchesAndCountsUnread', () => {
+    component.loadNotifications();
+
+    const req = httpMock.expectOne('http://localhost:8081/notifications');
+    req.flush([
+      { id: 1, read: false },
+      { id: 2, read: true },
+      { id: 3, read: false }
+    ]);
+
+    expect(component.notifications.length).toBe(3);
+    expect(component.unreadCount).toBe(2);
+  });
+
+  it('markNotificationRead_marksAsRead', () => {
+    component.notifications = [
+      { id: 1, read: false },
+      { id: 2, read: false }
+    ];
+    component.unreadCount = 2;
+
+    component.markNotificationRead(1);
+
+    const req = httpMock.expectOne('http://localhost:8081/notifications/1/read');
+    expect(req.request.method).toBe('PUT');
+    req.flush({});
+
+    expect(component.notifications[0].read).toBeTrue();
+    expect(component.unreadCount).toBe(1);
+  });
+
+  it('getNotificationIcon_returnsCorrectIconPerType', () => {
+    expect(component.getNotificationIcon('STRATEGY_GENERATED')).toBe('checkCircle');
+    expect(component.getNotificationIcon('WEEK_POSTS_GENERATED')).toBe('checkCircle');
+    expect(component.getNotificationIcon('STRATEGY_COMPLETED')).toBe('alertTriangle');
+    expect(component.getNotificationIcon('AUTO_GENERATE_ENABLED')).toBe('alertCircle');
+    expect(component.getNotificationIcon('AUTO_GENERATE_DISABLED')).toBe('alertCircle');
+    expect(component.getNotificationIcon('STRATEGY_EXPIRED')).toBe('X');
+    expect(component.getNotificationIcon('UNKNOWN')).toBe('bell');
   });
 });

@@ -5,6 +5,7 @@ import com.example.metatry.Enums.PlatformType;
 import com.example.metatry.Enums.PostStatus;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Models.PostImage;
+import com.example.metatry.Models.PostImage.PostImageBuilder;
 import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.AiContentService;
@@ -399,4 +400,58 @@ class PostControllerTest {
                 .andExpect(status().isOk());
     }
 
+    // ================= UPLOAD =================
+
+    @Test
+    @WithMockUser(roles = {"ADMIN", "MARKETING"})
+    void uploadFile_withImage_returnsUrl() throws Exception {
+        when(cloudinaryService.uploadImage(any())).thenReturn("https://res.cloudinary.com/test/img.png");
+
+        MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "fake-image".getBytes());
+
+        mockMvc.perform(multipart("/posts/upload").file(file))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value("https://res.cloudinary.com/test/img.png"));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN", "MARKETING"})
+    void uploadFile_withVideo_returnsUrl() throws Exception {
+        when(cloudinaryService.uploadVideo(any())).thenReturn("https://res.cloudinary.com/test/video.mp4");
+
+        MockMultipartFile file = new MockMultipartFile("file", "test.mp4", "video/mp4", "fake-video".getBytes());
+
+        mockMvc.perform(multipart("/posts/upload").file(file))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value("https://res.cloudinary.com/test/video.mp4"));
+    }
+
+    // ================= GENERATE IMAGE =================
+
+    @Test
+    @WithMockUser(roles = {"ADMIN", "MARKETING"})
+    void generateImage_forPost_returnsOk() throws Exception {
+        Post post = Post.builder().id(1L).title("Test").content("Test content").build();
+        PostImage image = PostImage.builder().imageUrl("https://res.cloudinary.com/test/ai-img.png").build();
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(aiImageService.generateImageForPost(post)).thenReturn(image);
+
+        mockMvc.perform(post("/posts/1/generate-image"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imageUrl").value("https://res.cloudinary.com/test/ai-img.png"));
+    }
+
+    // ================= APPROVE =================
+
+    @Test
+    @WithMockUser(roles = {"ADMIN", "MARKETING"})
+    void approvePost_returnsMessage() throws Exception {
+        Post post = Post.builder().id(1L).title("Test").build();
+        when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+        when(postRepository.save(any())).thenReturn(post);
+
+        mockMvc.perform(post("/posts/1/approve"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Post approved"));
+    }
 }

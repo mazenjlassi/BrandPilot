@@ -77,4 +77,37 @@ describe('PostService', () => {
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
+
+  it('uploadFile_callsPostWithFormData', () => {
+    const file = new File(['fake'], 'test.png', { type: 'image/png' });
+    service.uploadFile(file).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body instanceof FormData).toBeTrue();
+    req.flush({ url: 'https://img.com/test.png' });
+  });
+
+  it('generateImage_callsPost', () => {
+    service.generateImage(1).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/1/generate-image');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({ imageUrl: 'https://img.com/ai.png' });
+  });
+
+  it('generateImage_withPrompt_sendsPrompt', () => {
+    service.generateImage(1, 'a sunset').subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/1/generate-image');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ prompt: 'a sunset' });
+    req.flush({ imageUrl: 'https://img.com/ai.png' });
+  });
+
+  it('approvePost_callsPost', () => {
+    service.approvePost(1).subscribe();
+    const req = httpMock.expectOne('http://localhost:8081/posts/1/approve');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({ message: 'Post approved successfully' });
+  });
 });

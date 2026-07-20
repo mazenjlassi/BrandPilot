@@ -91,6 +91,10 @@ public class PostService {
         if(request.getScheduledAt() != null)
             post.setScheduledAt(request.getScheduledAt());
 
+        //  restrict platform change (must be before promotion check)
+        if(request.getPlatform() != null && post.getStatus() == PostStatus.DRAFT)
+            post.setPlatform(request.getPlatform());
+
         // If user explicitly approves → promote to SCHEDULED
         if (Boolean.TRUE.equals(request.getApproved()) && post.getScheduledAt() != null && post.getStatus() == PostStatus.DRAFT) {
             post.setStatus(PostStatus.SCHEDULED);
@@ -101,10 +105,6 @@ public class PostService {
 
         if(request.getLink() != null)
             post.setLink(request.getLink());
-
-        //  restrict platform change
-        if(request.getPlatform() != null && post.getStatus() == PostStatus.DRAFT)
-            post.setPlatform(request.getPlatform());
 
         //  update image if exists
         if(request.getImageUrl() != null) {

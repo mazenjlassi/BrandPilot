@@ -90,6 +90,21 @@ class CloudinaryServiceTest {
     }
 
     @Test
+    void uploadVideo_delegatesToUploadImage() throws Exception {
+        when(cloudinary.uploader()).thenReturn(uploader);
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("test.mp4");
+        when(file.getBytes()).thenReturn("fake-video-bytes".getBytes());
+
+        Map<String, Object> uploadResult = Map.of("secure_url", "https://res.cloudinary.com/test/video.mp4");
+        when(uploader.upload(any(java.io.File.class), any(Map.class))).thenReturn(uploadResult);
+
+        String result = cloudinaryService.uploadVideo(file);
+
+        assertThat(result).isEqualTo("https://res.cloudinary.com/test/video.mp4");
+    }
+
+    @Test
     void uploadWithOptions_throwsIOException_whenFileReadFails() throws Exception {
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("test.png");

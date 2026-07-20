@@ -280,4 +280,108 @@ describe('PostDetailsComponent', () => {
     component.chart = null;
     expect(() => component.ngOnDestroy()).not.toThrow();
   });
+
+  // ================= MEDIA TABS =================
+
+  it('switchMediaMode_changesModeAndClearsState', () => {
+    component.editSelectedFile = new File([''], 'test.png');
+    component.editSelectedVideoFile = new File([''], 'test.mp4');
+    component.editPreviewUrl = 'blob:test';
+
+    component.switchMediaMode('image');
+
+    expect(component.mediaMode).toBe('image');
+    expect(component.editSelectedFile).toBeNull();
+    expect(component.editSelectedVideoFile).toBeNull();
+    expect(component.editPreviewUrl).toBeNull();
+  });
+
+  it('onFileSelected_setsFileAndPreview', () => {
+    const file = new File(['fake'], 'photo.png', { type: 'image/png' });
+    const event = { target: { files: [file] } };
+
+    component.onFileSelected(event);
+
+    expect(component.editSelectedFile).toBe(file);
+    expect(component.editSelectedVideoFile).toBeNull();
+    expect(component.editPreviewUrl).toContain('blob:');
+  });
+
+  it('onVideoSelected_setsVideoAndPreview', () => {
+    const file = new File(['fake'], 'video.mp4', { type: 'video/mp4' });
+    const event = { target: { files: [file] } };
+
+    component.onVideoSelected(event);
+
+    expect(component.editSelectedVideoFile).toBe(file);
+    expect(component.editSelectedFile).toBeNull();
+    expect(component.editPreviewUrl).toContain('blob:');
+  });
+
+  it('uploadMedia_uploadsImageAndUpdatesPost', () => {
+    const file = new File(['fake'], 'photo.png', { type: 'image/png' });
+    component.editSelectedFile = file;
+    component.post = { id: 1, imageUrl: null };
+
+    component.uploadMedia();
+
+    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    expect(req.request.method).toBe('POST');
+    req.flush({ url: 'https://img.com/photo.png' });
+
+    expect(component.post.imageUrl).toBe('https://img.com/photo.png');
+    expect(component.uploadingMedia).toBeFalse();
+  });
+
+  it('uploadMedia_uploadsVideoAndUpdatesPost', () => {
+    const file = new File(['fake'], 'video.mp4', { type: 'video/mp4' });
+    component.editSelectedVideoFile = file;
+    component.post = { id: 1, videoUrl: null };
+
+    component.uploadMedia();
+
+    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    expect(req.request.method).toBe('POST');
+    req.flush({ url: 'https://img.com/video.mp4' });
+
+    expect(component.post.videoUrl).toBe('https://img.com/video.mp4');
+    expect(component.uploadingMedia).toBeFalse();
+  });
+
+  it('uploadMedia_doesNothing_whenNoFileSelected', () => {
+    component.editSelectedFile = null;
+    component.editSelectedVideoFile = null;
+
+    component.uploadMedia();
+
+    httpMock.expectNone('http://localhost:8081/posts/upload');
+  });
+
+  it('uploadMedia_handlesError', () => {
+    const file = new File(['fake'], 'photo.png', { type: 'image/png' });
+    component.editSelectedFile = file;
+    component.post = { id: 1 };
+
+    component.uploadMedia();
+
+    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    req.flush('Error', { status: 500, statusText: 'Server Error' });
+
+    expect(component.uploadingMedia).toBeFalse();
+    expect(component.errorMessage).toBe('Failed to upload media');
+  });
+
+  // ================= RISKY KEYWORDS =================
+
+  it('checkRiskyKeywords_detectsRiskyWords', () => {
+    component.imagePrompt = 'A photo of a person smiling';
+    component.checkRiskyKeywords();
+    expect(component.riskyKeywordsWarning).toBeTrue();
+  });
+
+  it('checkRiskyKeywords_noWarningForSafePrompt', () => {
+    component.imagePrompt = 'Abstract geometric shapes with blue gradient';
+    component.checkRiskyKeywords();
+    expect(component.riskyKeywordsWarning).toBeFalse();
+  });
 });
