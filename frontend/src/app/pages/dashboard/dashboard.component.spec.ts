@@ -260,7 +260,7 @@ describe('DashboardComponent', () => {
   });
 
   it('toggleAutoGenerate_guards_whenAlreadyToggling', () => {
-    component.isTogglingAutoGenerate = true;
+    component.togglingAutoGenerate = true;
     const strategyService = TestBed.inject(StrategyService);
     spyOn(strategyService, 'setAutoGenerate');
 
@@ -272,11 +272,11 @@ describe('DashboardComponent', () => {
   // ================= NOTIFICATIONS =================
 
   it('toggleNotificationsPanel_togglesPanel', () => {
-    expect(component.showNotifications).toBeFalse();
+    expect(component.showNotificationsPanel).toBeFalse();
     component.toggleNotificationsPanel();
-    expect(component.showNotifications).toBeTrue();
+    expect(component.showNotificationsPanel).toBeTrue();
     component.toggleNotificationsPanel();
-    expect(component.showNotifications).toBeFalse();
+    expect(component.showNotificationsPanel).toBeFalse();
   });
 
   it('loadNotifications_fetchesAndCountsUnread', () => {
