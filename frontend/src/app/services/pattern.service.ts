@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface CompanyProfile {
   id?: number;
@@ -13,10 +14,10 @@ export interface CompanyProfile {
 @Injectable({ providedIn: 'root' })
 export class PatternService {
 
-  private api = 'http://localhost:8081/api/scraped-posts';
-  private scraperApi = 'http://localhost:8081/api/scraper';
-  private companyApi = 'http://localhost:8081/api/company-profiles';
-  private patternApi = 'http://localhost:8081/api/patterns';
+  private api = environment.apiUrl + '/api/scraped-posts';
+  private scraperApi = environment.apiUrl + '/api/scraper';
+  private companyApi = environment.apiUrl + '/api/company-profiles';
+  private patternApi = environment.apiUrl + '/api/patterns';
 
   constructor(private http: HttpClient) {}
 

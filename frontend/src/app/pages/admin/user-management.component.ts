@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserPlus, Trash2, Ban, Unlock, Loader2 } from 'lucide-angular';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
+import { environment } from '../../../environments/environment';
 
 interface User {
   id: number;
@@ -44,7 +45,7 @@ export class UserManagementComponent implements OnInit {
   };
   creating = false;
 
-  private apiUrl = 'http://localhost:8081';
+  private apiUrl = environment.apiUrl;
   
   constructor(
     private http: HttpClient,
