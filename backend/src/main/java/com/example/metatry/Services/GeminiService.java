@@ -21,7 +21,7 @@ public class GeminiService {
     public String generate(String prompt){
 
         try {
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key="
                     + geminiConfig.getApiKey();
 
             Map<String, Object> body = Map.of(

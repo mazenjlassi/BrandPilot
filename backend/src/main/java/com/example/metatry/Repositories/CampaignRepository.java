@@ -14,4 +14,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
     // ✅ Fetch campaigns with posts (avoid N+1)
     @Query("SELECT DISTINCT c FROM Campaign c LEFT JOIN FETCH c.posts")
     List<Campaign> findAllWithPosts();
+
+    // ✅ Find campaigns by marketing strategy
+    List<Campaign> findByMarketingStrategyId(Long strategyId);
 }

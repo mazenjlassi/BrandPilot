@@ -12,6 +12,9 @@ import { CalendarComponent } from './pages/calendar/calendar.component';
 import { ScrapedPostsComponent } from './pages/scraped-posts/scraped-posts.component';
 import { PatternsComponent } from './pages/patterns/patterns.component';
 import { CompanyDetailsComponent } from './pages/company-details/company-details.component';
+import { StrategyDashboardComponent } from './pages/strategy-dashboard/strategy-dashboard.component';
+import { StrategyDetailsComponent } from './pages/strategy-details/strategy-details.component';
+import { WeeklyPlannerComponent } from './pages/weekly-planner/weekly-planner.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -27,5 +30,8 @@ export const routes: Routes = [
     {path: 'company/:companyName', component: CompanyDetailsComponent },
     {path: 'patterns', component: PatternsComponent },
     {path: 'calendar', component: CalendarComponent },
+    {path: 'marketing-strategies', component: StrategyDashboardComponent },
+    {path: 'marketing-strategies/:id', component: StrategyDetailsComponent },
+    {path: 'weekly-planner', component: WeeklyPlannerComponent },
     {path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 ];

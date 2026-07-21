@@ -137,6 +137,19 @@ public class CampaignService {
 
         return postRepository.save(post);
     }
+    // ================= GET BY STRATEGY =================
+
+    public List<CampaignDTO> getCampaignsByStrategy(Long strategyId) {
+        return campaignRepository.findByMarketingStrategyId(strategyId).stream()
+                .map(c -> CampaignDTO.builder()
+                        .id(c.getId())
+                        .name(c.getName())
+                        .topic(c.getTopic())
+                        .postCount(c.getPosts() != null ? c.getPosts().size() : 0)
+                        .build())
+                .toList();
+    }
+
     // ================= GET ALL =================
 
     public List<CampaignDTO> getAllCampaigns() {

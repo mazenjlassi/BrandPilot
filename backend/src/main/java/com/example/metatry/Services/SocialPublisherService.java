@@ -7,6 +7,7 @@ import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class SocialPublisherService {
     private final LinkedInService linkedInService;
     private final EmailService emailService;
     private final PostRepository postRepository;
+    @Transactional
     public Post publishPost(Post post){
 
         if(!Boolean.TRUE.equals(post.getApproved())){

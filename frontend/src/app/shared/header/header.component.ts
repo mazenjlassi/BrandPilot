@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, LayoutDashboard, PenTool, MessageCircle, FileText, Folder, Menu, X, Sun, Moon, Users, LogOut, Calendar, Search, PanelLeftClose, PanelLeftOpen } from 'lucide-angular';
+import { LucideAngularModule, LayoutDashboard, PenTool, MessageCircle, FileText, Folder, Menu, X, Sun, Moon, Users, LogOut, Calendar, Search, PanelLeftClose, PanelLeftOpen, Target, CalendarDays } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { SidebarStateService } from '../sidebar-state.service';
 
@@ -28,7 +28,9 @@ export class HeaderComponent implements OnInit {
     calendar: Calendar,
     search: Search,
     panelLeftClose: PanelLeftClose,
-    panelLeftOpen: PanelLeftOpen
+    panelLeftOpen: PanelLeftOpen,
+    target: Target,
+    calendarDays: CalendarDays
   };
   mobileMenuOpen = false;
   isDarkMode = false;

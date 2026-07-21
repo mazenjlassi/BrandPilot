@@ -1,0 +1,145 @@
+<div class="weekly-planner" role="main" aria-label="Weekly planner">
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Weekly Planner</h1>
+      <p class="subtitle">Plan and generate your weekly content across campaigns</p>
+    </div>
+  </header>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading active strategy...</p>
+  </div>
+
+  <!-- NO STRATEGY STATE -->
+  <div *ngIf="!loading && !activeStrategy" class="empty-state">
+    <div class="empty-icon">
+      <lucide-icon [img]="icons.calendar" [size]="48"></lucide-icon>
+    </div>
+    <h3>No Active Strategy</h3>
+    <p>There is no active marketing strategy. Please create and approve a strategy first.</p>
+    <a routerLink="/marketing-strategies" class="btn-primary">
+      <lucide-icon [img]="icons.chevronRight" [size]="16"></lucide-icon>
+      Go to Strategies
+    </a>
+  </div>
+
+  <!-- ACTIVE STRATEGY -->
+  <div *ngIf="!loading && activeStrategy">
+
+    <!-- Strategy Info Card -->
+    <div class="strategy-card">
+      <div class="strategy-header">
+        <div class="strategy-info">
+          <h2>{{ activeStrategy.title }}</h2>
+          <p class="strategy-topic" *ngIf="activeStrategy.topic">{{ activeStrategy.topic }}</p>
+        </div>
+        <span class="status-badge" [attr.data-status]="activeStrategy.status?.toLowerCase()">
+          <span class="status-dot"></span>
+          {{ activeStrategy.status }}
+        </span>
+      </div>
+
+      <div class="strategy-stats">
+        <div class="stat">
+          <span class="stat-value">Week {{ calculateWeek() }}</span>
+          <span class="stat-label">of {{ activeStrategy.durationWeeks }} weeks</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-value">{{ campaigns.length }}</span>
+          <span class="stat-label">Campaigns</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-value">{{ totalPosts }}</span>
+          <span class="stat-label">Posts</span>
+        </div>
+      </div>
+
+      <div class="strategy-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercent"></div>
+        </div>
+        <span class="progress-text">{{ progressPercent }}% complete</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-bar">
+      <button class="btn-primary btn-generate" (click)="generateWeek()" [disabled]="generating">
+        <lucide-icon *ngIf="generating" [img]="icons.loader" [size]="18" class="spin"></lucide-icon>
+        <lucide-icon *ngIf="!generating" [img]="icons.calendar" [size]="18"></lucide-icon>
+        {{ generating ? 'Generating...' : 'Generate This Week\'s Content' }}
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error" class="error-state">
+      <lucide-icon [img]="icons.alertTriangle" [size]="20"></lucide-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- Campaigns Section -->
+    <div class="campaigns-section" *ngIf="campaigns.length > 0">
+      <div class="section-header">
+        <h3>Campaigns</h3>
+        <span class="count-badge">{{ campaigns.length }} active</span>
+      </div>
+      <div class="campaigns-grid">
+        <a *ngFor="let c of campaigns; let i = index" 
+           [routerLink]="['/campaigns', c.id]" 
+           class="campaign-card"
+           [style.animation-delay.ms]="i * 50">
+          <div class="card-header">
+            <h4>{{ c.name }}</h4>
+            <lucide-icon [img]="icons.arrowUpRight" [size]="14"></lucide-icon>
+          </div>
+          <p class="topic" *ngIf="c.topic">{{ c.topic }}</p>
+          <div class="card-footer">
+            <div class="stat">
+              <span class="stat-value">{{ c.postCount || 0 }}</span>
+              <span class="stat-label">posts</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Success Result -->
+    <div class="result-card" *ngIf="lastResult">
+      <div class="result-content">
+        <div class="result-icon">
+          <lucide-icon [img]="icons.checkCircle" [size]="32"></lucide-icon>
+        </div>
+        <h3>Content Generated Successfully!</h3>
+        <div class="result-stats">
+          <div class="stat">
+            <span class="stat-value">{{ lastResult.campaigns }}</span>
+            <span class="stat-label">Campaigns</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-value">{{ lastResult.posts }}</span>
+            <span class="stat-label">Posts</span>
+          </div>
+        </div>
+        <p class="result-note">Posts are saved as DRAFT and await your approval.</p>
+        <div class="result-actions">
+          <a routerLink="/posts" class="btn-primary">
+            <lucide-icon [img]="icons.fileText" [size]="16"></lucide-icon>
+            Review Posts
+          </a>
+          <a routerLink="/campaign-list" class="btn-secondary">
+            <lucide-icon [img]="icons.folderOpen" [size]="16"></lucide-icon>
+            View Campaigns
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -161,7 +161,7 @@ class AdminIntegrationTest {
                 "/admin/users", HttpMethod.GET,
                 new HttpEntity<>(headers(marketingToken)), String.class);
 
-        assertThat(r.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test

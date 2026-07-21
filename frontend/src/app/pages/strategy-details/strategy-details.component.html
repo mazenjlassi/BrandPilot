@@ -1,0 +1,181 @@
+<div class="strategy-detail-page" role="main" aria-label="Strategy details">
+
+  <!-- BACK LINK -->
+  <a routerLink="/marketing-strategies" class="back-link">
+    <lucide-icon [img]="icons.arrowLeft" [size]="16"></lucide-icon>
+    Back to Strategies
+  </a>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading strategy...</p>
+  </div>
+
+  <!-- CONTENT -->
+  <div *ngIf="!loading && strategy">
+
+    <!-- HEADER -->
+    <header class="detail-header">
+      <div class="header-info">
+        <span class="status-badge" [attr.data-status]="strategy.status?.toLowerCase()">
+          <span class="status-dot"></span>
+          {{ strategy.status }}
+        </span>
+        <h1 *ngIf="!editing">{{ strategy.title }}</h1>
+      </div>
+      <div class="header-actions" *ngIf="!editing">
+        <button *ngIf="strategy.status === 'PENDING'" class="action-btn secondary" (click)="startEdit()">
+          <lucide-icon [img]="icons.penLine" [size]="16"></lucide-icon>
+          Edit
+        </button>
+        <button *ngIf="strategy.status === 'PENDING'" class="action-btn success" (click)="approve()">
+          <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
+          Approve
+        </button>
+        <button *ngIf="strategy.status === 'ACTIVE'" class="action-btn danger" (click)="deactivate()">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+          Deactivate
+        </button>
+      </div>
+    </header>
+
+    <!-- EDIT FORM -->
+    <div class="edit-card section" *ngIf="editing">
+      <h3>Edit Strategy</h3>
+      <div class="form-group">
+        <label for="edit-title">Title</label>
+        <input id="edit-title" type="text" [(ngModel)]="editTitle" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="edit-summary">Summary</label>
+        <textarea id="edit-summary" [(ngModel)]="editSummary" class="form-input" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="edit-desc">Description</label>
+        <textarea id="edit-desc" [(ngModel)]="editDescription" class="form-input" rows="6"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="edit-duration">Duration (weeks)</label>
+        <input id="edit-duration" type="number" [(ngModel)]="editDurationWeeks" class="form-input" min="4" max="52" />
+      </div>
+      <div class="form-group">
+        <label for="edit-notes">Manager Notes</label>
+        <textarea id="edit-notes" [(ngModel)]="editManagerNotes" class="form-input" rows="3" placeholder="Add your notes..."></textarea>
+      </div>
+      <div class="error-text" *ngIf="error">{{ error }}</div>
+      <div class="form-actions">
+        <button class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+        <button class="btn-primary" (click)="save()" [disabled]="saving">
+          <lucide-icon *ngIf="saving" [img]="icons.loader" [size]="16" class="spin"></lucide-icon>
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="detail-body" *ngIf="!editing">
+
+      <!-- Summary Section -->
+      <section class="section">
+        <h3>Summary</h3>
+        <p>{{ strategy.summary }}</p>
+      </section>
+
+      <!-- Description Section -->
+      <section class="section">
+        <h3>Description</h3>
+        <p>{{ strategy.description }}</p>
+      </section>
+
+      <!-- AI Reasoning -->
+      <section class="section ai-section" *ngIf="strategy.aiReasoning">
+        <h3><lucide-icon [img]="icons.sparkles" [size]="16"></lucide-icon> AI Reasoning</h3>
+        <p class="ai-reasoning">{{ strategy.aiReasoning }}</p>
+      </section>
+
+      <!-- Manager Notes -->
+      <section class="section" *ngIf="strategy.managerNotes">
+        <h3>Manager Notes</h3>
+        <p>{{ strategy.managerNotes }}</p>
+      </section>
+
+      <!-- Campaign Plan Preview -->
+      <section class="section" *ngIf="strategy.status === 'PENDING' && strategy.campaignPlanPreviews?.length > 0">
+        <h3>Campaign Plan <span class="count-badge">{{ strategy.campaignPlanPreviews.length }}</span></h3>
+        <div class="campaign-plan-list">
+          <div class="plan-card" *ngFor="let cp of strategy.campaignPlanPreviews; let i = index">
+            <div class="plan-header">
+              <span class="plan-number">#{{ i + 1 }}</span>
+              <h4>{{ cp.name || 'Campaign' }}</h4>
+            </div>
+            <div class="plan-details">
+              <div class="plan-row" *ngIf="cp.topic">
+                <span class="plan-label">Topic</span>
+                <span class="plan-value">{{ cp.topic }}</span>
+              </div>
+              <div class="plan-row" *ngIf="cp.objective">
+                <span class="plan-label">Objective</span>
+                <span class="plan-value">{{ cp.objective }}</span>
+              </div>
+              <div class="plan-stats-row">
+                <span *ngIf="cp.totalPosts" class="plan-stat">
+                  <strong>{{ cp.totalPosts }}</strong> posts
+                </span>
+                <span *ngIf="cp.durationWeeks" class="plan-stat">
+                  <strong>{{ cp.durationWeeks }}</strong> weeks
+                </span>
+              </div>
+              <div class="plan-distribution" *ngIf="cp.weeklyPostDistribution">
+                <span class="plan-label">Posts per week</span>
+                <div class="platform-chips">
+                  <span class="platform-chip" *ngFor="let entry of getMapEntries(cp.weeklyPostDistribution)">
+                    {{ entry.key | uppercase }}: {{ entry.value }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Meta Grid -->
+      <section class="meta-grid">
+        <div class="meta-card">
+          <span class="meta-label">Duration</span>
+          <span class="meta-value">{{ strategy.durationWeeks || 'N/A' }} weeks</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Start Date</span>
+          <span class="meta-value">{{ strategy.startDate ? (strategy.startDate | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">End Date</span>
+          <span class="meta-value">{{ strategy.expectedEndDate ? (strategy.expectedEndDate | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Campaigns</span>
+          <span class="meta-value">{{ strategy.campaignCount || 0 }}</span>
+        </div>
+        <div class="meta-card" *ngIf="strategy.estimatedWeeklyPosts != null">
+          <span class="meta-label">Posts/Week</span>
+          <span class="meta-value">{{ strategy.estimatedWeeklyPosts }}</span>
+        </div>
+        <div class="meta-card" *ngIf="strategy.estimatedTotalPosts != null">
+          <span class="meta-label">Total Posts</span>
+          <span class="meta-value">{{ strategy.estimatedTotalPosts }}</span>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Created</span>
+          <span class="meta-value">{{ strategy.createdAt ? (strategy.createdAt | date:'mediumDate') : 'N/A' }}</span>
+        </div>
+        <div class="meta-card" *ngIf="strategy.approvedAt">
+          <span class="meta-label">Approved</span>
+          <span class="meta-value">{{ strategy.approvedAt | date:'mediumDate' }}</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+</div>

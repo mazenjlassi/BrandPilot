@@ -202,24 +202,24 @@ public class AiImageService {
             case PORTRAIT -> "portrait 9:16 vertical";
         };
 
-        String title = post.getTitle() != null
-                ? post.getTitle().replaceAll("[^a-zA-Z0-9 ]", " ").trim()
-                : "";
+        Set<String> keywords = new LinkedHashSet<>();
 
-        String[] titleWords = title.split("\\s+");
-        StringBuilder keywords = new StringBuilder();
-        for (int i = 0; i < Math.min(titleWords.length, 8); i++) {
-            String w = titleWords[i].toLowerCase();
-            if (w.length() > 2) {
-                if (keywords.length() > 0) keywords.append(" ");
-                keywords.append(w);
+        String title = post.getTitle();
+        if (title != null && !title.isBlank()) {
+            for (String w : title.replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase().split("\\s+")) {
+                if (w.length() > 2 && keywords.size() < 5) keywords.add(w);
             }
         }
 
-        String result = keywords.length() > 0
-                ? keywords.toString().trim() + " " + styleTag
-                : styleTag;
+        String content = post.getContent();
+        if (content != null && !content.isBlank()) {
+            for (String w : content.replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase().split("\\s+")) {
+                if (w.length() > 2 && keywords.size() < 10) keywords.add(w);
+            }
+        }
 
+        String kw = String.join(" ", keywords);
+        String result = kw.isEmpty() ? styleTag : kw + " " + styleTag;
         return result + " professional business technology cinematic lighting photorealistic 4k clean minimalist";
     }
 }

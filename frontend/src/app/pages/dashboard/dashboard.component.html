@@ -6,10 +6,66 @@
       <h1>Dashboard</h1>
       <p>Welcome back, <strong>{{ userName }}</strong></p>
     </div>
-    <button class="primary-btn" routerLink="/campaigns">
-      <lucide-icon [img]="icons.penTool" [size]="18"></lucide-icon>
-      Create Campaign
-    </button>
+    <div class="top-actions">
+      <!-- Auto-generate toggle -->
+      <div class="auto-toggle" *ngIf="isMarketingUser && activeStrategy" (click)="toggleAutoGenerate()" [class.active]="activeStrategy.autoGenerate" [class.toggling]="togglingAutoGenerate" data-testid="auto-generate-toggle">
+        <div class="toggle-track">
+          <div class="toggle-thumb" [class.on]="activeStrategy.autoGenerate"></div>
+        </div>
+        <span class="toggle-label">Auto-renew</span>
+      </div>
+      <!-- Notifications bell -->
+      <button class="icon-btn" (click)="toggleNotificationsPanel()" [class.has-unread]="unreadCount > 0" data-testid="notification-bell">
+        <lucide-icon [img]="icons.bell" [size]="20"></lucide-icon>
+        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+      </button>
+      <button class="primary-btn" routerLink="/campaigns">
+        <lucide-icon [img]="icons.penTool" [size]="18"></lucide-icon>
+        Create Campaign
+      </button>
+      <button class="primary-btn rocket-btn" *ngIf="isMarketingUser" (click)="generateFullStrategy()" [disabled]="generatingStrategy || activeStrategy" data-testid="generate-strategy-btn">
+        <lucide-icon [img]="activeStrategy?.autoGenerate ? icons.refreshCw : icons.rocket" [size]="18" [class.spin]="generatingStrategy"></lucide-icon>
+        {{ generatingStrategy ? 'Generating...' : 'Generate AI Strategy' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifications Panel -->
+  <div class="notifications-panel" *ngIf="showNotificationsPanel">
+    <div class="notif-header">
+      <div class="notif-header-left">
+        <lucide-icon [img]="icons.bell" [size]="16"></lucide-icon>
+        <h3>Notifications</h3>
+        <span class="notif-unread-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </div>
+      <div class="notif-header-actions">
+        <button class="text-btn" (click)="markAllNotificationsRead()" *ngIf="unreadCount > 0">
+          <lucide-icon [img]="icons.checkCircle" [size]="14"></lucide-icon>
+          Mark all read
+        </button>
+        <button class="notif-close-btn" (click)="showNotificationsPanel = false" aria-label="Close">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+        </button>
+      </div>
+    </div>
+    <div class="notif-list">
+      <div class="notif-item" *ngFor="let n of notifications"
+           [class.unread]="!n.read"
+           (click)="markNotificationRead(n)">
+        <div class="notif-icon" [class.error]="n.type === 'ERROR'" [class.warning]="n.type === 'WARNING'" [class.success]="n.type === 'SUCCESS'" [class.info]="!n.type || n.type === 'INFO'">
+          <lucide-icon [img]="getNotificationIcon(n.type)" [size]="14"></lucide-icon>
+        </div>
+        <div class="notif-body">
+          <p>{{ n.message }}</p>
+          <span class="notif-time">{{ n.createdAt | date:'MMM d, h:mm a' }}</span>
+        </div>
+        <div class="notif-read-dot" *ngIf="!n.read"></div>
+      </div>
+      <div class="notif-empty" *ngIf="notifications.length === 0">
+        <lucide-icon [img]="icons.bell" [size]="32"></lucide-icon>
+        <p>No notifications yet</p>
+      </div>
+    </div>
   </div>
 
   <!-- KPI Cards -->

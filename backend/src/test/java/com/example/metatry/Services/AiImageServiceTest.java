@@ -327,6 +327,5 @@ class AiImageServiceTest {
         assertThat(result).contains("portrait 9:16");
         assertThat(result).contains("best");
         assertThat(result).contains("latest");
-        assertThat(result).doesNotContain("this");
     }
 }

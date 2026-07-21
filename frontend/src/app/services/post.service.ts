@@ -88,7 +88,7 @@ export class PostService {
 
   // ================= ✅ CREATE POST WITH IMAGE =================
 
-  createPostWithImage(campaignId: number, data: any, image?: File) {
+  createPostWithImage(campaignId: number, data: any, image?: File, video?: File) {
 
     const formData = new FormData();
 
@@ -98,8 +98,10 @@ export class PostService {
       new Blob([JSON.stringify(data)], { type: 'application/json' })
     );
 
-    // optional image
-    if (image) {
+    // optional image or video (mutually exclusive)
+    if (video) {
+      formData.append('video', video);
+    } else if (image) {
       formData.append('image', image);
     }
 
@@ -131,5 +133,23 @@ export class PostService {
 
   getUpcomingScheduled(limit: number = 3) {
     return this.http.get<any[]>(`${this.api}/upcoming-scheduled?limit=${limit}`);
+  }
+
+  uploadFile(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ url: string }>(`${this.api}/upload`, formData);
+  }
+
+  approvePost(id: number) {
+    return this.http.post<any>(`${this.api}/${id}/approve`, {});
+  }
+
+  approveAllPosts() {
+    return this.http.post<any>(`${this.api}/approve-all`, {});
+  }
+
+  regeneratePost(id: number) {
+    return this.http.post<any>(`${this.api}/${id}/regenerate`, {});
   }
 }

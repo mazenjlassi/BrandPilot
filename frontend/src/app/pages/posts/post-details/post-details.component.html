@@ -74,32 +74,80 @@
             <label>Scheduled At</label>
             <input type="datetime-local" [(ngModel)]="scheduledDate" class="form-input" />
           </div>
+          <!-- Media Tabs -->
           <div class="form-group">
-            <label>
-              Image Prompt
-              <span class="char-count">{{ imagePrompt.length }}/500</span>
-            </label>
-            <textarea
-              [(ngModel)]="imagePrompt"
-              (input)="checkRiskyKeywords()"
-              class="form-input prompt-input"
-              rows="2"
-              maxlength="500"
-              placeholder="Short keyword prompt: subject, style, lighting"
-            ></textarea>
-            <div class="warning-banner" *ngIf="riskyKeywordsWarning">
-              <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
-              <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+            <label>Media</label>
+            <div class="media-tabs">
+              <button type="button" class="media-tab" [class.active]="mediaMode === 'generate'" (click)="switchMediaMode('generate')">🎨 Generate</button>
+              <button type="button" class="media-tab" [class.active]="mediaMode === 'image'" (click)="switchMediaMode('image')">📷 Image</button>
+              <button type="button" class="media-tab" [class.active]="mediaMode === 'video'" (click)="switchMediaMode('video')">🎬 Video</button>
             </div>
           </div>
-          <div class="image-preview" *ngIf="post.imageUrl">
-            <img [src]="post.imageUrl" alt="Post image" />
-          </div>
-          <div class="form-group">
-            <button class="btn-secondary" (click)="generateImage()" [disabled]="generatingImage">
-              {{ generatingImage ? 'Generating...' : (post.imageUrl ? 'Regenerate Image' : 'Generate Image') }}
-            </button>
-          </div>
+
+          <!-- Generate Tab -->
+          <ng-container *ngIf="mediaMode === 'generate'">
+            <div class="media-tab-content">
+              <div class="form-group">
+                <label>
+                  Image Prompt
+                  <span class="char-count">{{ imagePrompt.length }}/500</span>
+                </label>
+                <textarea
+                  [(ngModel)]="imagePrompt"
+                  (input)="checkRiskyKeywords()"
+                  class="form-input prompt-input"
+                  rows="2"
+                  maxlength="500"
+                  placeholder="Short keyword prompt: subject, style, lighting"
+                ></textarea>
+                <div class="warning-banner" *ngIf="riskyKeywordsWarning">
+                  <lucide-icon [img]="icons.alertTriangle" [size]="14"></lucide-icon>
+                  <span>Avoid: faces, hands, people, text — SDXL struggles with these</span>
+                </div>
+              </div>
+              <div class="image-preview" *ngIf="post.imageUrl">
+                <img [src]="post.imageUrl" alt="Post image" />
+              </div>
+              <div class="form-group">
+                <button class="btn-secondary gen-btn" (click)="generateImage()" [disabled]="generatingImage">
+                  {{ generatingImage ? 'Generating...' : (post.imageUrl ? 'Regenerate Image' : 'Generate Image') }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Image Upload Tab -->
+          <ng-container *ngIf="mediaMode === 'image'">
+            <div class="media-tab-content">
+              <div class="form-group">
+                <label>Upload Image</label>
+                <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input" />
+                <div *ngIf="editPreviewUrl" class="image-preview">
+                  <img [src]="editPreviewUrl" alt="Preview" />
+                </div>
+                <button type="button" class="btn-secondary upload-btn" (click)="uploadMedia()" [disabled]="!editSelectedFile || uploadingMedia">
+                  {{ uploadingMedia ? 'Uploading...' : 'Upload to Cloudinary' }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Video Upload Tab -->
+          <ng-container *ngIf="mediaMode === 'video'">
+            <div class="media-tab-content">
+              <div class="form-group">
+                <label>Upload Video</label>
+                <input type="file" (change)="onVideoSelected($event)" accept="video/*" class="file-input" />
+                <div *ngIf="editPreviewUrl" class="video-preview">
+                  <video [src]="editPreviewUrl" controls></video>
+                </div>
+                <button type="button" class="btn-secondary upload-btn" (click)="uploadMedia()" [disabled]="!editSelectedVideoFile || uploadingMedia">
+                  {{ uploadingMedia ? 'Uploading...' : 'Upload to Cloudinary' }}
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
           <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
           <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
           <div class="form-actions">

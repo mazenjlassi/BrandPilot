@@ -91,15 +91,20 @@ public class PostService {
         if(request.getScheduledAt() != null)
             post.setScheduledAt(request.getScheduledAt());
 
+        //  restrict platform change (must be before promotion check)
+        if(request.getPlatform() != null && post.getStatus() == PostStatus.DRAFT)
+            post.setPlatform(request.getPlatform());
+
+        // If user explicitly approves → promote to SCHEDULED
+        if (Boolean.TRUE.equals(request.getApproved()) && post.getScheduledAt() != null && post.getStatus() == PostStatus.DRAFT) {
+            post.setStatus(PostStatus.SCHEDULED);
+        }
+
         if(request.getPermanent() != null)
             post.setPermanent(request.getPermanent());
 
         if(request.getLink() != null)
             post.setLink(request.getLink());
-
-        //  restrict platform change
-        if(request.getPlatform() != null && post.getStatus() == PostStatus.DRAFT)
-            post.setPlatform(request.getPlatform());
 
         //  update image if exists
         if(request.getImageUrl() != null) {
@@ -112,11 +117,6 @@ public class PostService {
                         .build();
                 post.addImage(newImage);
             }
-        }
-
-        // update status logic
-        if (post.getScheduledAt() != null && post.getStatus() != PostStatus.PUBLISHED) {
-            post.setStatus(PostStatus.SCHEDULED);
         }
 
         return postRepository.save(post);
@@ -245,7 +245,7 @@ public class PostService {
     // Frontend: /posts/scheduled — returns future scheduled posts only
     public List<Post> getAllScheduledPosts() {
         return postRepository.findByStatusAndScheduledAtAfterOrderByScheduledAtAsc(
-                PostStatus.SCHEDULED, LocalDateTime.now().plusHours(1)
+                PostStatus.SCHEDULED, LocalDateTime.now()
         );
     }
 
@@ -254,7 +254,7 @@ public class PostService {
 
         return postRepository.findByApprovedTrueAndStatusAndScheduledAtBefore(
                 PostStatus.SCHEDULED,
-                LocalDateTime.now().plusHours(1)
+                LocalDateTime.now()
         );
     }
 

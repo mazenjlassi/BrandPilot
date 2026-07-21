@@ -15,6 +15,8 @@ import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.AiImageService;
 import com.example.metatry.Services.CloudinaryService;
+import com.example.metatry.Services.AiContentService;
+import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.PostService;
 import com.example.metatry.Services.PostTimingService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,8 @@ public class PostController {
     private final PostImageRepository postImageRepository;
     private final PostTimingService postTimingService;
     private final CloudinaryService cloudinaryService;
+    private final GeminiService geminiService;
+    private final AiContentService aiContentService;
 
     // ================= BASIC =================
 
@@ -106,7 +110,7 @@ public class PostController {
     // ================= UPDATE =================
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updatePost(
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request){
@@ -119,7 +123,7 @@ public class PostController {
     // ================= DELETE =================
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deletePost(@PathVariable Long id){
 
         postService.deletePost(id);
@@ -129,7 +133,7 @@ public class PostController {
 
     // ================= CREATE MANUALLY =================
     @PostMapping(value = "/campaigns/{campaignId}/posts", consumes = "multipart/form-data")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public Post createPost(
             @PathVariable Long campaignId,
             @RequestPart("data") CreatePostRequest request,
@@ -151,7 +155,7 @@ public class PostController {
     // ================= AI IMAGE =================
 
     @PostMapping("/{id}/generate-image")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostImage> generateImage(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> body
@@ -178,7 +182,7 @@ public class PostController {
     // ================= GENERIC UPLOAD =================
 
     @PostMapping("/upload")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, String>> uploadFile(
             @RequestParam("file") MultipartFile file
     ) throws java.io.IOException {
@@ -195,7 +199,7 @@ public class PostController {
     // ================= CLEANUP =================
 
     @DeleteMapping("/cleanup-images")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> cleanDuplicateImages(){
 
         postService.cleanDuplicateImages();
@@ -229,7 +233,7 @@ public class PostController {
     }
 
     @GetMapping("/calendar")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<CalendarEventDTO> getCalendarEvents(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end
@@ -240,22 +244,82 @@ public class PostController {
     }
 
     @GetMapping("/timing-analysis")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public TimingAnalysisDTO getTimingAnalysis() {
         return postTimingService.analyzeBestPostingTimes();
     }
 
     @GetMapping("/weekly-comparison")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public WeeklyComparisonDTO getWeeklyComparison() {
         return postService.getWeeklyComparison();
     }
 
     @GetMapping("/upcoming-scheduled")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<Post> getUpcomingScheduled(
             @RequestParam(defaultValue = "3") int limit
     ) {
         return postService.getUpcomingScheduledPosts(limit);
+    }
+
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> approvePost(@PathVariable Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setApproved(true);
+        if (post.getScheduledAt() != null) {
+            post.setStatus(PostStatus.SCHEDULED);
+        }
+        postRepository.save(post);
+
+        if (post.getNeedsImage() != null && post.getNeedsImage()) {
+            try {
+                aiImageService.generateImageForPost(post);
+            } catch (Exception e) {
+                return ResponseEntity.ok(Map.of("message", "Post approved but image generation failed: " + e.getMessage()));
+            }
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Post approved"));
+    }
+
+    @PostMapping("/approve-all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> approveAllPosts() {
+        List<Post> unapproved = postRepository.findByApprovedTrue();
+        List<Post> allPosts = postRepository.findAll();
+        int count = 0;
+        for (Post post : allPosts) {
+            if (!Boolean.TRUE.equals(post.getApproved())) {
+                post.setApproved(true);
+                if (post.getScheduledAt() != null) {
+                    post.setStatus(PostStatus.SCHEDULED);
+                }
+                postRepository.save(post);
+                count++;
+            }
+        }
+        return ResponseEntity.ok(Map.of("message", count + " posts approved"));
+    }
+
+    @PostMapping("/{id}/regenerate")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> regeneratePost(@PathVariable Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        String prompt = "Rewrite this social media post for " + post.getPlatform()
+                + " keep the same topic but improve the content:\n\n"
+                + "Title: " + post.getTitle() + "\n"
+                + "Content: " + post.getContent();
+
+        String newContent = geminiService.generate(prompt);
+
+        post.setContent(newContent);
+        postRepository.save(post);
+
+        return ResponseEntity.ok(Map.of("message", "Post regenerated", "content", newContent));
     }
 }

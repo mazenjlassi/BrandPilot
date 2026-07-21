@@ -4,6 +4,7 @@ import com.example.metatry.Models.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class PostScheduler {
     private final SocialPublisherService publisher;
 
     @Scheduled(fixedRate = 60000) // every 1 minute
+    @Transactional
     public void publishScheduledPosts() {
 
         List<Post> posts = postService.getScheduledPostsToPublish();

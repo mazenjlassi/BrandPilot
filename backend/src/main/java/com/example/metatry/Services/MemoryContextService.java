@@ -27,6 +27,18 @@ public class MemoryContextService {
         StringBuilder context = new StringBuilder();
 
         context.append("============================================\n");
+        context.append("COMPANY / BRAND INFORMATION\n");
+        context.append("============================================\n");
+        context.append("Name: 3LM Solutions\n");
+        context.append("Description: Société informatique spécialisée dans la conception et la mise en œuvre de solutions digitales adaptées aux besoins des entreprises. Accompagne les PME, startups et organisations, en local comme en remote/nearshore, dans leur transformation digitale à travers des services fiables, performants et évolutifs.\n");
+        context.append("Website: www.3lmsolutions.net\n");
+        context.append("Phone: +216 54 507 574\n");
+        context.append("Sector: Développement de logiciels\n");
+        context.append("Size: 11-50 employés\n");
+        context.append("Specializations: Développement Web, Développement Mobile, Nearshore, Remote, Développement de logiciel ERP, Support informatique et Maintenance Web\n");
+        context.append("\n");
+
+        context.append("============================================\n");
         context.append("RECENT CONTEXT (From your recent activity)\n");
         context.append("============================================\n\n");
 

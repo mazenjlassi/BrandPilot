@@ -257,10 +257,14 @@ export class PostDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.service.updatePost(this.post.id, payload).subscribe({
-      next: () => {
+        next: () => {
         this.successMessage = 'Post updated successfully';
         this.editMode = false;
         this.saving = false;
+        this.service.getById(this.post.id).subscribe(res => {
+          this.post = res;
+          this.scheduledDate = this.formatDatetimeLocal(this.post.scheduledAt);
+        });
       },
       error: (err) => {
         this.saving = false;
@@ -315,6 +319,63 @@ export class PostDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   goBack() {
     this.location.back();
+  }
+
+  // ================= MEDIA =================
+
+  mediaMode: 'generate' | 'image' | 'video' = 'generate';
+
+  uploadingMedia = false;
+  editSelectedFile: File | null = null;
+  editSelectedVideoFile: File | null = null;
+  editPreviewUrl: string | null = null;
+
+  switchMediaMode(mode: 'generate' | 'image' | 'video') {
+    this.mediaMode = mode;
+    this.editSelectedFile = null;
+    this.editSelectedVideoFile = null;
+    this.editPreviewUrl = null;
+  }
+
+  onFileSelected(event: any) {
+    this.editSelectedFile = event.target.files[0];
+    this.editSelectedVideoFile = null;
+    if (this.editSelectedFile) {
+      this.editPreviewUrl = URL.createObjectURL(this.editSelectedFile);
+    }
+  }
+
+  onVideoSelected(event: any) {
+    this.editSelectedVideoFile = event.target.files[0];
+    this.editSelectedFile = null;
+    if (this.editSelectedVideoFile) {
+      this.editPreviewUrl = URL.createObjectURL(this.editSelectedVideoFile);
+    }
+  }
+
+  uploadMedia() {
+    const file = this.editSelectedFile || this.editSelectedVideoFile;
+    if (!file) return;
+
+    this.uploadingMedia = true;
+    this.service.uploadFile(file).subscribe({
+      next: (res: any) => {
+        if (this.editSelectedFile) {
+          this.post.imageUrl = res.url;
+        } else {
+          this.post.videoUrl = res.url;
+        }
+        this.uploadingMedia = false;
+        this.editPreviewUrl = null;
+        this.editSelectedFile = null;
+        this.editSelectedVideoFile = null;
+        this.successMessage = 'Media uploaded successfully';
+      },
+      error: () => {
+        this.uploadingMedia = false;
+        this.errorMessage = 'Failed to upload media';
+      }
+    });
   }
 
   icons = {

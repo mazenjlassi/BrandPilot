@@ -132,6 +132,7 @@ class PostServiceIntegrationTest {
     @Test
     void updatePost_setsScheduledStatus_whenScheduledAtSet() {
         UpdatePostRequest req = new UpdatePostRequest();
+        req.setApproved(true);
         req.setScheduledAt(LocalDateTime.now().plusDays(1));
 
         Post updated = postService.updatePost(savedPost.getId(), req);
