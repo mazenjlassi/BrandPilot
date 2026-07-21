@@ -8,14 +8,14 @@
     </div>
     <div class="top-actions">
       <!-- Auto-generate toggle -->
-      <div class="auto-toggle" *ngIf="isMarketingUser && activeStrategy" (click)="toggleAutoGenerate()" [class.active]="activeStrategy.autoGenerate" [class.toggling]="togglingAutoGenerate">
+      <div class="auto-toggle" *ngIf="isMarketingUser && activeStrategy" (click)="toggleAutoGenerate()" [class.active]="activeStrategy.autoGenerate" [class.toggling]="togglingAutoGenerate" data-testid="auto-generate-toggle">
         <div class="toggle-track">
           <div class="toggle-thumb" [class.on]="activeStrategy.autoGenerate"></div>
         </div>
         <span class="toggle-label">Auto-renew</span>
       </div>
       <!-- Notifications bell -->
-      <button class="icon-btn" (click)="toggleNotificationsPanel()" [class.has-unread]="unreadCount > 0">
+      <button class="icon-btn" (click)="toggleNotificationsPanel()" [class.has-unread]="unreadCount > 0" data-testid="notification-bell">
         <lucide-icon [img]="icons.bell" [size]="20"></lucide-icon>
         <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
       </button>
@@ -23,7 +23,7 @@
         <lucide-icon [img]="icons.penTool" [size]="18"></lucide-icon>
         Create Campaign
       </button>
-      <button class="primary-btn rocket-btn" *ngIf="isMarketingUser" (click)="generateFullStrategy()" [disabled]="generatingStrategy || activeStrategy">
+      <button class="primary-btn rocket-btn" *ngIf="isMarketingUser" (click)="generateFullStrategy()" [disabled]="generatingStrategy || activeStrategy" data-testid="generate-strategy-btn">
         <lucide-icon [img]="activeStrategy?.autoGenerate ? icons.refreshCw : icons.rocket" [size]="18" [class.spin]="generatingStrategy"></lucide-icon>
         {{ generatingStrategy ? 'Generating...' : 'Generate AI Strategy' }}
       </button>
