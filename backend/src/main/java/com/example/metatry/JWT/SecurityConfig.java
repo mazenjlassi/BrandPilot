@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // ✅ PUBLIC
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/facebook/public-test").permitAll()
                         .requestMatchers("/api/linkedin/callback").permitAll()
                         .requestMatchers("/api/scraper/scrape").permitAll()
