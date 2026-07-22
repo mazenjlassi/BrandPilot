@@ -155,7 +155,7 @@ public class PostController {
 
     @PostMapping("/{id}/generate-image")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PostImage> generateImage(
+    public ResponseEntity<?> generateImage(
             @PathVariable Long id,
             @RequestBody(required = false) Map<String, String> body
     ){
@@ -173,9 +173,12 @@ public class PostController {
             }
         }
 
-        PostImage image = aiImageService.generateImageForPost(post);
-
-        return ResponseEntity.ok(image);
+        try {
+            PostImage image = aiImageService.generateImageForPost(post);
+            return ResponseEntity.ok(image);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Image generation failed: " + e.getMessage()));
+        }
     }
 
     // ================= GENERIC UPLOAD =================

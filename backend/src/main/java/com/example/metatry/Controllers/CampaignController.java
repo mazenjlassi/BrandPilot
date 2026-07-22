@@ -8,7 +8,6 @@ import com.example.metatry.Models.Campaign;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Services.CampaignService;
 import com.example.metatry.Services.PostService;
-import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 @RestController
 @RequestMapping("/campaigns")
 @RequiredArgsConstructor
@@ -41,14 +41,18 @@ public class CampaignController {
     // 🔥 NEW: MANUAL CAMPAIGN
     @PostMapping("/{campaignId}/posts/with-image")
     @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
-    public Post createPostWithImage(
+    public ResponseEntity<?> createPostWithImage(
             @PathVariable Long campaignId,
             @RequestPart("data") CreatePostRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @RequestPart(value = "video", required = false) MultipartFile video
-    ) throws IOException, java.io.IOException {
-
-        return campaignService.createPostForCampaign(campaignId, request, image, video);
+    ) {
+        try {
+            Post post = campaignService.createPostForCampaign(campaignId, request, image, video);
+            return ResponseEntity.ok(post);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to create post: " + e.getMessage()));
+        }
     }
 
     // 📊 Get all campaigns

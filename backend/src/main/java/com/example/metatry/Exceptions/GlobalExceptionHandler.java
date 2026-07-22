@@ -7,34 +7,37 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(GeminiUnavailableException.class)
-    public ResponseEntity<String> handleGeminiUnavailable(GeminiUnavailableException ex) {
+    public ResponseEntity<Map<String, String>> handleGeminiUnavailable(GeminiUnavailableException ex) {
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(ex.getMessage());
+                .body(Map.of("error", "AI service unavailable", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body("Access denied: insufficient permissions");
+                .body(Map.of("error", "Access denied: insufficient permissions"));
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<String> handleAuthentication(AuthenticationException ex) {
+    public ResponseEntity<Map<String, String>> handleAuthentication(AuthenticationException ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body("Authentication failed: " + ex.getMessage());
+                .body(Map.of("error", "Authentication failed: " + ex.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        String message = ex.getMessage() != null ? ex.getMessage() : "Unknown error";
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
+                .body(Map.of("error", message));
     }
 }

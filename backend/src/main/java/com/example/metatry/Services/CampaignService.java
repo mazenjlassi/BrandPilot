@@ -10,7 +10,6 @@ import com.example.metatry.Models.Post;
 import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.CampaignRepository;
 import com.example.metatry.Repositories.PostRepository;
-import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,12 +56,17 @@ public class CampaignService {
         } catch (Exception ignored) {}
 
         //  GENERATE POSTS WITH FULL CONTEXT
-        return aiContentService.generatePostsWithCampaign(
-                request.getTopic(),
-                campaign,
-                insights,
-                conclusion
-        );
+        try {
+            return aiContentService.generatePostsWithCampaign(
+                    request.getTopic(),
+                    campaign,
+                    insights,
+                    conclusion
+            );
+        } catch (Exception e) {
+            System.out.println("AI generation failed but campaign saved: " + e.getMessage());
+            return List.of();
+        }
     }
 
     // ================= GENERATE FOR EXISTING CAMPAIGN =================
@@ -84,12 +88,17 @@ public class CampaignService {
         } catch (Exception ignored) {}
 
         // GENERATE POSTS WITH EXISTING CAMPAIGN
-        return aiContentService.generatePostsWithCampaign(
-                campaign.getTopic(),
-                campaign,
-                insights,
-                conclusion
-        );
+        try {
+            return aiContentService.generatePostsWithCampaign(
+                    campaign.getTopic(),
+                    campaign,
+                    insights,
+                    conclusion
+            );
+        } catch (Exception e) {
+            System.out.println("AI generation failed for campaign " + campaignId + ": " + e.getMessage());
+            return List.of();
+        }
     }
 
     public Post createPostForCampaign(
@@ -97,7 +106,7 @@ public class CampaignService {
             CreatePostRequest request,
             MultipartFile image,
             MultipartFile video
-    ) throws IOException, java.io.IOException {
+    ) {
 
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
@@ -125,14 +134,22 @@ public class CampaignService {
 
         // ✅ USE YOUR CLOUDINARY SERVICE HERE
         if (video != null && !video.isEmpty()) {
-            String videoUrl = cloudinaryService.uploadVideo(video);
-            post.setVideoUrl(videoUrl);
+            try {
+                String videoUrl = cloudinaryService.uploadVideo(video);
+                post.setVideoUrl(videoUrl);
+            } catch (Exception e) {
+                System.out.println("Video upload failed, saving post without video: " + e.getMessage());
+            }
         } else if (image != null && !image.isEmpty()) {
-            String imageUrl = cloudinaryService.uploadImage(image);
-            PostImage postImage = new PostImage();
-            postImage.setImageUrl(imageUrl);
-            postImage.setPost(post);
-            post.addImage(postImage);
+            try {
+                String imageUrl = cloudinaryService.uploadImage(image);
+                PostImage postImage = new PostImage();
+                postImage.setImageUrl(imageUrl);
+                postImage.setPost(post);
+                post.addImage(postImage);
+            } catch (Exception e) {
+                System.out.println("Image upload failed, saving post without image: " + e.getMessage());
+            }
         }
 
         return postRepository.save(post);
