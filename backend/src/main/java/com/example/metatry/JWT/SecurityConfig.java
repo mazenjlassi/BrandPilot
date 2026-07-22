@@ -52,6 +52,16 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/health").permitAll()
 
+                        // ✅ PUBLIC READ-ONLY POST ENDPOINTS (dashboard, calendar, etc.)
+                        .requestMatchers(HttpMethod.GET, "/posts/top").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/latestPublished").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/stats").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/permanent").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/calendar").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/timing-analysis").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/weekly-comparison").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts/upcoming-scheduled").permitAll()
+
                         // ✅ PROTECTED
                         .requestMatchers("/api/facebook/**").authenticated()
                         .requestMatchers("/api/instagram/**").authenticated()
@@ -79,7 +89,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "https://brand-pilot-an7hy2pem-mazenjlassis-projects.vercel.app"
+                "https://brand-pilot-an7hy2pem-mazenjlassis-projects.vercel.app",
+                "https://brand-pilot-xi.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

@@ -147,7 +147,6 @@ public class PostController {
 
 
     @GetMapping("/stats")
-    @PreAuthorize("isAuthenticated()")
     public PostStatsResponse getStats(){
         return postService.getStats();
     }
@@ -210,7 +209,6 @@ public class PostController {
     // ================= DASHBOARD =================
 
     @GetMapping("/latestPublished")
-    @PreAuthorize("isAuthenticated()")
     public List<Post> getLatestPublished(
             @RequestParam(defaultValue = "15") int limit
     ){
@@ -218,7 +216,6 @@ public class PostController {
     }
 
     @GetMapping("/top")
-    @PreAuthorize("isAuthenticated()")
     public List<Post> getTopPosts(
             @RequestParam(defaultValue = "5") int limit
     ){
@@ -226,14 +223,12 @@ public class PostController {
     }
 
     @GetMapping("/permanent")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Post>> getPermanentPosts() {
         List<Post> posts = postService.getPermanentPosts();
         return ResponseEntity.ok(posts);
     }
 
     @GetMapping("/calendar")
-    @PreAuthorize("isAuthenticated()")
     public List<CalendarEventDTO> getCalendarEvents(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime end
@@ -244,19 +239,16 @@ public class PostController {
     }
 
     @GetMapping("/timing-analysis")
-    @PreAuthorize("isAuthenticated()")
     public TimingAnalysisDTO getTimingAnalysis() {
         return postTimingService.analyzeBestPostingTimes();
     }
 
     @GetMapping("/weekly-comparison")
-    @PreAuthorize("isAuthenticated()")
     public WeeklyComparisonDTO getWeeklyComparison() {
         return postService.getWeeklyComparison();
     }
 
     @GetMapping("/upcoming-scheduled")
-    @PreAuthorize("isAuthenticated()")
     public List<Post> getUpcomingScheduled(
             @RequestParam(defaultValue = "3") int limit
     ) {
