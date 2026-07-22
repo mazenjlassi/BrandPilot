@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import Chart from 'chart.js/auto';
 import { LucideAngularModule, ArrowLeft, Trash2, Edit3, Lightbulb, AlertTriangle } from 'lucide-angular';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-post-details',
@@ -79,7 +80,7 @@ export class PostDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadMetrics(postId: number) {
-    this.http.get<any[]>(`http://localhost:8081/metrics/post/${postId}`).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/metrics/post/${postId}`).subscribe({
       next: (res) => {
         this.metrics = res || [];
         setTimeout(() => this.buildChart(), 200);

@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PostService {
 
-  private api = 'http://localhost:8081/posts';
-  private campaignApi = 'http://localhost:8081/campaigns';
+  private api = environment.apiUrl + '/posts';
+  private campaignApi = environment.apiUrl + '/campaigns';
 
   constructor(private http: HttpClient) {}
 
@@ -59,7 +60,7 @@ export class PostService {
 
   publishPost(postId: number) {
     return this.http.post(
-      `http://localhost:8081/publish/${postId}`,
+      `${environment.apiUrl}/publish/${postId}`,
       {}
     );
   }
