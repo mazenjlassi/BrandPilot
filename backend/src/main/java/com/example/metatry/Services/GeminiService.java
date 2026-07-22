@@ -5,7 +5,7 @@ import com.example.metatry.Exceptions.GeminiUnavailableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class GeminiService {
     public String generate(String prompt){
 
         try {
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key="
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="
                     + geminiConfig.getApiKey();
 
             Map<String, Object> body = Map.of(
@@ -47,15 +47,20 @@ public class GeminiService {
 
             return cleanJson(rawText);
 
-        } catch (HttpServerErrorException e) {
-            System.out.println("Gemini API error: " + e.getClass().getName() + " - " + e.getMessage());
+        } catch (HttpStatusCodeException e) {
+            System.out.println("=== Gemini API HTTP Error ===");
+            System.out.println("Status: " + e.getStatusCode());
+            System.out.println("Response body: " + e.getResponseBodyAsString());
+            System.out.println("Message: " + e.getMessage());
             e.printStackTrace(System.out);
             if (e.getStatusCode().is5xxServerError()) {
                 throw new GeminiUnavailableException("AI generation service is temporarily unavailable. Please try again later.");
             }
-            throw new RuntimeException("Gemini API failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            throw new RuntimeException("Gemini API failed (" + e.getStatusCode() + "): " + e.getResponseBodyAsString());
         } catch (Exception e) {
-            System.out.println("Gemini API error: " + e.getClass().getName() + " - " + e.getMessage());
+            System.out.println("=== Gemini API Error ===");
+            System.out.println("Type: " + e.getClass().getName());
+            System.out.println("Message: " + e.getMessage());
             e.printStackTrace(System.out);
             throw new RuntimeException("Gemini API failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
