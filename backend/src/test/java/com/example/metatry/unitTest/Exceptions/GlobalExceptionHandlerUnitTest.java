@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GlobalExceptionHandlerUnitTest {
@@ -13,20 +15,20 @@ class GlobalExceptionHandlerUnitTest {
 
     @Test
     void handleRuntimeException_returnsBadRequest() {
-        ResponseEntity<String> response = handler.handleRuntimeException(
+        ResponseEntity<Map<String, String>> response = handler.handleRuntimeException(
                 new RuntimeException("Something went wrong")
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("Something went wrong");
+        assertThat(response.getBody()).isEqualTo(Map.of("error", "Something went wrong"));
     }
 
     @Test
     void handleRuntimeException_returnsErrorMessage() {
-        ResponseEntity<String> response = handler.handleRuntimeException(
+        ResponseEntity<Map<String, String>> response = handler.handleRuntimeException(
                 new RuntimeException("Post not found")
         );
 
-        assertThat(response.getBody()).isEqualTo("Post not found");
+        assertThat(response.getBody()).isEqualTo(Map.of("error", "Post not found"));
     }
 }
