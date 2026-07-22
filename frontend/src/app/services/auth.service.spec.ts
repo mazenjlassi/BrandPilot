@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -30,7 +31,7 @@ describe('AuthService', () => {
       expect(localStorage.getItem('token')).toBe('jwt-token');
     });
 
-    const req = httpMock.expectOne('http://localhost:8081/auth/login');
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ username: 'user', password: 'pass' });
     req.flush({ token: 'jwt-token', role: 'ADMIN', name: 'Admin' });
@@ -42,7 +43,7 @@ describe('AuthService', () => {
       expect(localStorage.getItem('name')).toBe('Admin');
     });
 
-    const req = httpMock.expectOne('http://localhost:8081/auth/login');
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
     req.flush({ token: 'jwt-token', role: 'ADMIN', name: 'Admin' });
   });
 

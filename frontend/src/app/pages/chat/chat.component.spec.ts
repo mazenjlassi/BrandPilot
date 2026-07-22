@@ -4,6 +4,7 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 import { ChatService } from '../../services/chat.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 describe('ChatComponent', () => {
   let component: ChatComponent;
@@ -50,7 +51,7 @@ describe('ChatComponent', () => {
   it('should load conversations on init', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations`);
     expect(req.request.method).toBe('GET');
     req.flush(mockConversations);
 
@@ -61,7 +62,7 @@ describe('ChatComponent', () => {
     component.selectConversation(1);
     expect(component.selectedConversationId).toBe(1);
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1/messages');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1/messages`);
     expect(req.request.method).toBe('GET');
     req.flush(mockMessages);
 
@@ -71,11 +72,11 @@ describe('ChatComponent', () => {
   it('createConversation should create and select new conversation', () => {
     component.createConversation();
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations`);
     expect(req.request.method).toBe('POST');
     req.flush({ id: 3, title: 'New Chat' });
 
-    const msgReq = httpMock.expectOne('http://localhost:8081/chat/conversations/3/messages');
+    const msgReq = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/3/messages`);
     msgReq.flush([]);
 
     expect(component.conversations.length).toBe(1);
@@ -94,11 +95,11 @@ describe('ChatComponent', () => {
     expect(component.newMessage).toBe('');
     expect(component.loading).toBeTrue();
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1/messages');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1/messages`);
     expect(req.request.method).toBe('POST');
     req.flush({ id: 3, role: 'ASSISTANT', content: 'Response' });
 
-    const convReq = httpMock.expectOne('http://localhost:8081/chat/conversations');
+    const convReq = httpMock.expectOne(`${environment.apiUrl}/chat/conversations`);
     convReq.flush([]);
 
     expect(component.messages.length).toBe(2);
@@ -108,7 +109,7 @@ describe('ChatComponent', () => {
   it('sendMessage should not send if message is empty', () => {
     component.newMessage = '';
     component.sendMessage();
-    httpMock.expectNone('http://localhost:8081/chat/conversations/1/messages');
+    httpMock.expectNone(`${environment.apiUrl}/chat/conversations/1/messages`);
   });
 
   it('sendMessage should handle error', () => {
@@ -116,7 +117,7 @@ describe('ChatComponent', () => {
     component.newMessage = 'Test';
     component.sendMessage();
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1/messages');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1/messages`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.loading).toBeFalse();
@@ -129,7 +130,7 @@ describe('ChatComponent', () => {
 
     await component.deleteConversation(1);
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
 
@@ -146,7 +147,7 @@ describe('ChatComponent', () => {
 
     await component.deleteConversation(1);
 
-    httpMock.expectOne('http://localhost:8081/chat/conversations/1').flush(null);
+    httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1`).flush(null);
 
     expect(component.selectedConversationId).toBeNull();
     expect(component.messages).toEqual([]);
@@ -156,7 +157,7 @@ describe('ChatComponent', () => {
   it('deleteConversation should skip if not confirmed', async () => {
     confirmSpy.confirm.and.resolveTo(false);
     await component.deleteConversation(1);
-    httpMock.expectNone('http://localhost:8081/chat/conversations/1');
+    httpMock.expectNone(`${environment.apiUrl}/chat/conversations/1`);
   });
 
   it('deleteConversation should handle error', async () => {
@@ -165,7 +166,7 @@ describe('ChatComponent', () => {
 
     await component.deleteConversation(1);
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.conversations.length).toBe(2);
@@ -189,7 +190,7 @@ describe('ChatComponent', () => {
 
     expect(component.generatingConclusion).toBeTrue();
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1/conclusion');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1/conclusion`);
     expect(req.request.method).toBe('POST');
     req.flush('Great conversation!', { headers: { 'Content-Type': 'text/plain' } });
 
@@ -201,7 +202,7 @@ describe('ChatComponent', () => {
     component.selectedConversationId = 1;
     component.generateConclusion();
 
-    const req = httpMock.expectOne('http://localhost:8081/chat/conversations/1/conclusion');
+    const req = httpMock.expectOne(`${environment.apiUrl}/chat/conversations/1/conclusion`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.generatingConclusion).toBeFalse();

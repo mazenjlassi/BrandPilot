@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { PatternService } from './pattern.service';
+import { environment } from '../../environments/environment';
 
 describe('PatternService', () => {
   let service: PatternService;
@@ -19,21 +20,21 @@ describe('PatternService', () => {
 
   it('getScrapedPosts_callsCorrectUrl', () => {
     service.getScrapedPosts().subscribe();
-    const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts`);
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
   it('getScrapedPosts_withCompanyName', () => {
     service.getScrapedPosts('NVIDIA').subscribe();
-    const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
   it('triggerScrape_callsPost', () => {
     service.triggerScrape('NVIDIA').subscribe();
-    const req = httpMock.expectOne('http://localhost:8081/api/scraper/trigger?companyName=NVIDIA');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraper/trigger?companyName=NVIDIA`);
     expect(req.request.method).toBe('POST');
     req.flush({});
   });

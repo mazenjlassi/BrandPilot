@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { PatternService } from '../../services/pattern.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 describe('CompanyDetailsComponent', () => {
   let component: CompanyDetailsComponent;
@@ -50,13 +51,13 @@ describe('CompanyDetailsComponent', () => {
 
   it('loads_all_data_on_init', () => {
     fixture.detectChanges();
-    const profileReq = httpMock.expectOne('http://localhost:8081/api/company-profiles/by-name/NVIDIA');
+    const profileReq = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles/by-name/NVIDIA`);
     profileReq.flush({ id: 1, companyName: 'NVIDIA', instagramUrl: '', facebookUrl: '', linkedinUrl: '' });
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     postsReq.flush([{ id: 1, postText: 'Test' }]);
 
-    const patternsReq = httpMock.expectOne('http://localhost:8081/api/patterns?companyName=NVIDIA');
+    const patternsReq = httpMock.expectOne(`${environment.apiUrl}/api/patterns?companyName=NVIDIA`);
     patternsReq.flush([]);
 
     expect(component.companyName).toBe('NVIDIA');
@@ -68,7 +69,7 @@ describe('CompanyDetailsComponent', () => {
     component.companyName = 'NVIDIA';
     component.loadProfile();
 
-    const req = httpMock.expectOne('http://localhost:8081/api/company-profiles/by-name/NVIDIA');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles/by-name/NVIDIA`);
     req.flush({ id: 1, companyName: 'NVIDIA', instagramUrl: 'https://instagram.com/nvidia', facebookUrl: '', linkedinUrl: '' });
 
     expect(component.editForm.instagramUrl).toBe('https://instagram.com/nvidia');
@@ -81,11 +82,11 @@ describe('CompanyDetailsComponent', () => {
 
     component.saveProfile();
 
-    const req = httpMock.expectOne('http://localhost:8081/api/company-profiles/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles/1`);
     expect(req.request.method).toBe('PUT');
     req.flush({ id: 1, companyName: 'NVIDIA' });
 
-    const getReq = httpMock.expectOne('http://localhost:8081/api/company-profiles/by-name/NVIDIA');
+    const getReq = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles/by-name/NVIDIA`);
     getReq.flush({ id: 1, companyName: 'NVIDIA', instagramUrl: '', facebookUrl: '', linkedinUrl: '' });
 
     expect(component.saving).toBeFalse();
@@ -95,10 +96,10 @@ describe('CompanyDetailsComponent', () => {
     component.companyName = 'NVIDIA';
     component.launchScraper();
 
-    const scrapeReq = httpMock.expectOne('http://localhost:8081/api/scraper/trigger?companyName=NVIDIA');
+    const scrapeReq = httpMock.expectOne(`${environment.apiUrl}/api/scraper/trigger?companyName=NVIDIA`);
     scrapeReq.flush({});
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     postsReq.flush([]);
 
     expect(component.scraperLoading).toBeFalse();
@@ -109,7 +110,7 @@ describe('CompanyDetailsComponent', () => {
     spyOn(confirmService, 'confirm').and.returnValue(Promise.resolve(true));
 
     component.deletePost(1).then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/1`);
       req.flush({});
 
       expect(component.scrapedPosts.length).toBe(1);
@@ -124,7 +125,7 @@ describe('CompanyDetailsComponent', () => {
     const routerSpy = spyOn(router, 'navigate');
 
     component.deleteCompany().then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/api/company-profiles/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles/1`);
       req.flush({});
 
       expect(routerSpy).toHaveBeenCalledWith(['/scraped-posts']);

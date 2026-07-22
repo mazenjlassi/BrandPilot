@@ -9,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { PatternService } from '../../services/pattern.service';
 import { StrategyService } from '../../services/strategy.service';
+import { environment } from '../../../environments/environment';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -48,13 +49,13 @@ describe('DashboardComponent', () => {
 
   it('loads_basic_data_on_init', () => {
     fixture.detectChanges();
-    const postsReq = httpMock.expectOne('http://localhost:8081/posts/top?limit=5');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/posts/top?limit=5`);
     postsReq.flush([]);
 
-    const statsReq = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const statsReq = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     statsReq.flush({ totalPosts: 10, publishedPosts: 5, campaigns: 3 });
 
-    const campaignsReq = httpMock.expectOne('http://localhost:8081/campaigns');
+    const campaignsReq = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     campaignsReq.flush([]);
 
     expect(component.stats.totalPosts).toBe(10);
@@ -68,31 +69,31 @@ describe('DashboardComponent', () => {
 
     component.ngOnInit();
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/posts/top?limit=5');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/posts/top?limit=5`);
     postsReq.flush([]);
 
-    const statsReq = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const statsReq = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     statsReq.flush({});
 
-    const campaignsReq = httpMock.expectOne('http://localhost:8081/campaigns');
+    const campaignsReq = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     campaignsReq.flush([]);
 
-    const timingReq = httpMock.expectOne('http://localhost:8081/posts/timing-analysis');
+    const timingReq = httpMock.expectOne(`${environment.apiUrl}/posts/timing-analysis`);
     timingReq.flush({});
 
-    const weeklyReq = httpMock.expectOne('http://localhost:8081/posts/weekly-comparison');
+    const weeklyReq = httpMock.expectOne(`${environment.apiUrl}/posts/weekly-comparison`);
     weeklyReq.flush({});
 
-    const upcomingReq = httpMock.expectOne('http://localhost:8081/posts/upcoming-scheduled?limit=3');
+    const upcomingReq = httpMock.expectOne(`${environment.apiUrl}/posts/upcoming-scheduled?limit=3`);
     upcomingReq.flush([]);
 
-    const strategyReq = httpMock.expectOne('http://localhost:8081/marketing-strategies');
+    const strategyReq = httpMock.expectOne(`${environment.apiUrl}/marketing-strategies`);
     strategyReq.flush([]);
 
-    const notifReq = httpMock.expectOne('http://localhost:8081/notifications');
+    const notifReq = httpMock.expectOne(`${environment.apiUrl}/notifications`);
     notifReq.flush([]);
 
-    const unreadReq = httpMock.expectOne('http://localhost:8081/notifications/unread-count');
+    const unreadReq = httpMock.expectOne(`${environment.apiUrl}/notifications/unread-count`);
     unreadReq.flush({ count: 0 });
 
     expect(component.showMarketing).toBeTrue();
@@ -104,22 +105,22 @@ describe('DashboardComponent', () => {
 
     component.ngOnInit();
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/posts/top?limit=5');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/posts/top?limit=5`);
     postsReq.flush([]);
 
-    const statsReq = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const statsReq = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     statsReq.flush({});
 
-    const campaignsReq = httpMock.expectOne('http://localhost:8081/campaigns');
+    const campaignsReq = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     campaignsReq.flush([]);
 
-    const userStatsReq = httpMock.expectOne('http://localhost:8081/admin/stats');
+    const userStatsReq = httpMock.expectOne(`${environment.apiUrl}/admin/stats`);
     userStatsReq.flush({});
 
-    const progressReq = httpMock.expectOne('http://localhost:8081/admin/campaigns/progress?limit=3');
+    const progressReq = httpMock.expectOne(`${environment.apiUrl}/admin/campaigns/progress?limit=3`);
     progressReq.flush([]);
 
-    const patternsReq = httpMock.expectOne('http://localhost:8081/api/patterns');
+    const patternsReq = httpMock.expectOne(`${environment.apiUrl}/api/patterns`);
     patternsReq.flush([]);
 
     expect(component.showAdmin).toBeTrue();
@@ -128,7 +129,7 @@ describe('DashboardComponent', () => {
   it('loadStats_maps_fields_correctly', () => {
     component.loadStats();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     req.flush({ totalPosts: 20, publishedPosts: 15, campaigns: 5, draftPosts: 3, approvedPosts: 2 });
 
     expect(component.stats.totalPosts).toBe(20);
@@ -141,7 +142,7 @@ describe('DashboardComponent', () => {
   it('loadCampaigns_slices_to_4', () => {
     component.loadCampaigns();
 
-    const req = httpMock.expectOne('http://localhost:8081/campaigns');
+    const req = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     const manyCampaigns = Array.from({ length: 10 }, (_, i) => ({ id: i, name: `Campaign ${i}` }));
     req.flush(manyCampaigns);
 
@@ -151,7 +152,7 @@ describe('DashboardComponent', () => {
   it('loadTimingAnalysis_fetches_data', () => {
     component.loadTimingAnalysis();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/timing-analysis');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/timing-analysis`);
     req.flush({ bestTime: '9am' });
 
     expect(component.timingAnalysis).toEqual({ bestTime: '9am' });
@@ -160,7 +161,7 @@ describe('DashboardComponent', () => {
   it('loadWeeklyComparison_fetches_data', () => {
     component.loadWeeklyComparison();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/weekly-comparison');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/weekly-comparison`);
     req.flush({ change: 15 });
 
     expect(component.weeklyComparison).toEqual({ change: 15 });
@@ -169,7 +170,7 @@ describe('DashboardComponent', () => {
   it('loadUpcomingScheduled_fetches_data', () => {
     component.loadUpcomingScheduled();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/upcoming-scheduled?limit=3');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/upcoming-scheduled?limit=3`);
     req.flush([{ id: 1, title: 'Upcoming' }]);
 
     expect(component.upcomingPosts.length).toBe(1);
@@ -178,7 +179,7 @@ describe('DashboardComponent', () => {
   it('loadPatternStats_computes_best_pattern', () => {
     component.loadPatternStats();
 
-    const req = httpMock.expectOne('http://localhost:8081/api/patterns');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/patterns`);
     req.flush([
       { topic: 'AI', avgEngagementScore: 0.8 },
       { topic: 'ML', avgEngagementScore: 0.6 }
@@ -226,16 +227,16 @@ describe('DashboardComponent', () => {
 
   it('generateFullStrategy_callsGenerateAuto_andReloads', fakeAsync(() => {
     fixture.detectChanges();
-    const postsReq = httpMock.expectOne('http://localhost:8081/posts/top?limit=5');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/posts/top?limit=5`);
     postsReq.flush([]);
-    const statsReq = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const statsReq = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     statsReq.flush({});
-    const campaignsReq = httpMock.expectOne('http://localhost:8081/campaigns');
+    const campaignsReq = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     campaignsReq.flush([]);
 
     tick(200);
 
-    const chartReq = httpMock.expectOne('http://localhost:8081/posts/latestPublished?limit=20');
+    const chartReq = httpMock.expectOne(`${environment.apiUrl}/posts/latestPublished?limit=20`);
     chartReq.flush([]);
 
     spyOn(component, 'loadActiveStrategy');
@@ -244,7 +245,7 @@ describe('DashboardComponent', () => {
     component.generateFullStrategy();
     tick();
 
-    const genReq = httpMock.expectOne('http://localhost:8081/marketing-strategies/generate-auto');
+    const genReq = httpMock.expectOne(`${environment.apiUrl}/marketing-strategies/generate-auto`);
     expect(genReq.request.method).toBe('POST');
     genReq.flush({ id: 1 });
 
@@ -258,7 +259,7 @@ describe('DashboardComponent', () => {
     component.generateFullStrategy();
     tick();
 
-    const req = httpMock.expectOne('http://localhost:8081/marketing-strategies/generate-auto');
+    const req = httpMock.expectOne(`${environment.apiUrl}/marketing-strategies/generate-auto`);
     req.flush('Error', { status: 400, statusText: 'Bad Request' });
 
     expect(window.alert).toHaveBeenCalled();
@@ -272,7 +273,7 @@ describe('DashboardComponent', () => {
     component.activeStrategy = { id: 1, autoGenerate: false };
     component.toggleAutoGenerate();
 
-    const req = httpMock.expectOne('http://localhost:8081/marketing-strategies/1/auto-generate');
+    const req = httpMock.expectOne(`${environment.apiUrl}/marketing-strategies/1/auto-generate`);
     expect(req.request.method).toBe('PUT');
     req.flush({ autoGenerate: true });
 
@@ -302,14 +303,14 @@ describe('DashboardComponent', () => {
   it('loadNotifications_fetchesAndCountsUnread', () => {
     component.loadNotifications();
 
-    const req = httpMock.expectOne('http://localhost:8081/notifications');
+    const req = httpMock.expectOne(`${environment.apiUrl}/notifications`);
     req.flush([
       { id: 1, read: false },
       { id: 2, read: true },
       { id: 3, read: false }
     ]);
 
-    const unreadReq = httpMock.expectOne('http://localhost:8081/notifications/unread-count');
+    const unreadReq = httpMock.expectOne(`${environment.apiUrl}/notifications/unread-count`);
     unreadReq.flush({ count: 2 });
 
     expect(component.notifications.length).toBe(3);
@@ -325,7 +326,7 @@ describe('DashboardComponent', () => {
 
     component.markNotificationRead(component.notifications[0]);
 
-    const req = httpMock.expectOne('http://localhost:8081/notifications/1/read');
+    const req = httpMock.expectOne(`${environment.apiUrl}/notifications/1/read`);
     expect(req.request.method).toBe('POST');
     req.flush({});
 

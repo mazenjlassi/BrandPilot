@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { InsightService } from './insight.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 describe('InsightService', () => {
   let service: InsightService;
@@ -19,7 +20,7 @@ describe('InsightService', () => {
 
   it('getByCampaign_callsCorrectUrl', () => {
     service.getByCampaign(1).subscribe();
-    const req = httpMock.expectOne('http://localhost:8081/insights/campaign/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/insights/campaign/1`);
     expect(req.request.method).toBe('GET');
     req.flush({});
   });

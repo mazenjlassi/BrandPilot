@@ -3,6 +3,7 @@ import { PostsChartComponent } from './posts-chart.component';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { PostService } from '../../../../services/post.service';
+import { environment } from '../../../../../environments/environment';
 
 describe('PostsChartComponent', () => {
   let component: PostsChartComponent;
@@ -43,7 +44,7 @@ describe('PostsChartComponent', () => {
     fixture.detectChanges();
     tick(100);
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/latestPublished?limit=20');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/latestPublished?limit=20`);
     req.flush([]);
 
     expect(component.empty).toBeTrue();
@@ -53,7 +54,7 @@ describe('PostsChartComponent', () => {
     fixture.detectChanges();
     tick(100);
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/latestPublished?limit=20');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/latestPublished?limit=20`);
     req.flush(mockPosts.slice(3));
 
     expect(component.empty).toBeTrue();
@@ -67,7 +68,7 @@ describe('PostsChartComponent', () => {
     fixture.detectChanges();
     tick(100);
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/latestPublished?limit=20');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/latestPublished?limit=20`);
     req.flush(mockPosts);
 
     expect(component.chart).toBeTruthy();

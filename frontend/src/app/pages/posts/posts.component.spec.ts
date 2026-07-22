@@ -8,6 +8,7 @@ import { PostService } from '../../services/post.service';
 import { ToastService } from '../../shared/toast/toast.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 describe('PostsComponent', () => {
   let component: PostsComponent;
@@ -38,7 +39,7 @@ describe('PostsComponent', () => {
   });
 
   afterEach(() => {
-    try { httpMock.expectOne('http://localhost:8081/posts/drafts').flush([]); } catch {}
+    try { httpMock.expectOne(`${environment.apiUrl}/posts/drafts`).flush([]); } catch {}
     httpMock.verify();
   });
 
@@ -47,7 +48,7 @@ describe('PostsComponent', () => {
   });
 
   it('loads_drafts_on_init', () => {
-    const req = httpMock.expectOne('http://localhost:8081/posts/drafts');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/drafts`);
     expect(req.request.method).toBe('GET');
     req.flush([{ id: 1, content: 'Draft post' }]);
     expect(component.posts.length).toBe(1);
@@ -61,20 +62,20 @@ describe('PostsComponent', () => {
     expect(component.activeTab).toBe('published');
     expect(component.searchQuery).toBe('');
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/published');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/published`);
     req.flush([]);
   });
 
   it('setTab_scheduled_loads_scheduled', () => {
     component.setTab('scheduled');
-    const req = httpMock.expectOne('http://localhost:8081/posts/scheduled');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/scheduled`);
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
 
   it('setTab_permanent_loads_permanent', () => {
     component.setTab('permanent');
-    const req = httpMock.expectOne('http://localhost:8081/posts/permanent');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/permanent`);
     req.flush([]);
   });
 
@@ -122,7 +123,7 @@ describe('PostsComponent', () => {
     const confirmSpy = spyOn(confirmService, 'confirm').and.returnValue(Promise.resolve(true));
 
     component.postNow(post).then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/publish/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/publish/1`);
       expect(req.request.method).toBe('POST');
       req.flush({});
 

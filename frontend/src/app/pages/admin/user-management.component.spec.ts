@@ -3,6 +3,7 @@ import { UserManagementComponent } from './user-management.component';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 describe('UserManagementComponent', () => {
   let component: UserManagementComponent;
@@ -38,7 +39,7 @@ describe('UserManagementComponent', () => {
 
   it('loads_users_on_init', () => {
     fixture.detectChanges();
-    const req = httpMock.expectOne('http://localhost:8081/admin/users');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/users`);
     expect(req.request.method).toBe('GET');
     req.flush([{ id: 1, name: 'John', email: 'john@test.com', role: 'ADMIN', banned: false }]);
 
@@ -50,7 +51,7 @@ describe('UserManagementComponent', () => {
     component.newUser = { name: 'Jane', email: 'jane@test.com', password: 'pass', role: 'MARKETING' };
     component.createUser();
 
-    const req = httpMock.expectOne('http://localhost:8081/admin/users');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/users`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ name: 'Jane', email: 'jane@test.com', password: 'pass', role: 'MARKETING' });
     req.flush({ id: 2, name: 'Jane', email: 'jane@test.com', role: 'MARKETING', banned: false });
@@ -63,7 +64,7 @@ describe('UserManagementComponent', () => {
   it('createUser_skips_when_fields_missing', () => {
     component.newUser = { name: '', email: '', password: '', role: 'MARKETING' };
     component.createUser();
-    httpMock.expectNone('http://localhost:8081/admin/users');
+    httpMock.expectNone(`${environment.apiUrl}/admin/users`);
   });
 
   it('deleteUser_confirms_and_deletes', (done) => {
@@ -72,7 +73,7 @@ describe('UserManagementComponent', () => {
     spyOn(confirmService, 'confirm').and.returnValue(Promise.resolve(true));
 
     component.deleteUser(1).then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/admin/users/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1`);
       expect(req.request.method).toBe('DELETE');
       req.flush({});
 
@@ -86,7 +87,7 @@ describe('UserManagementComponent', () => {
     component.users = [{ id: 1, name: 'John', banned: false, email: '', role: '' }];
     component.banUser(1);
 
-    const req = httpMock.expectOne('http://localhost:8081/admin/users/1/ban');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/ban`);
     expect(req.request.method).toBe('PUT');
     req.flush({ id: 1, name: 'John', banned: true, email: '', role: '' });
 
@@ -97,7 +98,7 @@ describe('UserManagementComponent', () => {
     component.users = [{ id: 1, name: 'John', banned: true, email: '', role: '' }];
     component.unbanUser(1);
 
-    const req = httpMock.expectOne('http://localhost:8081/admin/users/1/unban');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/users/1/unban`);
     expect(req.request.method).toBe('PUT');
     req.flush({ id: 1, name: 'John', banned: false, email: '', role: '' });
 
@@ -126,7 +127,7 @@ describe('UserManagementComponent', () => {
 
     expect(component.creating).toBeTrue();
 
-    const req = httpMock.expectOne('http://localhost:8081/admin/users');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/users`);
     req.error(new ProgressEvent('error'));
 
     expect(component.creating).toBeFalse();

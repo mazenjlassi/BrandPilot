@@ -5,6 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { PatternService } from '../../services/pattern.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 describe('PatternsComponent', () => {
   let component: PatternsComponent;
@@ -39,12 +40,12 @@ describe('PatternsComponent', () => {
 
   it('loads_companies_on_init', () => {
     fixture.detectChanges();
-    const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts/companies');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/companies`);
     req.flush(['NVIDIA', 'Google']);
 
-    const patternsReq = httpMock.expectOne('http://localhost:8081/api/patterns?companyName=NVIDIA');
+    const patternsReq = httpMock.expectOne(`${environment.apiUrl}/api/patterns?companyName=NVIDIA`);
     patternsReq.flush([]);
-    const countReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts/count?companyName=NVIDIA');
+    const countReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/count?companyName=NVIDIA`);
     countReq.flush({ count: 0 });
 
     expect(component.companies.length).toBe(2);
@@ -52,13 +53,13 @@ describe('PatternsComponent', () => {
 
   it('selects_first_company_after_load', () => {
     fixture.detectChanges();
-    const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts/companies');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/companies`);
     req.flush(['NVIDIA', 'Google']);
 
-    const patternsReq = httpMock.expectOne('http://localhost:8081/api/patterns?companyName=NVIDIA');
+    const patternsReq = httpMock.expectOne(`${environment.apiUrl}/api/patterns?companyName=NVIDIA`);
     patternsReq.flush([]);
 
-    const countReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts/count?companyName=NVIDIA');
+    const countReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/count?companyName=NVIDIA`);
     countReq.flush({ count: 0 });
 
     expect(component.selectedCompany).toBe('NVIDIA');
@@ -68,10 +69,10 @@ describe('PatternsComponent', () => {
     component.companies = ['NVIDIA'];
     component.selectCompany('NVIDIA');
 
-    const patternsReq = httpMock.expectOne('http://localhost:8081/api/patterns?companyName=NVIDIA');
+    const patternsReq = httpMock.expectOne(`${environment.apiUrl}/api/patterns?companyName=NVIDIA`);
     patternsReq.flush([{ id: 1, topic: 'AI' }]);
 
-    const countReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts/count?companyName=NVIDIA');
+    const countReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/count?companyName=NVIDIA`);
     countReq.flush({ count: 5 });
 
     expect(component.patterns.length).toBe(1);
@@ -91,10 +92,10 @@ describe('PatternsComponent', () => {
     component.selectedCompany = 'NVIDIA';
     component.runBatchAnalysis();
 
-    const req = httpMock.expectOne('http://localhost:8081/api/patterns/analyze-batch?companyName=NVIDIA');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/patterns/analyze-batch?companyName=NVIDIA`);
     req.flush('Analysis complete');
 
-    const patternsReq = httpMock.expectOne('http://localhost:8081/api/patterns?companyName=NVIDIA');
+    const patternsReq = httpMock.expectOne(`${environment.apiUrl}/api/patterns?companyName=NVIDIA`);
     patternsReq.flush([]);
 
     expect(component.batchResult).toBe('Analysis complete');
@@ -105,7 +106,7 @@ describe('PatternsComponent', () => {
     spyOn(confirmService, 'confirm').and.returnValue(Promise.resolve(true));
 
     component.deletePattern(1).then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/api/patterns/crud/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/patterns/crud/1`);
       expect(req.request.method).toBe('DELETE');
       req.flush({});
 

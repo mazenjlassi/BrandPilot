@@ -6,6 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { PatternService } from '../../services/pattern.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
+import { environment } from '../../../environments/environment';
 
 describe('ScrapedPostsComponent', () => {
   let component: ScrapedPostsComponent;
@@ -41,10 +42,10 @@ describe('ScrapedPostsComponent', () => {
 
   it('loads_companies_on_init', () => {
     fixture.detectChanges();
-    const req = httpMock.expectOne('http://localhost:8081/api/company-profiles');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles`);
     req.flush([{ companyName: 'NVIDIA', instagramUrl: '', facebookUrl: '', linkedinUrl: '' }, { companyName: 'Google', instagramUrl: '', facebookUrl: '', linkedinUrl: '' }]);
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     postsReq.flush([]);
 
     expect(component.companies.length).toBe(2);
@@ -52,10 +53,10 @@ describe('ScrapedPostsComponent', () => {
 
   it('selects_first_company_after_load', () => {
     fixture.detectChanges();
-    const companiesReq = httpMock.expectOne('http://localhost:8081/api/company-profiles');
+    const companiesReq = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles`);
     companiesReq.flush([{ companyName: 'NVIDIA', instagramUrl: '', facebookUrl: '', linkedinUrl: '' }, { companyName: 'Google', instagramUrl: '', facebookUrl: '', linkedinUrl: '' }]);
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     postsReq.flush([]);
 
     expect(component.selectedCompany).toBe('NVIDIA');
@@ -70,7 +71,7 @@ describe('ScrapedPostsComponent', () => {
     component.selectedCompany = 'NVIDIA';
     component.selectCompany('NVIDIA');
 
-    const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     req.flush([{ id: 1, postText: 'Test post' }]);
 
     expect(component.scrapedPosts.length).toBe(1);
@@ -90,14 +91,14 @@ describe('ScrapedPostsComponent', () => {
     component.newPost = { companyName: 'NVIDIA', platform: 'LINKEDIN', postText: 'Hello', postUrl: '', postedAt: '' };
     component.createPost();
 
-    const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body.companyName).toBe('NVIDIA');
     req.flush({ id: 1, companyName: 'NVIDIA', postText: 'Hello' });
 
-    const companiesReq = httpMock.expectOne('http://localhost:8081/api/company-profiles');
+    const companiesReq = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles`);
     companiesReq.flush([]);
-    const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     postsReq.flush([]);
 
     expect(component.showAddModal).toBeFalse();
@@ -106,18 +107,18 @@ describe('ScrapedPostsComponent', () => {
   it('createPost_skips_when_text_empty', () => {
     component.newPost = { companyName: 'NVIDIA', platform: 'LINKEDIN', postText: '', postUrl: '', postedAt: '' };
     component.createPost();
-    httpMock.expectNone('http://localhost:8081/api/scraped-posts');
+    httpMock.expectNone(`${environment.apiUrl}/api/scraped-posts`);
   });
 
   it('launchScraper_triggers_scrape', () => {
     component.selectedCompany = 'NVIDIA';
     component.launchScraper();
 
-    const req = httpMock.expectOne('http://localhost:8081/api/scraper/trigger?companyName=NVIDIA');
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/scraper/trigger?companyName=NVIDIA`);
     expect(req.request.method).toBe('POST');
     req.flush({});
 
-    const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=NVIDIA');
+    const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=NVIDIA`);
     postsReq.flush([]);
   });
 
@@ -126,7 +127,7 @@ describe('ScrapedPostsComponent', () => {
     spyOn(confirmService, 'confirm').and.returnValue(Promise.resolve(true));
 
     component.deletePost(1).then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/api/scraped-posts/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts/1`);
       expect(req.request.method).toBe('DELETE');
       req.flush({});
 
@@ -145,14 +146,14 @@ describe('ScrapedPostsComponent', () => {
     spyOn(confirmService, 'confirm').and.returnValue(Promise.resolve(true));
 
     component.deleteCompany({ id: 1, companyName: 'NVIDIA', instagramUrl: '', facebookUrl: '', linkedinUrl: '' }).then(() => {
-      const req = httpMock.expectOne('http://localhost:8081/api/company-profiles/1');
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/company-profiles/1`);
       expect(req.request.method).toBe('DELETE');
       req.flush({});
 
       expect(component.companies.length).toBe(1);
       expect(component.selectedCompany).toBe('Google');
 
-      const postsReq = httpMock.expectOne('http://localhost:8081/api/scraped-posts?companyName=Google');
+      const postsReq = httpMock.expectOne(`${environment.apiUrl}/api/scraped-posts?companyName=Google`);
       postsReq.flush([]);
 
       done();

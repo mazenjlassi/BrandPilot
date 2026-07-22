@@ -8,6 +8,7 @@ import { PostService } from '../../../services/post.service';
 import { CommentService } from '../../../services/comment.service';
 import { ConfirmDialogService } from '../../../shared/confirm-dialog/confirm-dialog.service';
 import { Location } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 describe('PostDetailsComponent', () => {
   let component: PostDetailsComponent;
@@ -65,7 +66,7 @@ describe('PostDetailsComponent', () => {
   it('should load post on init', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     expect(req.request.method).toBe('GET');
     req.flush(mockPost);
 
@@ -76,7 +77,7 @@ describe('PostDetailsComponent', () => {
   it('should handle load post error', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.errorMessage).toBe('Failed to load post');
@@ -87,14 +88,14 @@ describe('PostDetailsComponent', () => {
     const publishedPost = { ...mockPost, status: 'PUBLISHED' };
     fixture.detectChanges();
 
-    const postReq = httpMock.expectOne('http://localhost:8081/posts/1');
+    const postReq = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     postReq.flush(publishedPost);
 
-    const commentReq = httpMock.expectOne('http://localhost:8081/comments/post/1');
+    const commentReq = httpMock.expectOne(`${environment.apiUrl}/comments/post/1`);
     expect(commentReq.request.method).toBe('GET');
     commentReq.flush([{ id: 1, commentText: 'Nice!', sentiment: 'POSITIVE' }]);
 
-    const metricsReq = httpMock.expectOne('http://localhost:8081/metrics/post/1');
+    const metricsReq = httpMock.expectOne(`${environment.apiUrl}/metrics/post/1`);
     expect(metricsReq.request.method).toBe('GET');
     metricsReq.flush([{ collectedAt: '2026-06-01T10:00:00Z', likes: 10, comments: 2 }]);
 
@@ -105,11 +106,11 @@ describe('PostDetailsComponent', () => {
   it('should not load comments for non-PUBLISHED post', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     req.flush(mockPost);
 
-    httpMock.expectNone('http://localhost:8081/comments/post/1');
-    httpMock.expectNone('http://localhost:8081/metrics/post/1');
+    httpMock.expectNone(`${environment.apiUrl}/comments/post/1`);
+    httpMock.expectNone(`${environment.apiUrl}/metrics/post/1`);
   });
 
   it('formatDatetimeLocal should format date string', () => {
@@ -150,13 +151,13 @@ describe('PostDetailsComponent', () => {
     component.scheduledDate = '2026-06-10T14:30';
     component.updatePost();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     expect(req.request.method).toBe('PUT');
     req.flush('Updated');
 
     tick();
 
-    const reloadReq = httpMock.expectOne('http://localhost:8081/posts/1');
+    const reloadReq = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     reloadReq.flush(mockPost);
 
     expect(component.successMessage).toBe('Post updated successfully');
@@ -168,7 +169,7 @@ describe('PostDetailsComponent', () => {
     component.post = { ...mockPost, id: 1 };
     component.updatePost();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     req.flush('Error', { status: 400, statusText: 'Bad Request' });
 
     expect(component.saving).toBeFalse();
@@ -181,7 +182,7 @@ describe('PostDetailsComponent', () => {
 
     await component.deletePost();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1`);
     expect(req.request.method).toBe('DELETE');
     req.flush('Deleted');
   });
@@ -192,14 +193,14 @@ describe('PostDetailsComponent', () => {
 
     await component.deletePost();
 
-    httpMock.expectNone('http://localhost:8081/posts/1');
+    httpMock.expectNone(`${environment.apiUrl}/posts/1`);
   });
 
   it('generateImage should POST and update imageUrl', () => {
     component.post = { id: 1 };
     component.generateImage();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1/generate-image');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1/generate-image`);
     expect(req.request.method).toBe('POST');
     req.flush({ imageUrl: 'http://example.com/img.png' });
 
@@ -212,7 +213,7 @@ describe('PostDetailsComponent', () => {
     component.post = { id: 1 };
     component.generateImage();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/1/generate-image');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/1/generate-image`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.generatingImage).toBeFalse();
@@ -222,7 +223,7 @@ describe('PostDetailsComponent', () => {
   it('loadComments should fetch comments', () => {
     component.loadComments(1);
 
-    const req = httpMock.expectOne('http://localhost:8081/comments/post/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/comments/post/1`);
     req.flush([{ id: 1, commentText: 'Great!' }]);
 
     expect(component.comments.length).toBe(1);
@@ -233,7 +234,7 @@ describe('PostDetailsComponent', () => {
     component.post = { id: 1 };
     component.filterSentiment('');
 
-    const req = httpMock.expectOne('http://localhost:8081/comments/post/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/comments/post/1`);
     req.flush([]);
   });
 
@@ -241,7 +242,7 @@ describe('PostDetailsComponent', () => {
     component.post = { id: 1 };
     component.filterSentiment('POSITIVE');
 
-    const req = httpMock.expectOne('http://localhost:8081/comments/post/1/sentiment/POSITIVE');
+    const req = httpMock.expectOne(`${environment.apiUrl}/comments/post/1/sentiment/POSITIVE`);
     req.flush([{ id: 1, commentText: 'Great!', sentiment: 'POSITIVE' }]);
 
     expect(component.sentimentFilter).toBe('POSITIVE');
@@ -251,14 +252,14 @@ describe('PostDetailsComponent', () => {
   it('filterSentiment should skip if no post id', () => {
     component.post = null;
     component.filterSentiment('POSITIVE');
-    httpMock.expectNone('http://localhost:8081/comments/post/1/sentiment/POSITIVE');
+    httpMock.expectNone(`${environment.apiUrl}/comments/post/1/sentiment/POSITIVE`);
   });
 
   it('resetComments should reload comments', () => {
     component.post = { id: 1 };
     component.resetComments();
 
-    const req = httpMock.expectOne('http://localhost:8081/comments/post/1');
+    const req = httpMock.expectOne(`${environment.apiUrl}/comments/post/1`);
     req.flush([]);
   });
 
@@ -330,7 +331,7 @@ describe('PostDetailsComponent', () => {
 
     component.uploadMedia();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/upload`);
     expect(req.request.method).toBe('POST');
     req.flush({ url: 'https://img.com/photo.png' });
 
@@ -345,7 +346,7 @@ describe('PostDetailsComponent', () => {
 
     component.uploadMedia();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/upload`);
     expect(req.request.method).toBe('POST');
     req.flush({ url: 'https://img.com/video.mp4' });
 
@@ -359,7 +360,7 @@ describe('PostDetailsComponent', () => {
 
     component.uploadMedia();
 
-    httpMock.expectNone('http://localhost:8081/posts/upload');
+    httpMock.expectNone(`${environment.apiUrl}/posts/upload`);
   });
 
   it('uploadMedia_handlesError', () => {
@@ -369,7 +370,7 @@ describe('PostDetailsComponent', () => {
 
     component.uploadMedia();
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/upload');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/upload`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.uploadingMedia).toBeFalse();

@@ -4,6 +4,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { PostService } from '../../../../services/post.service';
+import { environment } from '../../../../../environments/environment';
 
 describe('PlatformChartComponent', () => {
   let component: PlatformChartComponent;
@@ -40,7 +41,7 @@ describe('PlatformChartComponent', () => {
     fixture.detectChanges();
     tick(100);
 
-    const req = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     expect(req.request.method).toBe('GET');
     req.flush({ facebookPosts: 5, instagramPosts: 3, linkedinPosts: 2 });
 
@@ -50,7 +51,7 @@ describe('PlatformChartComponent', () => {
   it('ngOnDestroy_destroys_chart', fakeAsync(() => {
     fixture.detectChanges();
     tick(100);
-    const req = httpMock.expectOne('http://localhost:8081/posts/stats');
+    const req = httpMock.expectOne(`${environment.apiUrl}/posts/stats`);
     req.flush({ facebookPosts: 1, instagramPosts: 1, linkedinPosts: 1 });
 
     expect(component.chart).toBeTruthy();

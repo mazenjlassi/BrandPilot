@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { CampaignService } from '../../services/campaign.service';
+import { environment } from '../../../environments/environment';
 
 describe('CampaignListComponent', () => {
   let component: CampaignListComponent;
@@ -43,7 +44,7 @@ describe('CampaignListComponent', () => {
   it('should load campaigns on init', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('http://localhost:8081/campaigns');
+    const req = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     expect(req.request.method).toBe('GET');
     req.flush(mockCampaigns);
 
@@ -54,7 +55,7 @@ describe('CampaignListComponent', () => {
   it('should handle load error', () => {
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('http://localhost:8081/campaigns');
+    const req = httpMock.expectOne(`${environment.apiUrl}/campaigns`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(component.error).toBe('Failed to load campaigns');

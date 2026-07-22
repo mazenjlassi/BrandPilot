@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -46,21 +47,21 @@ describe('LoginComponent', () => {
     component.username = '';
     component.password = '';
     component.login();
-    httpMock.expectNone('http://localhost:8081/auth/login');
+    httpMock.expectNone(`${environment.apiUrl}/auth/login`);
   });
 
   it('login_skips_when_username_missing', () => {
     component.username = '';
     component.password = 'pass';
     component.login();
-    httpMock.expectNone('http://localhost:8081/auth/login');
+    httpMock.expectNone(`${environment.apiUrl}/auth/login`);
   });
 
   it('login_skips_when_password_missing', () => {
     component.username = 'user';
     component.password = '';
     component.login();
-    httpMock.expectNone('http://localhost:8081/auth/login');
+    httpMock.expectNone(`${environment.apiUrl}/auth/login`);
   });
 
   it('login_calls_auth_and_navigates', () => {
@@ -70,7 +71,7 @@ describe('LoginComponent', () => {
     component.password = 'pass';
     component.login();
 
-    const req = httpMock.expectOne('http://localhost:8081/auth/login');
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ username: 'user', password: 'pass' });
     req.flush({ token: 'jwt', role: 'ADMIN', name: 'Admin' });
@@ -85,7 +86,7 @@ describe('LoginComponent', () => {
     component.password = 'wrong';
     component.login();
 
-    const req = httpMock.expectOne('http://localhost:8081/auth/login');
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
     req.error(new ProgressEvent('error'));
 
     expect(component.loading).toBeFalse();
@@ -99,7 +100,7 @@ describe('LoginComponent', () => {
 
     expect(component.loading).toBeTrue();
 
-    const req = httpMock.expectOne('http://localhost:8081/auth/login');
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
     req.flush({ token: 'jwt', role: 'ADMIN', name: 'Admin' });
   });
 });

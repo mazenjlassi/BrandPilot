@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { AdminService } from './admin.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -19,14 +20,14 @@ describe('AdminService', () => {
 
   it('getUserStats_callsCorrectUrl', () => {
     service.getUserStats().subscribe();
-    const req = httpMock.expectOne('http://localhost:8081/admin/stats');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/stats`);
     expect(req.request.method).toBe('GET');
     req.flush({});
   });
 
   it('getCampaignsProgress_callsWithLimit', () => {
     service.getCampaignsProgress(5).subscribe();
-    const req = httpMock.expectOne('http://localhost:8081/admin/campaigns/progress?limit=5');
+    const req = httpMock.expectOne(`${environment.apiUrl}/admin/campaigns/progress?limit=5`);
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
