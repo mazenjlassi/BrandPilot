@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -17,28 +18,30 @@ public class GeminiService {
 
     private final GeminiConfig geminiConfig;
     private final RestTemplate restTemplate;
+    private static final AtomicLong lastRateLimitTime = new AtomicLong(0);
 
     public String generate(String prompt){
 
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key="
+                + geminiConfig.getApiKey();
+
+        Map<String, Object> body = Map.of(
+                "contents", List.of(
+                        Map.of(
+                                "parts", List.of(
+                                        Map.of("text", prompt)
+                                )
+                        )
+                )
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> request =
+                new HttpEntity<>(body, headers);
+
         try {
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key="
-                    + geminiConfig.getApiKey();
-
-            Map<String, Object> body = Map.of(
-                    "contents", List.of(
-                            Map.of(
-                                    "parts", List.of(
-                                            Map.of("text", prompt)
-                                    )
-                            )
-                    )
-            );
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<Map<String, Object>> request =
-                    new HttpEntity<>(body, headers);
 
             ResponseEntity<Map> response =
                     restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
@@ -48,6 +51,23 @@ public class GeminiService {
             return cleanJson(rawText);
 
         } catch (HttpStatusCodeException e) {
+            if (e.getStatusCode().value() == 429) {
+                long now = System.currentTimeMillis();
+                long last = lastRateLimitTime.getAndSet(now);
+                long waitMs = Math.min(30000, now - last);
+                if (waitMs > 0) {
+                    try { Thread.sleep(waitMs); } catch (InterruptedException ignored) {}
+                }
+                try {
+                    ResponseEntity<Map> retryResponse = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
+                    String rawText = extractText(retryResponse.getBody());
+                    return cleanJson(rawText);
+                } catch (HttpStatusCodeException retryEx) {
+                    System.out.println("=== Gemini API Rate Limited (429) ===");
+                    System.out.println("Response body: " + retryEx.getResponseBodyAsString());
+                    throw new GeminiUnavailableException("AI generation is temporarily over capacity. Please try again in a few minutes.");
+                }
+            }
             System.out.println("=== Gemini API HTTP Error ===");
             System.out.println("Status: " + e.getStatusCode());
             System.out.println("Response body: " + e.getResponseBodyAsString());
