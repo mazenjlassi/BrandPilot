@@ -9,6 +9,7 @@ import com.example.metatry.Repositories.PostImageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -101,7 +102,19 @@ public class AiImageService {
 
             return imageUrl;
 
+        } catch (HttpStatusCodeException e) {
+            System.out.println("=== Cloudflare AI HTTP Error ===");
+            System.out.println("Status: " + e.getStatusCode());
+            System.out.println("Response body: " + e.getResponseBodyAsString());
+            throw new ResponseStatusException(
+                    BAD_REQUEST,
+                    "Cloudflare AI error: " + e.getResponseBodyAsString()
+            );
         } catch (Exception e) {
+            System.out.println("=== Cloudflare AI Error ===");
+            System.out.println("Type: " + e.getClass().getName());
+            System.out.println("Message: " + e.getMessage());
+            e.printStackTrace(System.out);
             throw new ResponseStatusException(
                     BAD_REQUEST,
                     "Error generating AI image: " + e.getMessage()
