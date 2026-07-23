@@ -1,6 +1,6 @@
 package com.example.metatry.Services;
 
-import com.example.metatry.Config.GeminiConfig;
+import com.example.metatry.Config.GroqConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,23 +20,23 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class GeminiServiceTest {
 
-    @Mock private GeminiConfig geminiConfig;
+    @Mock private GroqConfig groqConfig;
     @Mock private RestTemplate restTemplate;
 
     private GeminiService geminiService;
 
     @BeforeEach
     void setUp() {
-        geminiService = new GeminiService(geminiConfig, restTemplate);
+        geminiService = new GeminiService(groqConfig, restTemplate);
     }
 
     @Test
     void generate_success_returnsCleanedJson() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
+        when(groqConfig.getApiKey()).thenReturn("test-key");
         Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(
-                        Map.of("content", Map.of(
-                                "parts", List.of(Map.of("text", "```json\n{\"result\": \"ok\"}\n```"))
+                "choices", List.of(
+                        Map.of("message", Map.of(
+                                "content", "```json\n{\"result\": \"ok\"}\n```"
                         ))
                 )
         );
@@ -48,7 +48,7 @@ class GeminiServiceTest {
 
         assertThat(result).isEqualTo("{\"result\": \"ok\"}");
         verify(restTemplate).exchange(
-                contains("gemini-2.0-flash-lite:generateContent"),
+                contains("api.groq.com"),
                 eq(HttpMethod.POST),
                 any(),
                 eq(Map.class)
@@ -57,64 +57,34 @@ class GeminiServiceTest {
 
     @Test
     void generate_apiError_throwsRuntimeException() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
+        when(groqConfig.getApiKey()).thenReturn("test-key");
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
                 .thenThrow(new RuntimeException("Connection refused"));
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> geminiService.generate("test"));
-        assertThat(ex.getMessage()).contains("Gemini API failed");
+        assertThat(ex.getMessage()).contains("AI API failed");
     }
 
     @Test
-    void generate_emptyCandidates_throwsRuntimeException() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
-        Map<String, Object> responseBody = Map.of("candidates", List.of());
+    void generate_emptyResponse_throwsRuntimeException() {
+        when(groqConfig.getApiKey()).thenReturn("test-key");
+        Map<String, Object> responseBody = Map.of("choices", List.of());
         ResponseEntity<Map> response = new ResponseEntity<>(responseBody, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
                 .thenReturn(response);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> geminiService.generate("test"));
-        assertThat(ex.getMessage()).contains("Failed to extract Gemini response");
+        assertThat(ex.getMessage()).contains("AI API failed");
     }
 
     @Test
-    void generate_nullCandidates_throwsRuntimeException() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
-        Map<String, Object> responseBody = Map.of();
-        ResponseEntity<Map> response = new ResponseEntity<>(responseBody, HttpStatus.OK);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
-                .thenReturn(response);
-
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> geminiService.generate("test"));
-        assertThat(ex.getMessage()).contains("Failed to extract Gemini response");
-    }
-
-    @Test
-    void generate_malformedResponse_throwsRuntimeException() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
+    void generate_emptyContent_returnsEmpty() {
+        when(groqConfig.getApiKey()).thenReturn("test-key");
         Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(Map.of("content", Map.of()))
-        );
-        ResponseEntity<Map> response = new ResponseEntity<>(responseBody, HttpStatus.OK);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
-                .thenReturn(response);
-
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> geminiService.generate("test"));
-        assertThat(ex.getMessage()).contains("Failed to extract");
-    }
-
-    @Test
-    void generate_withEmptyText_returnsEmpty() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
-        Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(
-                        Map.of("content", Map.of(
-                                "parts", List.of(Map.of("text", ""))
-                        ))
+                "choices", List.of(
+                        Map.of("message", Map.of("content", ""))
                 )
         );
         ResponseEntity<Map> response = new ResponseEntity<>(responseBody, HttpStatus.OK);
@@ -127,12 +97,11 @@ class GeminiServiceTest {
 
     @Test
     void generate_withArrayResult_cleansCorrectly() {
-        when(geminiConfig.getApiKey()).thenReturn("test-key");
+        when(groqConfig.getApiKey()).thenReturn("test-key");
         Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(
-                        Map.of("content", Map.of(
-                                "parts", List.of(Map.of("text",
-                                        "```json\n[{\"id\": 1}, {\"id\": 2}]\n```"))
+                "choices", List.of(
+                        Map.of("message", Map.of("content",
+                                "```json\n[{\"id\": 1}, {\"id\": 2}]\n```"
                         ))
                 )
         );

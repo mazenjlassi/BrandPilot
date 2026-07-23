@@ -1,6 +1,6 @@
 package com.example.metatry.integrationTest.Integration;
 
-import com.example.metatry.Config.GeminiConfig;
+import com.example.metatry.Config.GroqConfig;
 import com.example.metatry.Exceptions.GeminiUnavailableException;
 import com.example.metatry.Services.GeminiService;
 import com.example.metatry.integrationTest.TestcontainersConfiguration;
@@ -33,16 +33,14 @@ class GeminiServiceIntegrationTest {
     private RestTemplate restTemplate;
 
     @Autowired
-    private GeminiConfig geminiConfig;
+    private GroqConfig groqConfig;
 
     @Test
     void generate_validResponse_returnsText() {
         Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(
-                        Map.of("content", Map.of(
-                                "parts", List.of(
-                                        Map.of("text", "```json\n{\"key\": \"value\"}\n```")
-                                )
+                "choices", List.of(
+                        Map.of("message", Map.of(
+                                "content", "```json\n{\"key\": \"value\"}\n```"
                         ))
                 )
         );
@@ -59,11 +57,9 @@ class GeminiServiceIntegrationTest {
     @Test
     void generate_withoutJsonMarkdown_returnsCleanText() {
         Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(
-                        Map.of("content", Map.of(
-                                "parts", List.of(
-                                        Map.of("text", "{\"result\": \"ok\"}")
-                                )
+                "choices", List.of(
+                        Map.of("message", Map.of(
+                                "content", "{\"result\": \"ok\"}"
                         ))
                 )
         );
@@ -80,11 +76,9 @@ class GeminiServiceIntegrationTest {
     @Test
     void generate_withArrayResponse_cleansProperly() {
         Map<String, Object> responseBody = Map.of(
-                "candidates", List.of(
-                        Map.of("content", Map.of(
-                                "parts", List.of(
-                                        Map.of("text", "```json\n[{\"a\": 1}, {\"a\": 2}]\n```")
-                                )
+                "choices", List.of(
+                        Map.of("message", Map.of(
+                                "content", "```json\n[{\"a\": 1}, {\"a\": 2}]\n```"
                         ))
                 )
         );
@@ -100,7 +94,7 @@ class GeminiServiceIntegrationTest {
     }
 
     @Test
-    void generate_noCandidates_throws() {
+    void generate_noChoices_throws() {
         Map<String, Object> responseBody = Map.of();
 
         when(restTemplate.exchange(
@@ -109,7 +103,7 @@ class GeminiServiceIntegrationTest {
 
         assertThatThrownBy(() -> geminiService.generate("Test"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Gemini API failed");
+                .hasMessageContaining("AI API failed");
     }
 
     @Test

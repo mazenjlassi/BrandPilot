@@ -1,7 +1,7 @@
 package com.example.metatry.unitTest.Services;
 import com.example.metatry.Services.*;
 
-import com.example.metatry.Config.GeminiConfig;
+import com.example.metatry.Config.GroqConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class GeminiServiceUnitTest {
 
     @Mock
-    private GeminiConfig geminiConfig;
+    private GroqConfig groqConfig;
     @Mock
     private RestTemplate restTemplate;
 
@@ -30,18 +30,16 @@ class GeminiServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        when(geminiConfig.getApiKey()).thenReturn("fake-api-key");
-        geminiService = new GeminiService(geminiConfig, restTemplate);
+        when(groqConfig.getApiKey()).thenReturn("fake-api-key");
+        geminiService = new GeminiService(groqConfig, restTemplate);
     }
 
     @Test
     void generate_returnsCleanedJson() {
-        Map<String, Object> candidateContent = Map.of(
-                "content", Map.of(
-                        "parts", List.of(Map.of("text", "```json\n{\"key\": \"value\"}\n```"))
-                )
+        Map<String, Object> messageContent = Map.of(
+                "message", Map.of("content", "```json\n{\"key\": \"value\"}\n```")
         );
-        Map<String, Object> responseBody = Map.of("candidates", List.of(candidateContent));
+        Map<String, Object> responseBody = Map.of("choices", List.of(messageContent));
         ResponseEntity<Map> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
                 .thenReturn(responseEntity);
@@ -58,29 +56,27 @@ class GeminiServiceUnitTest {
 
         assertThatThrownBy(() -> geminiService.generate("prompt"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Gemini API failed");
+                .hasMessageContaining("AI API failed");
     }
 
     @Test
-    void generate_throwsException_whenNoCandidates() {
-        Map<String, Object> responseBody = Map.of("candidates", List.of());
+    void generate_throwsException_whenNoChoices() {
+        Map<String, Object> responseBody = Map.of("choices", List.of());
         ResponseEntity<Map> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
                 .thenReturn(responseEntity);
 
         assertThatThrownBy(() -> geminiService.generate("prompt"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Gemini API failed");
+                .hasMessageContaining("AI API failed");
     }
 
     @Test
     void generate_handlesResponseWithoutCodeFences() {
-        Map<String, Object> candidateContent = Map.of(
-                "content", Map.of(
-                        "parts", List.of(Map.of("text", "{\"result\": \"ok\"}"))
-                )
+        Map<String, Object> messageContent = Map.of(
+                "message", Map.of("content", "{\"result\": \"ok\"}")
         );
-        Map<String, Object> responseBody = Map.of("candidates", List.of(candidateContent));
+        Map<String, Object> responseBody = Map.of("choices", List.of(messageContent));
         ResponseEntity<Map> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
                 .thenReturn(responseEntity);
@@ -92,12 +88,10 @@ class GeminiServiceUnitTest {
 
     @Test
     void generate_handlesArrayResponse() {
-        Map<String, Object> candidateContent = Map.of(
-                "content", Map.of(
-                        "parts", List.of(Map.of("text", "```\n[{\"a\": 1}]\n```"))
-                )
+        Map<String, Object> messageContent = Map.of(
+                "message", Map.of("content", "```\n[{\"a\": 1}]\n```")
         );
-        Map<String, Object> responseBody = Map.of("candidates", List.of(candidateContent));
+        Map<String, Object> responseBody = Map.of("choices", List.of(messageContent));
         ResponseEntity<Map> responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(Map.class)))
                 .thenReturn(responseEntity);
