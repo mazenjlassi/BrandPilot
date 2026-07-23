@@ -48,7 +48,7 @@ class GeminiServiceTest {
 
         assertThat(result).isEqualTo("{\"result\": \"ok\"}");
         verify(restTemplate).exchange(
-                contains("gemini-3.5-flash:generateContent"),
+                contains("gemini-2.0-flash:generateContent"),
                 eq(HttpMethod.POST),
                 any(),
                 eq(Map.class)

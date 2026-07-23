@@ -506,7 +506,7 @@ export class CampaignsComponent implements OnInit {
         },
         error: (err) => {
           this.loading = false;
-          this.toast.error(err.error || 'Failed to generate posts');
+          this.toast.error(err.error?.error || err.error?.message || (typeof err.error === 'string' ? err.error : null) || 'Failed to generate posts');
         }
       });
       return;
@@ -524,7 +524,7 @@ export class CampaignsComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.toast.error(err.error || 'Failed to generate posts');
+        this.toast.error(err.error?.error || err.error?.message || (typeof err.error === 'string' ? err.error : null) || 'Failed to generate posts');
       }
     });
   }

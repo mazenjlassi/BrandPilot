@@ -26,21 +26,21 @@ public class CampaignController {
 
     // 🔥 AI GENERATION - NEW CAMPAIGN
     @PostMapping("/generate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<Post> generateCampaign(@RequestBody CreateCampaignRequest request) {
         return campaignService.createCampaignAndGeneratePosts(request);
     }
 
     // 🔥 AI GENERATION - EXISTING CAMPAIGN
     @PostMapping("/{campaignId}/generate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public List<Post> generateForExistingCampaign(@PathVariable Long campaignId) {
         return campaignService.generatePostsForExistingCampaign(campaignId);
     }
 
     // 🔥 NEW: MANUAL CAMPAIGN
     @PostMapping("/{campaignId}/posts/with-image")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MARKETING')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createPostWithImage(
             @PathVariable Long campaignId,
             @RequestPart("data") CreatePostRequest request,
@@ -57,20 +57,17 @@ public class CampaignController {
 
     // 📊 Get all campaigns
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public List<CampaignDTO> getAllCampaigns() {
         return campaignService.getAllCampaigns();
     }
     // 📊 Get one campaign
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public Campaign getCampaign(@PathVariable Long id) {
         return campaignService.getCampaign(id);
     }
 
     // 📊 Get posts by campaign
     @GetMapping("/{campaignId}/posts")
-    @PreAuthorize("isAuthenticated()")
     public List<Post> getPostsByCampaign(@PathVariable Long campaignId) {
         return postService.getPostsByCampaign(campaignId);
     }
@@ -92,7 +89,6 @@ public class CampaignController {
 
     // 📊 Get recent campaigns (last N)
     @GetMapping("/recent")
-    @PreAuthorize("isAuthenticated()")
     public List<CampaignDTO> getRecentCampaigns(@RequestParam(defaultValue = "5") int limit) {
         return campaignService.getRecentCampaigns(limit);
     }

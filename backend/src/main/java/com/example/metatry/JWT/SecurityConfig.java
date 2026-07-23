@@ -62,6 +62,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/posts/weekly-comparison").permitAll()
                         .requestMatchers(HttpMethod.GET, "/posts/upcoming-scheduled").permitAll()
 
+                        // ✅ PUBLIC READ-ONLY CAMPAIGN ENDPOINTS
+                        .requestMatchers(HttpMethod.GET, "/campaigns/recent").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/campaigns").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/campaigns/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/campaigns/{campaignId}/posts").permitAll()
+
                         // ✅ PROTECTED
                         .requestMatchers("/api/facebook/**").authenticated()
                         .requestMatchers("/api/instagram/**").authenticated()
