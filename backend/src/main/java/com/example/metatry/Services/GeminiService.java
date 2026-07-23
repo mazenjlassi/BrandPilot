@@ -25,7 +25,7 @@ public class GeminiService {
         String url = "https://api.groq.com/openai/v1/chat/completions";
 
         Map<String, Object> body = Map.of(
-                "model", "mixtral-8x7b-32768",
+                "model", "llama-3.3-70b-versatile",
                 "messages", List.of(
                         Map.of("role", "user", "content", prompt)
                 ),
