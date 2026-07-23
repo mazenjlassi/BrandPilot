@@ -106,6 +106,7 @@ public class GeminiService {
 
         text = text.replace("```json", "");
         text = text.replace("```", "");
+        text = text.replaceAll("[\\u0000-\\u001f]", "");
 
         text = text.trim();
 
