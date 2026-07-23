@@ -2,6 +2,7 @@ package com.example.metatry.Services;
 
 import com.example.metatry.DTOs.AiContentPostItem;
 import com.example.metatry.DTOs.AiContentPostList;
+import com.example.metatry.Exceptions.GeminiUnavailableException;
 import com.example.metatry.Enums.ImageSize;
 import com.example.metatry.Enums.PlatformType;
 import com.example.metatry.Enums.PostStatus;
@@ -136,6 +137,8 @@ public class AiContentService {
 
             return savedPosts;
 
+        } catch (GeminiUnavailableException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error generating " + platform + " posts: " + e.getMessage());
@@ -220,6 +223,8 @@ public class AiContentService {
 
             return savedPosts;
 
+        } catch (GeminiUnavailableException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Error generating AI posts: " + e.getMessage());
