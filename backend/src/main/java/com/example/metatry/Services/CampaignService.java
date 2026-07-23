@@ -55,18 +55,12 @@ public class CampaignService {
             }
         } catch (Exception ignored) {}
 
-        //  GENERATE POSTS WITH FULL CONTEXT
-        try {
-            return aiContentService.generatePostsWithCampaign(
-                    request.getTopic(),
-                    campaign,
-                    insights,
-                    conclusion
-            );
-        } catch (Exception e) {
-            System.out.println("AI generation failed but campaign saved: " + e.getMessage());
-            return List.of();
-        }
+        return aiContentService.generatePostsWithCampaign(
+                request.getTopic(),
+                campaign,
+                insights,
+                conclusion
+        );
     }
 
     // ================= GENERATE FOR EXISTING CAMPAIGN =================
@@ -87,18 +81,12 @@ public class CampaignService {
             conclusion = chatService.generateConclusion(null);
         } catch (Exception ignored) {}
 
-        // GENERATE POSTS WITH EXISTING CAMPAIGN
-        try {
-            return aiContentService.generatePostsWithCampaign(
-                    campaign.getTopic(),
-                    campaign,
-                    insights,
-                    conclusion
-            );
-        } catch (Exception e) {
-            System.out.println("AI generation failed for campaign " + campaignId + ": " + e.getMessage());
-            return List.of();
-        }
+        return aiContentService.generatePostsWithCampaign(
+                campaign.getTopic(),
+                campaign,
+                insights,
+                conclusion
+        );
     }
 
     public Post createPostForCampaign(
