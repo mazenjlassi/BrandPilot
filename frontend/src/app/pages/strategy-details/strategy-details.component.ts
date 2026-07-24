@@ -26,6 +26,8 @@ export class StrategyDetailsComponent implements OnInit {
   loading = true;
   editing = false;
   saving = false;
+  approving = false;
+  approveStatus = '';
   error = '';
 
   editTitle = '';
@@ -63,6 +65,8 @@ export class StrategyDetailsComponent implements OnInit {
       next: (res) => {
         this.strategy = res;
         this.loading = false;
+        this.approving = false;
+        this.approveStatus = '';
       },
       error: () => { this.loading = false; }
     });
@@ -112,7 +116,20 @@ export class StrategyDetailsComponent implements OnInit {
   }
 
   approve() {
-    this.strategyService.approve(this.strategy.id).subscribe(() => this.loadStrategy(this.strategy.id));
+    this.approving = true;
+    this.approveStatus = 'generating';
+    this.error = '';
+    this.strategyService.approve(this.strategy.id).subscribe({
+      next: () => {
+        this.approveStatus = 'success';
+        this.loadStrategy(this.strategy.id);
+      },
+      error: (err) => {
+        this.approveStatus = 'error';
+        this.approving = false;
+        this.error = err.error?.error || err.error?.message || 'Approval failed';
+      }
+    });
   }
 
   deactivate() {

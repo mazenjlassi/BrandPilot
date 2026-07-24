@@ -209,11 +209,19 @@ public class AiImageService {
             return post.getImage().getImagePrompt();
         }
 
-        String styleTag = switch (size){
-            case SQUARE -> "square 1:1 instagram";
-            case LANDSCAPE -> "landscape 16:9 linkedin facebook";
-            case PORTRAIT -> "portrait 9:16 vertical";
-        };
+        StringBuilder promptBuilder = new StringBuilder();
+
+        if (post.getCampaign() != null) {
+            String campaignName = post.getCampaign().getName();
+            String campaignTopic = post.getCampaign().getTopic();
+            if (campaignName != null && !campaignName.isBlank()) {
+                promptBuilder.append(campaignName);
+            }
+            if (campaignTopic != null && !campaignTopic.isBlank()) {
+                if (promptBuilder.length() > 0) promptBuilder.append(": ");
+                promptBuilder.append(campaignTopic);
+            }
+        }
 
         Set<String> keywords = new LinkedHashSet<>();
 
@@ -232,7 +240,19 @@ public class AiImageService {
         }
 
         String kw = String.join(" ", keywords);
-        String result = kw.isEmpty() ? styleTag : kw + " " + styleTag;
-        return result + " professional business technology cinematic lighting photorealistic 4k clean minimalist";
+        if (!kw.isEmpty()) {
+            if (promptBuilder.length() > 0) promptBuilder.append(" - ");
+            promptBuilder.append(kw);
+        }
+
+        String styleTag = switch (size){
+            case SQUARE -> "square 1:1 instagram";
+            case LANDSCAPE -> "landscape 16:9 linkedin facebook";
+            case PORTRAIT -> "portrait 9:16 vertical";
+        };
+
+        promptBuilder.append(" ").append(styleTag);
+        promptBuilder.append(" professional business technology cinematic lighting photorealistic 4k clean minimalist");
+        return promptBuilder.toString();
     }
 }

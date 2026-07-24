@@ -25,13 +25,25 @@
         <h1 *ngIf="!editing">{{ strategy.title }}</h1>
       </div>
       <div class="header-actions" *ngIf="!editing">
-        <button *ngIf="strategy.status === 'PENDING'" class="action-btn secondary" (click)="startEdit()">
+        <div class="approve-status" *ngIf="approveStatus === 'generating'">
+          <lucide-icon [img]="icons.loader" [size]="16" class="spin"></lucide-icon>
+          Generating posts...
+        </div>
+        <div class="approve-status success" *ngIf="approveStatus === 'success'">
+          <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
+          Approved successfully
+        </div>
+        <div class="approve-status error" *ngIf="approveStatus === 'error'">
+          <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
+          Approval failed
+        </div>
+        <button *ngIf="strategy.status === 'PENDING' && !approving" class="action-btn secondary" (click)="startEdit()">
           <lucide-icon [img]="icons.penLine" [size]="16"></lucide-icon>
           Edit
         </button>
-        <button *ngIf="strategy.status === 'PENDING'" class="action-btn success" (click)="approve()">
-          <lucide-icon [img]="icons.check" [size]="16"></lucide-icon>
-          Approve
+        <button *ngIf="strategy.status === 'PENDING'" class="action-btn success" (click)="approve()" [disabled]="approving">
+          <lucide-icon *ngIf="approving" [img]="icons.loader" [size]="16" class="spin"></lucide-icon>
+          {{ approving ? 'Approving...' : 'Approve' }}
         </button>
         <button *ngIf="strategy.status === 'ACTIVE'" class="action-btn danger" (click)="deactivate()">
           <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
