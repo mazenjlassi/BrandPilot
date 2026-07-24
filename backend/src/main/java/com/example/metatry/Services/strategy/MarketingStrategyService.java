@@ -4,6 +4,11 @@ import com.example.metatry.DTOs.GenerateStrategyRequest;
 import com.example.metatry.DTOs.MarketingStrategyDTO;
 import com.example.metatry.DTOs.MarketingStrategyRequest;
 import com.example.metatry.Enums.MarketingStrategyStatus;
+import com.example.metatry.Exceptions.StrategyConflictException;
+import com.example.metatry.Exceptions.StrategyGenerationException;
+import com.example.metatry.Exceptions.StrategyNotEditableException;
+import com.example.metatry.Exceptions.StrategyNotFoundException;
+import com.example.metatry.Exceptions.StrategyNotPendingException;
 import com.example.metatry.Models.Campaign;
 import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Models.Post;
@@ -45,7 +50,7 @@ public class MarketingStrategyService {
     @Transactional
     public MarketingStrategyDTO generateStrategy(GenerateStrategyRequest request) {
         if (strategyRepository.existsByStatus(MarketingStrategyStatus.PENDING)) {
-            throw new RuntimeException("A PENDING strategy already exists. Approve or deactivate it first.");
+            throw new StrategyConflictException("A PENDING strategy already exists. Approve or deactivate it first.");
         }
 
         String prompt = strategyPromptBuilder.build(request.getTopic(), request.getDurationWeeks());
@@ -55,7 +60,7 @@ public class MarketingStrategyService {
         try {
             parsed = objectMapper.readValue(aiText, Map.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse AI strategy response", e);
+            throw new StrategyGenerationException("Failed to parse AI strategy response", e);
         }
 
         String campaignsJson = null;
@@ -127,17 +132,17 @@ public class MarketingStrategyService {
     public MarketingStrategyDTO getStrategy(Long id) {
         return strategyRepository.findById(id)
                 .map(marketingStrategyMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Strategy not found: " + id));
+                .orElseThrow(() -> new StrategyNotFoundException(id));
     }
 
     @Transactional
     public MarketingStrategyDTO updateStrategy(Long id, MarketingStrategyRequest request) {
         MarketingStrategy strategy = strategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found: " + id));
+                .orElseThrow(() -> new StrategyNotFoundException(id));
 
         if (strategy.getStatus() == MarketingStrategyStatus.COMPLETED
                 || strategy.getStatus() == MarketingStrategyStatus.INACTIVE) {
-            throw new RuntimeException("Cannot edit a " + strategy.getStatus().name().toLowerCase() + " strategy");
+            throw new StrategyNotEditableException(strategy.getStatus());
         }
 
         if (request.getTitle() != null) strategy.setTitle(request.getTitle());
@@ -231,17 +236,17 @@ Respond with this exact JSON structure (an array of campaign objects):
             List<?> parsed = objectMapper.readValue(aiText, List.class);
             return objectMapper.writeValueAsString(parsed);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to regenerate campaign plans", e);
+            throw new StrategyGenerationException("Failed to regenerate campaign plans", e);
         }
     }
 
     @Transactional
     public MarketingStrategyDTO approveStrategy(Long id) {
         MarketingStrategy strategy = strategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found: " + id));
+                .orElseThrow(() -> new StrategyNotFoundException(id));
 
         if (strategy.getStatus() != MarketingStrategyStatus.PENDING) {
-            throw new RuntimeException("Only PENDING strategies can be approved");
+            throw new StrategyNotPendingException(strategy.getStatus());
         }
 
         strategyRepository.findFirstByStatusOrderByCreatedAtDesc(MarketingStrategyStatus.ACTIVE)
@@ -310,14 +315,14 @@ Respond with this exact JSON structure (an array of campaign objects):
 
             return campaignRepository.saveAll(campaigns);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse campaign plans", e);
+            throw new StrategyGenerationException("Failed to parse campaign plans", e);
         }
     }
 
     @Transactional
     public MarketingStrategyDTO setAutoGenerate(Long id, boolean autoGenerate) {
         MarketingStrategy strategy = strategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found: " + id));
+                .orElseThrow(() -> new StrategyNotFoundException(id));
 
         strategy.setAutoGenerate(autoGenerate);
         strategy.setUpdatedAt(LocalDateTime.now());
@@ -336,7 +341,7 @@ Respond with this exact JSON structure (an array of campaign objects):
     @Transactional
     public MarketingStrategyDTO deactivateStrategy(Long id) {
         MarketingStrategy strategy = strategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found: " + id));
+                .orElseThrow(() -> new StrategyNotFoundException(id));
 
         strategy.setStatus(MarketingStrategyStatus.INACTIVE);
         strategy.setUpdatedAt(LocalDateTime.now());

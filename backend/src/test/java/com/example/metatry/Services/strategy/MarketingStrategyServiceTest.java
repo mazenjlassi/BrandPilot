@@ -11,6 +11,10 @@ import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.MemoryContextService;
 import com.example.metatry.Services.prompts.StrategyPromptBuilder;
 import com.example.metatry.Services.strategy.NotificationService;
+import com.example.metatry.Exceptions.StrategyNotFoundException;
+import com.example.metatry.Exceptions.StrategyConflictException;
+import com.example.metatry.Exceptions.StrategyGenerationException;
+import com.example.metatry.Exceptions.StrategyNotEditableException;
 import com.example.metatry.Services.scheduler.WeeklyImageDecisionService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,7 +93,7 @@ class MarketingStrategyServiceTest {
 
         assertThatThrownBy(() -> strategyService.generateStrategy(
                 GenerateStrategyRequest.builder().topic("T").build()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(StrategyConflictException.class)
                 .hasMessageContaining("PENDING strategy already exists");
     }
 
@@ -101,7 +105,7 @@ class MarketingStrategyServiceTest {
 
         assertThatThrownBy(() -> strategyService.generateStrategy(
                 GenerateStrategyRequest.builder().topic("T").build()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(StrategyGenerationException.class)
                 .hasMessageContaining("Failed to parse");
     }
 
@@ -186,7 +190,7 @@ class MarketingStrategyServiceTest {
     void getStrategy_notFound_throws() {
         when(strategyRepository.findById(99L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> strategyService.getStrategy(99L))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(StrategyNotFoundException.class)
                 .hasMessageContaining("Strategy not found");
     }
 
@@ -214,7 +218,7 @@ class MarketingStrategyServiceTest {
         when(strategyRepository.findById(1L)).thenReturn(Optional.of(ms));
 
         assertThatThrownBy(() -> strategyService.updateStrategy(1L, new MarketingStrategyRequest()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(StrategyNotEditableException.class)
                 .hasMessageContaining("Cannot edit");
     }
 
@@ -224,7 +228,7 @@ class MarketingStrategyServiceTest {
         when(strategyRepository.findById(1L)).thenReturn(Optional.of(ms));
 
         assertThatThrownBy(() -> strategyService.updateStrategy(1L, new MarketingStrategyRequest()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(StrategyNotEditableException.class)
                 .hasMessageContaining("Cannot edit");
     }
 
@@ -287,7 +291,7 @@ class MarketingStrategyServiceTest {
     void getStrategy_notFoundById_throws() {
         when(strategyRepository.findById(99L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> strategyService.getStrategy(99L))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(StrategyNotFoundException.class)
                 .hasMessageContaining("Strategy not found");
     }
 }

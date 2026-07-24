@@ -33,11 +33,46 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "Authentication failed: " + ex.getMessage()));
     }
 
+    @ExceptionHandler(StrategyNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleStrategyNotFound(StrategyNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(StrategyNotPendingException.class)
+    public ResponseEntity<Map<String, String>> handleStrategyNotPending(StrategyNotPendingException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(StrategyNotEditableException.class)
+    public ResponseEntity<Map<String, String>> handleStrategyNotEditable(StrategyNotEditableException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(StrategyConflictException.class)
+    public ResponseEntity<Map<String, String>> handleStrategyConflict(StrategyConflictException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(StrategyGenerationException.class)
+    public ResponseEntity<Map<String, String>> handleStrategyGeneration(StrategyGenerationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(Map.of("error", "Strategy generation failed", "message", ex.getMessage()));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         String message = ex.getMessage() != null ? ex.getMessage() : "Unknown error";
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", message));
     }
 }
