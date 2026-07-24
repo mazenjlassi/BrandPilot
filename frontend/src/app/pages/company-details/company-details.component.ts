@@ -122,21 +122,55 @@ export class CompanyDetailsComponent implements OnInit {
     });
   }
 
+  private pollTimer: any = null;
+
   launchScraper() {
     if (this.scraperLoading) return;
     this.scraperLoading = true;
     this.error = '';
+    const initialCount = this.scrapedPosts.length;
+
     this.patternService.triggerScrape(this.companyName).subscribe({
       next: () => {
-        this.scraperLoading = false;
-        this.toast.success('Scraping completed');
-        this.loadScrapedPosts();
+        this.toast.success('Scraping launched — waiting for data...');
+        this.pollForNewPosts(initialCount);
       },
       error: (err) => {
         this.scraperLoading = false;
-        this.toast.error(err.error?.message || 'Scraping failed');
+        this.toast.error(err.error?.message || 'Failed to launch scraper');
       }
     });
+  }
+
+  private pollForNewPosts(initialCount: number) {
+    let attempts = 0;
+    const maxAttempts = 36;
+
+    this.pollTimer = setInterval(() => {
+      attempts++;
+      this.patternService.getScrapedPosts(this.companyName).subscribe({
+        next: (res) => {
+          this.scrapedPosts = res;
+          if (res.length > initialCount) {
+            this.clearPollTimer();
+            this.scraperLoading = false;
+            this.toast.success('Scraping completed');
+            this.loadPatterns();
+          } else if (attempts >= maxAttempts) {
+            this.clearPollTimer();
+            this.scraperLoading = false;
+            this.toast.error('Scraping timed out — check back later');
+          }
+        }
+      });
+    }, 5000);
+  }
+
+  private clearPollTimer() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
   }
 
   async deletePost(id: number) {

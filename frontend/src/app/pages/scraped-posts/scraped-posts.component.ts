@@ -6,6 +6,7 @@ import { PatternService, CompanyProfile } from '../../services/pattern.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
 import { LoadingSkeletonComponent } from '../../shared/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component';
+import { ToastService } from '../../shared/toast/toast.service';
 import { LucideAngularModule, Trash2, X, Loader2, Search } from 'lucide-angular';
 
 @Component({
@@ -43,7 +44,8 @@ export class ScrapedPostsComponent implements OnInit {
 
   constructor(
     private patternService: PatternService,
-    private confirm: ConfirmDialogService
+    private confirm: ConfirmDialogService,
+    private toast: ToastService
   ) {}
 
   ngOnInit() {
@@ -151,20 +153,54 @@ export class ScrapedPostsComponent implements OnInit {
     });
   }
 
+  private pollTimer: any = null;
+
   launchScraper() {
     if (!this.selectedCompany || this.scraperLoading) return;
     this.scraperLoading = true;
     this.error = '';
+    const initialCount = this.scrapedPosts.length;
+
     this.patternService.triggerScrape(this.selectedCompany).subscribe({
       next: () => {
-        this.scraperLoading = false;
-        this.loadScrapedPosts();
+        this.toast.success('Scraping launched — waiting for data...');
+        this.pollForNewPosts(initialCount);
       },
       error: (err) => {
         this.scraperLoading = false;
-        this.error = err.error?.message || 'Scraping failed';
+        this.error = err.error?.message || 'Failed to launch scraper';
       }
     });
+  }
+
+  private pollForNewPosts(initialCount: number) {
+    let attempts = 0;
+    const maxAttempts = 36;
+
+    this.pollTimer = setInterval(() => {
+      attempts++;
+      this.patternService.getScrapedPosts(this.selectedCompany).subscribe({
+        next: (res) => {
+          this.scrapedPosts = res;
+          if (res.length > initialCount) {
+            this.clearPollTimer();
+            this.scraperLoading = false;
+            this.toast.success('Scraping completed');
+          } else if (attempts >= maxAttempts) {
+            this.clearPollTimer();
+            this.scraperLoading = false;
+            this.error = 'Scraping timed out — check back later';
+          }
+        }
+      });
+    }, 5000);
+  }
+
+  private clearPollTimer() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
   }
 
   async deletePost(id: number) {
