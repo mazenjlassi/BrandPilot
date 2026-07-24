@@ -28,6 +28,7 @@ jobs:
 
       - run: node run-scrape.js
         env:
+          HEADLESS: 'true'
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           SCRAPER_TOKEN: ${{ secrets.SCRAPER_TOKEN }}
           COMPANY_NAME: ${{ inputs.companyName || '' }}
