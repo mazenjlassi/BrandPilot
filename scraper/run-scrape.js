@@ -1,4 +1,4 @@
-const { scrapeAllPlatforms } = require('./scrapers/index');
+const { scrapeAllPlatforms } = require('./src/scrapers/index');
 const axios = require('axios');
 
 const BACKEND_URL = process.env.BACKEND_URL;
