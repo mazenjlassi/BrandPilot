@@ -11,6 +11,7 @@ import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.MemoryContextService;
 import com.example.metatry.Services.prompts.StrategyPromptBuilder;
 import com.example.metatry.Services.strategy.NotificationService;
+import com.example.metatry.Services.scheduler.WeeklyImageDecisionService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,7 @@ class MarketingStrategyServiceTest {
     @Mock private MemoryContextService memoryContextService;
     @Mock private MarketingStrategyMapper marketingStrategyMapper;
     @Mock private WeeklyPostPlanner weeklyPostPlanner;
+    @Mock private WeeklyImageDecisionService weeklyImageDecisionService;
     @Mock private NotificationService notificationService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -49,7 +51,8 @@ class MarketingStrategyServiceTest {
         strategyService = new MarketingStrategyService(
                 strategyRepository, campaignRepository, geminiService,
                 strategyPromptBuilder, memoryContextService,
-                marketingStrategyMapper, weeklyPostPlanner, notificationService,
+                marketingStrategyMapper, weeklyPostPlanner,
+                weeklyImageDecisionService, notificationService,
                 objectMapper
         );
     }

@@ -11,7 +11,7 @@ public class WeeklyPostPromptBuilder {
 
     private final MemoryContextService memoryContextService;
 
-    public String build(MarketingStrategy strategy, String campaignsContext, String previousPostsContext) {
+    public String build(MarketingStrategy strategy, String campaignsContext, String previousPostsContext, String campaignPlanContext) {
         String brandContext = memoryContextService.getRecentContext();
         return """
 You are an expert social media content creator. Generate weekly posts for the active marketing strategy.
@@ -25,6 +25,9 @@ STRATEGY DESCRIPTION: %s
 CAMPAIGNS FOR THIS WEEK:
 %s
 
+CAMPAIGN POST QUOTAS (THIS WEEK — generate exactly this many posts per campaign):
+%s
+
 PREVIOUS POSTS (for context, DO NOT duplicate):
 %s
 
@@ -34,7 +37,8 @@ CRITICAL INSTRUCTIONS:
 - Each post must have a specific platform
 - Assign a scheduled day (YYYY-MM-DD) and hour (0-23) for each post
 - Schedule posts sequentially by campaign: all Campaign 1 posts first (Mon-Wed), then Campaign 2 (Thu-Fri), etc.
-- Spread posts across the week (Monday to Friday), 1-2 posts per platform
+- Spread posts across the week (Monday to Friday)
+- YOU MUST GENERATE THE EXACT NUMBER OF POSTS SPECIFIED IN THE CAMPAIGN POST QUOTAS above, distributed across the specified platforms
 - Indicate if the post needs an AI-generated image
 - Return ONLY valid JSON with no markdown formatting
 - CRITICAL: Generate COMPLETE, READY-TO-PUBLISH posts. NEVER use placeholders, brackets, or generic text like "[Product Name]", "[Company]", "[Feature]", "[Industry]", etc.
@@ -58,6 +62,6 @@ Respond with this exact JSON structure:
     }
   ]
 }
-""".formatted(brandContext, strategy.getTitle(), strategy.getDescription(), campaignsContext, previousPostsContext);
+""".formatted(brandContext, strategy.getTitle(), strategy.getDescription(), campaignsContext, campaignPlanContext, previousPostsContext);
     }
 }

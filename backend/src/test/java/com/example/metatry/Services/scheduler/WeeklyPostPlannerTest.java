@@ -45,7 +45,7 @@ class WeeklyPostPlannerTest {
         Campaign c2 = Campaign.builder().id(20L).name("Camp2").topic("Topic2").build();
 
         when(postRepository.findTop3ByOrderByCreatedAtDesc()).thenReturn(List.of());
-        when(promptBuilder.build(any(), any(), any())).thenReturn("prompt");
+        when(promptBuilder.build(any(), any(), any(), any())).thenReturn("prompt");
 
         String aiResponse = """
                 {"posts":[
@@ -78,7 +78,7 @@ class WeeklyPostPlannerTest {
     @Test
     void generateWeeklyPosts_whenAiReturnsEmpty_returnsEmpty() {
         when(postRepository.findTop3ByOrderByCreatedAtDesc()).thenReturn(List.of());
-        when(promptBuilder.build(any(), any(), any())).thenReturn("prompt");
+        when(promptBuilder.build(any(), any(), any(), any())).thenReturn("prompt");
         when(geminiService.generate("prompt")).thenReturn("{\"posts\":[]}");
 
         List<Post> posts = planner.generateWeeklyPosts(
@@ -90,7 +90,7 @@ class WeeklyPostPlannerTest {
     @Test
     void generateWeeklyPosts_whenAiReturnsNoPostsKey_returnsEmpty() {
         when(postRepository.findTop3ByOrderByCreatedAtDesc()).thenReturn(List.of());
-        when(promptBuilder.build(any(), any(), any())).thenReturn("prompt");
+        when(promptBuilder.build(any(), any(), any(), any())).thenReturn("prompt");
         when(geminiService.generate("prompt")).thenReturn("{}");
 
         List<Post> posts = planner.generateWeeklyPosts(
@@ -102,7 +102,7 @@ class WeeklyPostPlannerTest {
     @Test
     void generateWeeklyPosts_skipsInvalidPlatform() {
         when(postRepository.findTop3ByOrderByCreatedAtDesc()).thenReturn(List.of());
-        when(promptBuilder.build(any(), any(), any())).thenReturn("prompt");
+        when(promptBuilder.build(any(), any(), any(), any())).thenReturn("prompt");
         when(geminiService.generate("prompt")).thenReturn("""
                 {"posts":[
                   {"title":"P1","content":"C1","hashtags":["#ai"],"platform":"INVALID","scheduledDay":"2026-07-27","scheduledHour":9,"needsImage":false}

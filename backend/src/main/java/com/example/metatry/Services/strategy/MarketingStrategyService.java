@@ -38,6 +38,7 @@ public class MarketingStrategyService {
     private final MemoryContextService memoryContextService;
     private final MarketingStrategyMapper marketingStrategyMapper;
     private final WeeklyPostPlanner weeklyPostPlanner;
+    private final WeeklyImageDecisionService weeklyImageDecisionService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
@@ -102,7 +103,7 @@ public class MarketingStrategyService {
 
         GenerateStrategyRequest request = GenerateStrategyRequest.builder()
                 .topic(topic)
-                .durationWeeks(8)
+                .durationWeeks(null)
                 .autoGenerate(true)
                 .build();
         return generateStrategy(request);
@@ -144,14 +145,94 @@ public class MarketingStrategyService {
         if (request.getDescription() != null) strategy.setDescription(request.getDescription());
         if (request.getDurationWeeks() != null) {
             strategy.setDurationWeeks(request.getDurationWeeks());
-            strategy.setExpectedEndDate(LocalDate.now().plusWeeks(request.getDurationWeeks()));
+            LocalDate base = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
+            strategy.setExpectedEndDate(base.plusWeeks(request.getDurationWeeks()));
         }
         if (request.getManagerNotes() != null) strategy.setManagerNotes(request.getManagerNotes());
         if (request.getAutoGenerate() != null) strategy.setAutoGenerate(request.getAutoGenerate());
+        if (request.getStartDate() != null) {
+            strategy.setStartDate(request.getStartDate());
+            if (strategy.getDurationWeeks() != null) {
+                strategy.setExpectedEndDate(request.getStartDate().plusWeeks(strategy.getDurationWeeks()));
+            }
+        }
+        if (request.getExpectedEndDate() != null) {
+            strategy.setExpectedEndDate(request.getExpectedEndDate());
+        }
+        if (request.getCampaignCount() != null) {
+            int currentCount = getCurrentCampaignCount(strategy);
+            if (request.getCampaignCount() > 0 && request.getCampaignCount() != currentCount) {
+                String newCampaignPlans = regenerateCampaignPlans(strategy, request.getCampaignCount());
+                strategy.setCampaignPlans(newCampaignPlans);
+            }
+        }
 
         strategy.setUpdatedAt(LocalDateTime.now());
         strategy = strategyRepository.save(strategy);
         return marketingStrategyMapper.toDTO(strategy);
+    }
+
+    private int getCurrentCampaignCount(MarketingStrategy strategy) {
+        if (strategy.getCampaignPlans() == null || strategy.getCampaignPlans().isBlank()) {
+            return 0;
+        }
+        try {
+            List<?> plans = objectMapper.readValue(strategy.getCampaignPlans(), List.class);
+            return plans.size();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private String regenerateCampaignPlans(MarketingStrategy strategy, int newCount) {
+        String prompt = """
+You are an expert marketing strategist. Given the following marketing strategy, generate %d campaign plans that will run sequentially.
+
+STRATEGY TITLE: %s
+STRATEGY SUMMARY: %s
+STRATEGY DESCRIPTION: %s
+TOTAL DURATION: %d weeks
+
+INSTRUCTIONS:
+- Design exactly %d campaigns that run sequentially (Campaign 1 finishes first, then Campaign 2, etc.)
+- Each campaign must have: name, topic, objective, totalPosts, durationWeeks, weeklyPostDistribution
+- The sum of all campaign durationWeeks must equal the total duration (%d weeks)
+- Total weekly posts across all campaigns should be 5-10
+- Platforms available: facebook, instagram, linkedin
+- The weeklyPostDistribution must have exact post counts per platform per week
+- Return ONLY valid JSON array with no markdown formatting
+
+Respond with this exact JSON structure (an array of campaign objects):
+[
+  {
+    "name": "Campaign display name",
+    "topic": "Specific topic/focus of this campaign",
+    "objective": "What this campaign aims to achieve",
+    "totalPosts": 12,
+    "durationWeeks": 3,
+    "weeklyPostDistribution": {
+      "facebook": 2,
+      "instagram": 1,
+      "linkedin": 1
+    }
+  }
+]
+""".formatted(newCount,
+                strategy.getTitle(),
+                strategy.getSummary() != null ? strategy.getSummary() : "",
+                strategy.getDescription() != null ? strategy.getDescription() : "",
+                strategy.getDurationWeeks() != null ? strategy.getDurationWeeks() : 8,
+                newCount,
+                strategy.getDurationWeeks() != null ? strategy.getDurationWeeks() : 8);
+
+        String aiText = geminiService.generate(prompt);
+
+        try {
+            List<?> parsed = objectMapper.readValue(aiText, List.class);
+            return objectMapper.writeValueAsString(parsed);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to regenerate campaign plans", e);
+        }
     }
 
     @Transactional
@@ -184,6 +265,9 @@ public class MarketingStrategyService {
 
         try {
             List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(strategy, campaigns);
+
+            weeklyImageDecisionService.decideAndGenerateImages(posts,
+                    strategy.getTitle() + ": " + strategy.getSummary());
 
             strategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(strategy);

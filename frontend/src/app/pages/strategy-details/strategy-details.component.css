@@ -190,6 +190,12 @@ textarea.form-input {
   resize: vertical;
 }
 
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 .error-text {
   font-size: var(--text-sm);
   color: #EF4444;

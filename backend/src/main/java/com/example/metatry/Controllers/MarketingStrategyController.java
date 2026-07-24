@@ -14,6 +14,8 @@ import com.example.metatry.Services.scheduler.WeeklyImageDecisionService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
 import com.example.metatry.Services.strategy.MarketingStrategyService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,8 @@ import java.util.Map;
 @RequestMapping("/marketing-strategies")
 @RequiredArgsConstructor
 public class MarketingStrategyController {
+
+    private static final Logger log = LoggerFactory.getLogger(MarketingStrategyController.class);
 
     private final MarketingStrategyService strategyService;
     private final MarketingStrategyRepository marketingStrategyRepository;
@@ -52,7 +56,12 @@ public class MarketingStrategyController {
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MarketingStrategyDTO> getStrategy(@PathVariable Long id) {
-        return ResponseEntity.ok(strategyService.getStrategy(id));
+        try {
+            return ResponseEntity.ok(strategyService.getStrategy(id));
+        } catch (Exception e) {
+            log.error("Error fetching strategy id={}: {}", id, e.getMessage(), e);
+            throw e;
+        }
     }
 
     @PostMapping("/generate")

@@ -32,6 +32,9 @@ export class StrategyDetailsComponent implements OnInit {
   editSummary = '';
   editDescription = '';
   editDurationWeeks = 8;
+  editStartDate = '';
+  editEndDate = '';
+  editCampaignCount = 0;
   editManagerNotes = '';
 
   icons = {
@@ -71,6 +74,9 @@ export class StrategyDetailsComponent implements OnInit {
     this.editSummary = this.strategy.summary;
     this.editDescription = this.strategy.description;
     this.editDurationWeeks = this.strategy.durationWeeks || 8;
+    this.editStartDate = this.strategy.startDate || '';
+    this.editEndDate = this.strategy.expectedEndDate || '';
+    this.editCampaignCount = this.strategy.campaignCount || 0;
     this.editManagerNotes = this.strategy.managerNotes || '';
   }
 
@@ -82,13 +88,17 @@ export class StrategyDetailsComponent implements OnInit {
   save() {
     this.saving = true;
     this.error = '';
-    this.strategyService.update(this.strategy.id, {
+    const payload: any = {
       title: this.editTitle,
       summary: this.editSummary,
       description: this.editDescription,
       durationWeeks: this.editDurationWeeks,
       managerNotes: this.editManagerNotes
-    }).subscribe({
+    };
+    if (this.editStartDate) payload.startDate = this.editStartDate;
+    if (this.editEndDate) payload.expectedEndDate = this.editEndDate;
+    if (this.editCampaignCount > 0) payload.campaignCount = this.editCampaignCount;
+    this.strategyService.update(this.strategy.id, payload).subscribe({
       next: (res) => {
         this.strategy = res;
         this.editing = false;

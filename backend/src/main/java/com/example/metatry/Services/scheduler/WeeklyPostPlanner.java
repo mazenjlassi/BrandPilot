@@ -8,6 +8,7 @@ import com.example.metatry.Models.Post;
 import com.example.metatry.Repositories.PostRepository;
 import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.prompts.WeeklyPostPromptBuilder;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,8 @@ public class WeeklyPostPlanner {
                 .map(c -> "- Campaign: " + c.getName() + " | Topic: " + c.getTopic())
                 .collect(Collectors.joining("\n"));
 
+        String campaignPlanContext = buildCampaignPlanContext(strategy);
+
         List<Post> recentPosts = postRepository.findTop3ByOrderByCreatedAtDesc();
         String previousPostsContext = recentPosts.stream()
                 .map(p -> "[" + p.getPlatform() + "] " + p.getTitle() + " - " +
@@ -50,7 +53,7 @@ public class WeeklyPostPlanner {
                                 : p.getContent()))
                 .collect(Collectors.joining("\n"));
 
-        String prompt = promptBuilder.build(strategy, campaignsContext, previousPostsContext);
+        String prompt = promptBuilder.build(strategy, campaignsContext, previousPostsContext, campaignPlanContext);
         String aiText = geminiService.generate(prompt);
 
         Map<String, Object> parsed;
@@ -134,6 +137,40 @@ public class WeeklyPostPlanner {
                 post.setScheduledAt(LocalDateTime.of(date, LocalTime.of(hour, 0)));
                 postIdx++;
             }
+        }
+    }
+
+    private String buildCampaignPlanContext(MarketingStrategy strategy) {
+        if (strategy.getCampaignPlans() == null || strategy.getCampaignPlans().isBlank()) {
+            return "";
+        }
+        try {
+            List<Map<String, Object>> plans = objectMapper.readValue(
+                    strategy.getCampaignPlans(),
+                    new TypeReference<List<Map<String, Object>>>() {}
+            );
+            StringBuilder sb = new StringBuilder();
+            for (Map<String, Object> plan : plans) {
+                String name = (String) plan.getOrDefault("name", "Campaign");
+                Object dist = plan.get("weeklyPostDistribution");
+                if (dist instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> distMap = (Map<String, Object>) dist;
+                    int total = distMap.values().stream()
+                            .filter(Number.class::isInstance)
+                            .mapToInt(v -> ((Number) v).intValue())
+                            .sum();
+                    sb.append("- ").append(name).append(": ").append(total).append(" posts (");
+                    List<String> parts = new ArrayList<>();
+                    for (Map.Entry<String, Object> entry : distMap.entrySet()) {
+                        parts.add(entry.getValue() + " " + entry.getKey());
+                    }
+                    sb.append(String.join(", ", parts)).append(")\n");
+                }
+            }
+            return sb.length() > 0 ? sb.toString() : "";
+        } catch (Exception ignored) {
+            return "";
         }
     }
 

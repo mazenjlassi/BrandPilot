@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -17,4 +19,7 @@ public class MarketingStrategyRequest {
     private Integer durationWeeks;
     private String managerNotes;
     private Boolean autoGenerate;
+    private LocalDate startDate;
+    private LocalDate expectedEndDate;
+    private Integer campaignCount;
 }

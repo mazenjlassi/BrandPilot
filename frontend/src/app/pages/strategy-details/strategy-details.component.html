@@ -60,6 +60,19 @@
         <input id="edit-duration" type="number" [(ngModel)]="editDurationWeeks" class="form-input" min="4" max="52" />
       </div>
       <div class="form-group">
+        <label for="edit-start-date">Start Date</label>
+        <input id="edit-start-date" type="date" [(ngModel)]="editStartDate" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="edit-end-date">End Date</label>
+        <input id="edit-end-date" type="date" [(ngModel)]="editEndDate" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label for="edit-campaigns">Campaigns</label>
+        <input id="edit-campaigns" type="number" [(ngModel)]="editCampaignCount" class="form-input" min="1" max="10" />
+        <small class="form-hint" *ngIf="editCampaignCount !== strategy.campaignCount">Changing campaign count will regenerate campaign plans via AI.</small>
+      </div>
+      <div class="form-group">
         <label for="edit-notes">Manager Notes</label>
         <textarea id="edit-notes" [(ngModel)]="editManagerNotes" class="form-input" rows="3" placeholder="Add your notes..."></textarea>
       </div>
