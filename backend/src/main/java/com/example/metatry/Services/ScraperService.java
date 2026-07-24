@@ -1,5 +1,6 @@
 package com.example.metatry.Services;
 
+import com.example.metatry.DTOs.IngestRequest;
 import com.example.metatry.DTOs.ScrapeRequest;
 import com.example.metatry.DTOs.ScrapeResponse;
 import com.example.metatry.DTOs.ScrapedPostDTO;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -22,13 +24,66 @@ public class ScraperService {
 
     @Value("${scraper.base-url}")
     private String scraperBaseUrl;
-    
+
+    @Value("${scraper.token}")
+    private String scraperToken;
+
     private final RestTemplate restTemplate;
     private final ScrapedPostRepository scrapedPostRepository;
     private final ScrapedPostService scrapedPostService;
     private final PatternAnalysisService patternAnalysisService;
     private final ScraperProcessService scraperProcessService;
     private final CompanyProfileRepository companyProfileRepository;
+
+    public void validateToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring(7);
+        if (!scraperToken.equals(token)) {
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid scraper token");
+        }
+    }
+
+    public int ingestPosts(IngestRequest request) {
+        String companyName = request.getCompanyName();
+        int total = 0;
+
+        for (IngestRequest.PlatformResult pr : request.getResults()) {
+            String platform = pr.getPlatform();
+            for (IngestRequest.PostData pd : pr.getPosts()) {
+                ScrapedPost post = ScrapedPost.builder()
+                    .companyName(companyName)
+                    .platform(platform)
+                    .postText(pd.getPostText() != null ? pd.getPostText() : "")
+                    .postUrl(pd.getUrl() != null ? pd.getUrl() : "")
+                    .postedAt(pd.getPostedAt() != null ? pd.getPostedAt() : "")
+                    .scrapedAt(LocalDateTime.now())
+                    .topic(companyName)
+                    .usedForPattern(false)
+                    .build();
+                scrapedPostService.save(post);
+                total++;
+            }
+        }
+
+        long unanalyzed = scrapedPostRepository.countByCompanyNameAndUsedForPatternFalse(companyName);
+        if (unanalyzed >= 3) {
+            try {
+                int patternsSaved = patternAnalysisService.analyzeUnanalyzedBatch(companyName);
+                System.out.println("Auto-analyzed batch for " + companyName + ": " + patternsSaved + " patterns saved from " + unanalyzed + " unanalyzed posts");
+            } catch (Exception e) {
+                System.out.println("Pattern analysis failed for " + companyName + " (non-fatal): " + e.getMessage());
+            }
+        }
+
+        int removed = scrapedPostService.removeDuplicates();
+        if (removed > 0) {
+            System.out.println("Cleaned up " + removed + " duplicate posts for " + companyName);
+        }
+
+        return total;
+    }
 
     public ScrapeResponse scrapeCompany(String companyName) {
         CompanyProfile profile = companyProfileRepository.findByCompanyName(companyName)
@@ -59,7 +114,7 @@ public class ScraperService {
             scraperProcessService.ensureRunning();
 
             String url = scraperBaseUrl + "/scrape";
-            
+
             Map<String, String> accounts = new HashMap<>();
             accounts.put("linkedin", linkedin != null ? linkedin : "");
             accounts.put("instagram", instagram != null ? instagram : "");
@@ -83,9 +138,9 @@ public class ScraperService {
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 Map<String, Object> body = response.getBody();
-                
+
                 savePostsToDatabase(companyName, body, topic);
-                
+
                 return buildResponse(companyName, body, "success", null);
             }
 
@@ -109,13 +164,13 @@ public class ScraperService {
                     Map<?, ?> itemMap = (Map<?, ?>) item;
                     String platform = String.valueOf(itemMap.get("platform"));
                     Object postsObj = itemMap.get("posts");
-                    
+
                     if (postsObj instanceof List) {
                         List<?> postsList = (List<?>) postsObj;
                         for (Object postObj : postsList) {
                             if (postObj instanceof Map) {
                                 Map<?, ?> postMap = (Map<?, ?>) postObj;
-                                
+
                                 ScrapedPost post = ScrapedPost.builder()
                                     .companyName(companyName)
                                     .platform(platform)
@@ -126,7 +181,7 @@ public class ScraperService {
                                     .topic(topic != null ? topic : companyName)
                                     .usedForPattern(false)
                                     .build();
-                                
+
                                 scrapedPostService.save(post);
                             }
                         }
@@ -173,7 +228,7 @@ public class ScraperService {
                     Map<?, ?> itemMap = (Map<?, ?>) item;
                     String platform = String.valueOf(itemMap.get("platform"));
                     Object postsObj = itemMap.get("posts");
-                    
+
                     List<ScrapedPostDTO> posts = new ArrayList<>();
                     if (postsObj instanceof List) {
                         List<?> postsList = (List<?>) postsObj;
@@ -183,7 +238,7 @@ public class ScraperService {
                                 String postText = postMap.get("postText") != null ? postMap.get("postText").toString() : "";
                             String postedAt = postMap.get("postedAt") != null ? postMap.get("postedAt").toString() : "";
                             String url = postMap.get("url") != null ? postMap.get("url").toString() : "";
-                            
+
                             ScrapedPostDTO post = ScrapedPostDTO.builder()
                                 .platform(platform)
                                 .postText(postText)
