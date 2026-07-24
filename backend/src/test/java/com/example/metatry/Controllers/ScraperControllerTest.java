@@ -15,7 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -86,9 +86,7 @@ class ScraperControllerTest {
 
     @Test
     void trigger_returnsOk() throws Exception {
-        ScrapeResponse response = ScrapeResponse.builder()
-                .status("success").companyName("NVIDIA").build();
-        when(scraperService.scrapeCompany("NVIDIA")).thenReturn(response);
+        doNothing().when(scraperService).dispatchWorkflow("NVIDIA");
 
         mockMvc.perform(post("/api/scraper/trigger")
                         .param("companyName", "NVIDIA"))
@@ -105,13 +103,12 @@ class ScraperControllerTest {
     }
 
     @Test
-    void trigger_serviceError_returnsBadRequest() throws Exception {
-        ScrapeResponse response = ScrapeResponse.builder()
-                .status("error").message("Scraping failed").build();
-        when(scraperService.scrapeCompany("NVIDIA")).thenReturn(response);
+    void trigger_serviceError_returnsBadGateway() throws Exception {
+        doThrow(new RuntimeException("GitHub API error"))
+                .when(scraperService).dispatchWorkflow("NVIDIA");
 
         mockMvc.perform(post("/api/scraper/trigger")
                         .param("companyName", "NVIDIA"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadGateway());
     }
 }

@@ -47,23 +47,19 @@ public class ScraperController {
     }
 
     @PostMapping("/trigger")
-    public ResponseEntity<ScrapeResponse> trigger(@RequestParam String companyName) {
+    public ResponseEntity<Map<String, Object>> trigger(@RequestParam String companyName) {
         if (companyName == null || companyName.isBlank()) {
             return ResponseEntity.badRequest().body(
-                ScrapeResponse.builder()
-                    .status("error")
-                    .message("companyName is required")
-                    .build()
+                Map.of("status", "error", "message", "companyName is required")
             );
         }
 
-        ScrapeResponse response = scraperService.scrapeCompany(companyName);
-
-        if ("error".equals(response.getStatus())) {
-            return ResponseEntity.badRequest().body(response);
+        try {
+            scraperService.dispatchWorkflow(companyName);
+            return ResponseEntity.ok(Map.of("status", "success", "message", "Scraping triggered for " + companyName));
+        } catch (Exception e) {
+            return ResponseEntity.status(502).body(Map.of("status", "error", "message", e.getMessage()));
         }
-
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/companies")

@@ -28,6 +28,15 @@ public class ScraperService {
     @Value("${scraper.token}")
     private String scraperToken;
 
+    @Value("${github.token}")
+    private String githubToken;
+
+    @Value("${github.owner}")
+    private String githubOwner;
+
+    @Value("${github.repo}")
+    private String githubRepo;
+
     private final RestTemplate restTemplate;
     private final ScrapedPostRepository scrapedPostRepository;
     private final ScrapedPostService scrapedPostService;
@@ -42,6 +51,24 @@ public class ScraperService {
         if (!scraperToken.equals(token)) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid scraper token");
         }
+    }
+
+    public void dispatchWorkflow(String companyName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(githubToken);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("ref", "deployment");
+        body.put("inputs", Map.of("companyName", companyName != null ? companyName : ""));
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        restTemplate.exchange(
+            "https://api.github.com/repos/" + githubOwner + "/" + githubRepo + "/actions/workflows/scraper.yml/dispatches",
+            HttpMethod.POST,
+            entity,
+            String.class
+        );
     }
 
     public int ingestPosts(IngestRequest request) {
