@@ -25,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -275,7 +277,12 @@ Respond with this exact JSON structure (an array of campaign objects):
 
             List<Long> postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
             String context = strategy.getTitle() + ": " + strategy.getSummary();
-            asyncImageGenerationService.generateImagesForStrategy(context, postIds);
+            TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
+                    @Override public void afterCommit() {
+                        asyncImageGenerationService.generateImagesForStrategy(context, postIds);
+                    }
+                });
 
             strategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(strategy);
