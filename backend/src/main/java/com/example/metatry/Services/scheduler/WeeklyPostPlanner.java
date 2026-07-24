@@ -78,8 +78,7 @@ public class WeeklyPostPlanner {
                 continue;
             }
 
-            boolean aiNeedsImage = data.get("needsImage") != null && (Boolean) data.get("needsImage");
-            boolean needsImage = platform == PlatformType.INSTAGRAM || aiNeedsImage;
+            boolean needsImage = true;
 
             Post post = Post.builder()
                     .title((String) data.getOrDefault("title", ""))

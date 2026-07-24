@@ -63,7 +63,7 @@ class WeeklyPostPlannerTest {
         assertThat(posts).hasSize(3);
         assertThat(posts.get(0).getTitle()).isEqualTo("P1");
         assertThat(posts.get(0).getCampaign()).isEqualTo(c1);
-        assertThat(posts.get(0).getNeedsImage()).isFalse();
+        assertThat(posts.get(0).getNeedsImage()).isTrue();
         assertThat(posts.get(1).getTitle()).isEqualTo("P2");
         assertThat(posts.get(1).getCampaign()).isEqualTo(c1);
         assertThat(posts.get(1).getNeedsImage()).isTrue();
