@@ -8,6 +8,7 @@ import com.example.metatry.Models.ScrapedPost;
 import com.example.metatry.Repositories.CompanyProfileRepository;
 import com.example.metatry.Repositories.ScrapedPostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,7 +20,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ScraperService {
 
-    private static final String SCRAPER_BASE_URL = "http://host.docker.internal:3001";
+    @Value("${scraper.base-url}")
+    private String scraperBaseUrl;
     
     private final RestTemplate restTemplate;
     private final ScrapedPostRepository scrapedPostRepository;
@@ -56,7 +58,7 @@ public class ScraperService {
         try {
             scraperProcessService.ensureRunning();
 
-            String url = SCRAPER_BASE_URL + "/scrape";
+            String url = scraperBaseUrl + "/scrape";
             
             Map<String, String> accounts = new HashMap<>();
             accounts.put("linkedin", linkedin != null ? linkedin : "");

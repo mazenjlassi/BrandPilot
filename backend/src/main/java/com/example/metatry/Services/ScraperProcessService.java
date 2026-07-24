@@ -1,6 +1,7 @@
 package com.example.metatry.Services;
 
 import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.HttpURLConnection;
@@ -9,7 +10,9 @@ import java.net.URI;
 @Service
 public class ScraperProcessService {
 
-    private static final String HEALTH_URL = "http://host.docker.internal:3001/health";
+    @Value("${scraper.base-url}")
+    private String scraperBaseUrl;
+
     private static final long MAX_WAIT_MS = 15000;
 
     public synchronized void ensureRunning() {
@@ -19,7 +22,7 @@ public class ScraperProcessService {
 
     public boolean isAlive() {
         try {
-            HttpURLConnection conn = (HttpURLConnection) URI.create(HEALTH_URL).toURL().openConnection();
+            HttpURLConnection conn = (HttpURLConnection) URI.create(scraperBaseUrl + "/health").toURL().openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(2000);
             conn.setReadTimeout(2000);
@@ -35,7 +38,7 @@ public class ScraperProcessService {
         long deadline = System.currentTimeMillis() + MAX_WAIT_MS;
         while (System.currentTimeMillis() < deadline) {
             try {
-                HttpURLConnection conn = (HttpURLConnection) URI.create(HEALTH_URL).toURL().openConnection();
+                HttpURLConnection conn = (HttpURLConnection) URI.create(scraperBaseUrl + "/health").toURL().openConnection();
                 conn.setRequestMethod("GET");
                 conn.setConnectTimeout(1000);
                 conn.setReadTimeout(1000);
