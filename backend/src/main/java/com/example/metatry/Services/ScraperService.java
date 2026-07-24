@@ -35,11 +35,10 @@ public class ScraperService {
     private final ScraperProcessService scraperProcessService;
     private final CompanyProfileRepository companyProfileRepository;
 
-    public void validateToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
+    public void validateToken(String token) {
+        if (token == null || token.isBlank()) {
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Missing scraper token");
         }
-        String token = authHeader.substring(7);
         if (!scraperToken.equals(token)) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid scraper token");
         }

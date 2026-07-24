@@ -3,6 +3,7 @@ package com.example.metatry.Controllers;
 import com.example.metatry.DTOs.ScrapeRequest;
 import com.example.metatry.DTOs.ScrapeResponse;
 import com.example.metatry.Services.JwtService;
+import com.example.metatry.Repositories.CompanyProfileRepository;
 import com.example.metatry.Services.ScraperService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,9 @@ class ScraperControllerTest {
 
     @MockitoBean
     private UserDetailsService userDetailsService;
+
+    @MockitoBean
+    private CompanyProfileRepository companyProfileRepository;
 
     @Test
     void scrape_returnsOk() throws Exception {

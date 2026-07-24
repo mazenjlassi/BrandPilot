@@ -68,16 +68,16 @@ public class ScraperController {
 
     @GetMapping("/companies")
     public ResponseEntity<List<CompanyProfile>> getCompanies(
-            @RequestHeader("Authorization") String auth) {
-        scraperService.validateToken(auth);
+            @RequestHeader("X-Scraper-Token") String token) {
+        scraperService.validateToken(token);
         return ResponseEntity.ok(companyProfileRepository.findAll());
     }
 
     @PostMapping("/ingest")
     public ResponseEntity<Map<String, Object>> ingest(
-            @RequestHeader("Authorization") String auth,
+            @RequestHeader("X-Scraper-Token") String token,
             @RequestBody IngestRequest request) {
-        scraperService.validateToken(auth);
+        scraperService.validateToken(token);
         int saved = scraperService.ingestPosts(request);
         return ResponseEntity.ok(Map.of("saved", saved));
     }

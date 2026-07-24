@@ -10,7 +10,7 @@ if (!BACKEND_URL || !SCRAPER_TOKEN) {
   process.exit(1);
 }
 
-const headers = { Authorization: `Bearer ${SCRAPER_TOKEN}` };
+const headers = { 'X-Scraper-Token': SCRAPER_TOKEN };
 
 async function getCompanies() {
   if (COMPANY_NAME) {
