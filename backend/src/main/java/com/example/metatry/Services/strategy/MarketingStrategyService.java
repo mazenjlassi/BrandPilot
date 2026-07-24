@@ -14,19 +14,15 @@ import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Repositories.CampaignRepository;
 import com.example.metatry.Repositories.MarketingStrategyRepository;
-import com.example.metatry.Services.AsyncImageGenerationService;
 import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.MemoryContextService;
 import com.example.metatry.Services.prompts.StrategyPromptBuilder;
-import com.example.metatry.Services.scheduler.WeeklyImageDecisionService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,8 +42,6 @@ public class MarketingStrategyService {
     private final MemoryContextService memoryContextService;
     private final MarketingStrategyMapper marketingStrategyMapper;
     private final WeeklyPostPlanner weeklyPostPlanner;
-    private final WeeklyImageDecisionService weeklyImageDecisionService;
-    private final AsyncImageGenerationService asyncImageGenerationService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
@@ -275,20 +269,11 @@ Respond with this exact JSON structure (an array of campaign objects):
         try {
             List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(strategy, campaigns);
 
-            List<Long> postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
-            String context = strategy.getTitle() + ": " + strategy.getSummary();
-            TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override public void afterCommit() {
-                        asyncImageGenerationService.generateImagesForStrategy(context, postIds);
-                    }
-                });
-
             strategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(strategy);
 
             String msg = "Strategy \"" + strategy.getTitle() + "\" approved. Week 1 content generated: "
-                    + campaigns.size() + " campaigns, " + posts.size() + " posts ready for review. Images generating in background.";
+                    + campaigns.size() + " campaigns, " + posts.size() + " posts ready for review. Images will be generated shortly.";
             notificationService.createNotification(msg, "INFO", "/weekly-planner");
         } catch (Exception e) {
             notificationService.createNotification(

@@ -15,8 +15,6 @@ import com.example.metatry.Exceptions.StrategyNotFoundException;
 import com.example.metatry.Exceptions.StrategyConflictException;
 import com.example.metatry.Exceptions.StrategyGenerationException;
 import com.example.metatry.Exceptions.StrategyNotEditableException;
-import com.example.metatry.Services.AsyncImageGenerationService;
-import com.example.metatry.Services.scheduler.WeeklyImageDecisionService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +43,6 @@ class MarketingStrategyServiceTest {
     @Mock private MemoryContextService memoryContextService;
     @Mock private MarketingStrategyMapper marketingStrategyMapper;
     @Mock private WeeklyPostPlanner weeklyPostPlanner;
-    @Mock private WeeklyImageDecisionService weeklyImageDecisionService;
-    @Mock private AsyncImageGenerationService asyncImageGenerationService;
     @Mock private NotificationService notificationService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -58,7 +54,6 @@ class MarketingStrategyServiceTest {
                 strategyRepository, campaignRepository, geminiService,
                 strategyPromptBuilder, memoryContextService,
                 marketingStrategyMapper, weeklyPostPlanner,
-                weeklyImageDecisionService, asyncImageGenerationService,
                 notificationService, objectMapper
         );
     }

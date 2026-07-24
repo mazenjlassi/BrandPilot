@@ -74,4 +74,7 @@ List<Post> findByStatusAndScheduledAtBetween(PostStatus status, LocalDateTime st
 
     List<Post> findTop3ByOrderByCreatedAtDesc();
 
+    @Query("SELECT p FROM Post p WHERE p.needsImage = true AND p.images IS EMPTY")
+    List<Post> findByNeedsImageTrueAndImagesEmpty();
+
 }

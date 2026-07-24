@@ -252,7 +252,7 @@ public class AiImageService {
         };
 
         promptBuilder.append(" ").append(styleTag);
-        promptBuilder.append(" photorealistic cinematic lighting 4k");
+        promptBuilder.append(" information technology business enterprise software solution digital transformation SaaS modern corporate professional 4k");
         return promptBuilder.toString();
     }
 }
