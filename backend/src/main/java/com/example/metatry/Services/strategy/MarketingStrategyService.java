@@ -14,6 +14,7 @@ import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Repositories.CampaignRepository;
 import com.example.metatry.Repositories.MarketingStrategyRepository;
+import com.example.metatry.Services.AsyncImageGenerationService;
 import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.MemoryContextService;
 import com.example.metatry.Services.prompts.StrategyPromptBuilder;
@@ -44,6 +45,7 @@ public class MarketingStrategyService {
     private final MarketingStrategyMapper marketingStrategyMapper;
     private final WeeklyPostPlanner weeklyPostPlanner;
     private final WeeklyImageDecisionService weeklyImageDecisionService;
+    private final AsyncImageGenerationService asyncImageGenerationService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
@@ -271,14 +273,15 @@ Respond with this exact JSON structure (an array of campaign objects):
         try {
             List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(strategy, campaigns);
 
-            weeklyImageDecisionService.decideAndGenerateImages(posts,
-                    strategy.getTitle() + ": " + strategy.getSummary());
+            List<Long> postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
+            String context = strategy.getTitle() + ": " + strategy.getSummary();
+            asyncImageGenerationService.generateImagesForStrategy(context, postIds);
 
             strategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(strategy);
 
             String msg = "Strategy \"" + strategy.getTitle() + "\" approved. Week 1 content generated: "
-                    + campaigns.size() + " campaigns, " + posts.size() + " posts ready for review.";
+                    + campaigns.size() + " campaigns, " + posts.size() + " posts ready for review. Images generating in background.";
             notificationService.createNotification(msg, "INFO", "/weekly-planner");
         } catch (Exception e) {
             notificationService.createNotification(

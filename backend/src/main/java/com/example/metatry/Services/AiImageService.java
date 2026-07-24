@@ -252,7 +252,7 @@ public class AiImageService {
         };
 
         promptBuilder.append(" ").append(styleTag);
-        promptBuilder.append(" professional business technology cinematic lighting photorealistic 4k clean minimalist");
+        promptBuilder.append(" photorealistic cinematic lighting 4k");
         return promptBuilder.toString();
     }
 }
