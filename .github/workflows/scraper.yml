@@ -32,3 +32,7 @@ jobs:
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           SCRAPER_TOKEN: ${{ secrets.SCRAPER_TOKEN }}
           COMPANY_NAME: ${{ inputs.companyName || '' }}
+          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
+          INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
+          FACEBOOK_USERNAME: ${{ secrets.FACEBOOK_USERNAME }}
+          FACEBOOK_PASSWORD: ${{ secrets.FACEBOOK_PASSWORD }}
