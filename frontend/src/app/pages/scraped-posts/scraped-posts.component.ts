@@ -175,7 +175,7 @@ export class ScrapedPostsComponent implements OnInit {
 
   private pollForNewPosts(initialCount: number) {
     let attempts = 0;
-    const maxAttempts = 36;
+    const maxAttempts = 120;
 
     this.pollTimer = setInterval(() => {
       attempts++;
