@@ -11,6 +11,20 @@
   animation: fadeIn 400ms ease-out;
 }
 
+/* Page Header with LinkedIn Badge */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.page-header h1 {
+  margin-bottom: 0;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -375,6 +389,68 @@
 }
 
 /* Reduced Motion */
+/* LinkedIn Connection Badge */
+.linkedin-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.linkedin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: var(--font-medium);
+}
+
+.linkedin-badge.connected {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.linkedin-badge.checking {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-secondary);
+}
+
+.linkedin-badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.btn-connect-linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #0A66C2;
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all 200ms ease;
+  min-height: 44px;
+}
+
+.btn-connect-linkedin:hover {
+  background: #004182;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(10, 102, 194, 0.3);
+}
+
+.btn-connect-linkedin:active {
+  transform: scale(0.98);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .posts-page,
   .post-card,

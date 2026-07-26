@@ -153,4 +153,18 @@ export class PostService {
   regeneratePost(id: number) {
     return this.http.post<any>(`${this.api}/${id}/regenerate`, {});
   }
+
+  // ================= LINKEDIN AUTH =================
+
+  getLinkedInStatus() {
+    return this.http.get<{ authenticated: boolean; personUrn: string | null }>(
+      `${environment.apiUrl}/api/linkedin/status`
+    );
+  }
+
+  getLinkedInAuthUrl() {
+    return this.http.get<{ authUrl: string }>(
+      `${environment.apiUrl}/api/linkedin/auth-url`
+    );
+  }
 }

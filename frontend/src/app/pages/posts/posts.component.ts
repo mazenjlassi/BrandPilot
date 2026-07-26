@@ -5,7 +5,7 @@ import { PostService } from '../../services/post.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../shared/toast/toast.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
-import { LucideAngularModule, Eye, Clock, CheckCircle, Send, FileText, Image, Search, Loader2 } from 'lucide-angular';
+import { LucideAngularModule, Eye, Clock, CheckCircle, Send, FileText, Image, Search, Loader2, Linkedin } from 'lucide-angular';
 
 @Component({
   selector: 'app-posts',
@@ -22,6 +22,10 @@ export class PostsComponent implements OnInit {
   
   // Search
   searchQuery = '';
+
+  // LinkedIn Auth
+  linkedInStatus: { authenticated: boolean; personUrn: string | null } | null = null;
+  linkedInChecking = false;
   
   // Filtered posts based on search
   get filteredPosts() {
@@ -43,6 +47,7 @@ export class PostsComponent implements OnInit {
 
   ngOnInit() {
     this.loadPosts();
+    this.checkLinkedInStatus();
   }
 
   setTab(tab: string) {
@@ -102,6 +107,48 @@ export class PostsComponent implements OnInit {
     });
   }
 
+  checkLinkedInStatus() {
+    this.linkedInChecking = true;
+    this.service.getLinkedInStatus().subscribe({
+      next: (res) => {
+        this.linkedInStatus = res;
+        this.linkedInChecking = false;
+      },
+      error: () => {
+        this.linkedInStatus = null;
+        this.linkedInChecking = false;
+      }
+    });
+  }
+
+  connectLinkedIn() {
+    this.service.getLinkedInAuthUrl().subscribe({
+      next: (res) => {
+        const popup = window.open(res.authUrl, '_blank', 'width=600,height=700');
+        if (popup) {
+          const interval = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(interval);
+              this.checkLinkedInStatus();
+              return;
+            }
+            this.service.getLinkedInStatus().subscribe(s => {
+              if (s.authenticated) {
+                this.linkedInStatus = s;
+                clearInterval(interval);
+                popup.close();
+                this.toast.success('LinkedIn connected!');
+              }
+            });
+          }, 2000);
+        }
+      },
+      error: () => {
+        this.toast.error('Failed to get LinkedIn auth URL');
+      }
+    });
+  }
+
   icons = {
     eye: Eye,
     clock: Clock,
@@ -110,6 +157,7 @@ export class PostsComponent implements OnInit {
     fileText: FileText,
     image: Image,
     search: Search,
-    loader2: Loader2
+    loader2: Loader2,
+    linkedin: Linkedin
   };
 }

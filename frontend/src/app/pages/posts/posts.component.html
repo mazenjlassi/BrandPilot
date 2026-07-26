@@ -1,5 +1,24 @@
 <div class="posts-page">
-  <h1>Posts</h1>
+  <div class="page-header">
+    <h1>Posts</h1>
+
+    <!-- LinkedIn Connection Badge -->
+    <div class="linkedin-status">
+      <div *ngIf="linkedInChecking" class="linkedin-badge checking">
+        <lucide-icon [img]="icons.loader2" [size]="16" class="spin"></lucide-icon>
+        Checking...
+      </div>
+      <div *ngIf="!linkedInChecking && linkedInStatus?.authenticated" class="linkedin-badge connected">
+        <span class="dot"></span>
+        LinkedIn Connected
+      </div>
+      <button *ngIf="!linkedInChecking && linkedInStatus !== null && !linkedInStatus?.authenticated"
+              class="btn-connect-linkedin" (click)="connectLinkedIn()">
+        <lucide-icon [img]="icons.linkedin" [size]="16"></lucide-icon>
+        Connect LinkedIn
+      </button>
+    </div>
+  </div>
 
   <!-- Search Bar -->
   <div class="search-bar">
