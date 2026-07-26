@@ -115,6 +115,10 @@
           <lucide-icon [img]="icons.eye" [size]="16"></lucide-icon>
           View Details
         </button>
+        <button *ngIf="activeTab === 'drafts' && post.image?.imageUrl" (click)="deleteImage(post)" class="btn-delete-image" aria-label="Delete image from this post">
+          <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+          Delete Image
+        </button>
         <button *ngIf="activeTab === 'permanent'" (click)="postNow(post)" aria-label="Post this to social media now">
           <lucide-icon [img]="icons.send" [size]="16"></lucide-icon>
           Post Now

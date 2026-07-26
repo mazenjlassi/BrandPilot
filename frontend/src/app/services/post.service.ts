@@ -156,6 +156,10 @@ export class PostService {
 
   // ================= CLEANUP =================
 
+  deletePostImage(postId: number) {
+    return this.http.delete<any>(`${this.api}/${postId}/image`);
+  }
+
   deleteAllDrafts() {
     return this.http.delete<any>(`${this.api}/draft/all`);
   }

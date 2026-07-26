@@ -134,6 +134,17 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    @Transactional
+    public void deletePostImage(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        if (post.getImages() != null && !post.getImages().isEmpty()) {
+            postImageRepository.deleteAll(post.getImages());
+            post.getImages().clear();
+            postRepository.save(post);
+        }
+    }
+
     // ================= BULK DELETE =================
 
     @Transactional

@@ -314,6 +314,19 @@
   transform: scale(0.98);
 }
 
+.post-card .actions button.btn-delete-image {
+  background: transparent;
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: none;
+}
+
+.post-card .actions button.btn-delete-image:hover {
+  background: rgba(239, 68, 68, 0.1);
+  transform: none;
+  box-shadow: none;
+}
+
 /* Loading */
 .posts-page .loading {
   grid-column: 1 / -1;

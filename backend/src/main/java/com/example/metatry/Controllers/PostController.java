@@ -131,6 +131,13 @@ public class PostController {
         return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
     }
 
+    @DeleteMapping("/{id}/image")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> deletePostImage(@PathVariable Long id) {
+        postService.deletePostImage(id);
+        return ResponseEntity.ok(Map.of("message", "Post image deleted successfully"));
+    }
+
     @DeleteMapping("/draft/all")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> deleteAllDrafts() {

@@ -122,6 +122,23 @@ export class PostsComponent implements OnInit {
     });
   }
 
+  async deleteImage(post: any) {
+    const ok = await this.confirm.confirm({
+      title: 'Delete Image',
+      message: 'Remove the image from this draft post?'
+    });
+    if (!ok) return;
+    this.service.deletePostImage(post.id).subscribe({
+      next: () => {
+        post.image = null;
+        this.toast.success('Image deleted');
+      },
+      error: () => {
+        this.toast.error('Failed to delete image');
+      }
+    });
+  }
+
   async deleteAllDrafts() {
     const ok = await this.confirm.confirm({
       title: 'Delete All Drafts',
