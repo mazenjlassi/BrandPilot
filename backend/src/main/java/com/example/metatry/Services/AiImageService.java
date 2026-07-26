@@ -7,6 +7,8 @@ import com.example.metatry.Models.Post;
 import com.example.metatry.Models.PostImage;
 import com.example.metatry.Repositories.PostImageRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -20,6 +22,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Service
 @RequiredArgsConstructor
 public class AiImageService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiImageService.class);
 
     private final CloudinaryService cloudinaryService;
     private final CloudflareConfig cloudflareConfig;
@@ -103,18 +107,13 @@ public class AiImageService {
             return imageUrl;
 
         } catch (HttpStatusCodeException e) {
-            System.out.println("=== Cloudflare AI HTTP Error ===");
-            System.out.println("Status: " + e.getStatusCode());
-            System.out.println("Response body: " + e.getResponseBodyAsString());
+            log.error("Cloudflare AI HTTP Error: status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
             throw new ResponseStatusException(
                     BAD_REQUEST,
                     "Cloudflare AI error: " + e.getResponseBodyAsString()
             );
         } catch (Exception e) {
-            System.out.println("=== Cloudflare AI Error ===");
-            System.out.println("Type: " + e.getClass().getName());
-            System.out.println("Message: " + e.getMessage());
-            e.printStackTrace(System.out);
+            log.error("Cloudflare AI Error: type={}, message={}", e.getClass().getName(), e.getMessage(), e);
             throw new ResponseStatusException(
                     BAD_REQUEST,
                     "Error generating AI image: " + e.getMessage()
