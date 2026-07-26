@@ -8,7 +8,7 @@ import com.example.metatry.Services.CampaignService;
 import com.example.metatry.Services.JwtService;
 import com.example.metatry.Services.strategy.MarketingStrategyService;
 import com.example.metatry.Services.scheduler.WeeklyCampaignService;
-import com.example.metatry.Services.scheduler.WeeklyImageDecisionService;
+import com.example.metatry.Services.AiImageService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class MarketingStrategyControllerTest {
     private WeeklyPostPlanner weeklyPostPlanner;
 
     @MockitoBean
-    private WeeklyImageDecisionService weeklyImageDecisionService;
+    private AiImageService aiImageService;
 
     @MockitoBean
     private WeeklyCampaignService weeklyCampaignService;

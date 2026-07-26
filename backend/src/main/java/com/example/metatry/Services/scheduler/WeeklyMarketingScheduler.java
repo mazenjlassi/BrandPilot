@@ -2,11 +2,13 @@ package com.example.metatry.Services.scheduler;
 
 import com.example.metatry.DTOs.GenerateStrategyRequest;
 import com.example.metatry.Enums.MarketingStrategyStatus;
+import com.example.metatry.Enums.PlatformType;
 import com.example.metatry.Models.Campaign;
 import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Repositories.CampaignRepository;
 import com.example.metatry.Repositories.MarketingStrategyRepository;
+import com.example.metatry.Services.AiImageService;
 import com.example.metatry.Services.EmailService;
 import com.example.metatry.Services.strategy.MarketingStrategyService;
 import com.example.metatry.Services.strategy.NotificationService;
@@ -26,7 +28,7 @@ public class WeeklyMarketingScheduler {
     private final CampaignRepository campaignRepository;
     private final MarketingStrategyService strategyService;
     private final WeeklyPostPlanner weeklyPostPlanner;
-    private final WeeklyImageDecisionService weeklyImageDecisionService;
+    private final AiImageService aiImageService;
     private final EmailService emailService;
     private final NotificationService notificationService;
 
@@ -74,8 +76,13 @@ public class WeeklyMarketingScheduler {
 
             List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(activeStrategy, campaigns);
 
-            String strategyContext = activeStrategy.getTitle() + ": " + activeStrategy.getSummary();
-            weeklyImageDecisionService.decideAndGenerateImages(posts, strategyContext);
+            for (Post p : posts) {
+                if (p.getPlatform() != null && p.getPlatform() != PlatformType.LINKEDIN) {
+                    try {
+                        aiImageService.generateImageForPost(p);
+                    } catch (Exception ignored) {}
+                }
+            }
 
             activeStrategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(activeStrategy);
