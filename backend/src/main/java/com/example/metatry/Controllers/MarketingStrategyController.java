@@ -133,6 +133,13 @@ public class MarketingStrategyController {
         return generateWeek(active.getId());
     }
 
+    @DeleteMapping("/inactive")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> deleteInactiveStrategies() {
+        strategyService.deleteInactiveStrategies();
+        return ResponseEntity.ok(Map.of("message", "Inactive strategies deleted successfully"));
+    }
+
     @PutMapping("/{id}/auto-generate")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MarketingStrategyDTO> setAutoGenerate(

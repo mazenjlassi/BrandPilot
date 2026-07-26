@@ -345,6 +345,16 @@ Respond with this exact JSON structure (an array of campaign objects):
     }
 
     @Transactional
+    public void deleteInactiveStrategies() {
+        List<MarketingStrategy> inactive = strategyRepository.findByStatus(MarketingStrategyStatus.INACTIVE);
+        for (MarketingStrategy s : inactive) {
+            List<Campaign> campaigns = campaignRepository.findByMarketingStrategyId(s.getId());
+            campaignRepository.deleteAll(campaigns);
+            strategyRepository.delete(s);
+        }
+    }
+
+    @Transactional
     public void autoCompleteExpiredStrategies() {
         List<MarketingStrategy> activeStrategies = List.copyOf(
                 strategyRepository.findAll().stream()

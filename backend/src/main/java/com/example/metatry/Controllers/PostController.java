@@ -131,6 +131,16 @@ public class PostController {
         return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
     }
 
+    @DeleteMapping("/draft/images")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> deleteDraftImages() {
+        int count = postService.deleteImagesForDraftPosts();
+        return ResponseEntity.ok(Map.of(
+                "message", count + " image(s) deleted for draft posts",
+                "deletedCount", count
+        ));
+    }
+
     // ================= CREATE MANUALLY =================
     @PostMapping(value = "/campaigns/{campaignId}/posts", consumes = "multipart/form-data")
     @PreAuthorize("isAuthenticated()")

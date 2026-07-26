@@ -11,6 +11,7 @@ import com.example.metatry.Repositories.PostImageRepository;
 import com.example.metatry.Repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -131,6 +132,22 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         postRepository.delete(post);
+    }
+
+    // ================= DELETE DRAFT IMAGES =================
+
+    @Transactional
+    public int deleteImagesForDraftPosts() {
+        List<Post> drafts = postRepository.findByStatus(PostStatus.DRAFT);
+        int count = 0;
+        for (Post post : drafts) {
+            if (post.getImages() != null && !post.getImages().isEmpty()) {
+                count += post.getImages().size();
+                postImageRepository.deleteAll(post.getImages());
+                post.getImages().clear();
+            }
+        }
+        return count;
     }
 
     // =================  CREATE MANUALLY =================

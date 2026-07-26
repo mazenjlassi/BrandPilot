@@ -14,4 +14,6 @@ public interface MarketingStrategyRepository extends JpaRepository<MarketingStra
     List<MarketingStrategy> findAllByOrderByCreatedAtDesc();
 
     boolean existsByStatus(MarketingStrategyStatus status);
+
+    List<MarketingStrategy> findByStatus(MarketingStrategyStatus status);
 }
