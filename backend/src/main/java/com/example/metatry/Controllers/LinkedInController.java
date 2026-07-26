@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,11 +32,10 @@ public class LinkedInController {
      * ✅ Obtenir l'URL d'authentification
      */
     @GetMapping("/auth-url")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAuthUrl() {
-        return ResponseEntity.ok(Map.of(
-                "authUrl", tokenService.getAuthorizationUrl()
-        ));
+    public ResponseEntity<Void> getAuthUrl() {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(tokenService.getAuthorizationUrl()))
+                .build();
     }
 
     /**
@@ -239,9 +239,10 @@ public class LinkedInController {
      */
     @GetMapping("/status")
     public ResponseEntity<?> getStatus() {
+        String urn = tokenService.getPersonUrn();
         return ResponseEntity.ok(Map.of(
                 "authenticated", tokenService.isAuthenticated(),
-                "personUrn", tokenService.getPersonUrn()
+                "personUrn", urn != null ? urn : ""
         ));
     }
 }

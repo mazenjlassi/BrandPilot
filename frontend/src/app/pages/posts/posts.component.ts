@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 import { PostService } from '../../services/post.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../shared/toast/toast.service';
@@ -122,31 +123,28 @@ export class PostsComponent implements OnInit {
   }
 
   connectLinkedIn() {
-    this.service.getLinkedInAuthUrl().subscribe({
-      next: (res) => {
-        const popup = window.open(res.authUrl, '_blank', 'width=600,height=700');
-        if (popup) {
-          const interval = setInterval(() => {
-            if (popup.closed) {
-              clearInterval(interval);
-              this.checkLinkedInStatus();
-              return;
-            }
-            this.service.getLinkedInStatus().subscribe(s => {
-              if (s.authenticated) {
-                this.linkedInStatus = s;
-                clearInterval(interval);
-                popup.close();
-                this.toast.success('LinkedIn connected!');
-              }
-            });
-          }, 2000);
+    const popup = window.open(
+      `${environment.apiUrl}/api/linkedin/auth-url`,
+      '_blank',
+      'width=600,height=700'
+    );
+    if (popup) {
+      const interval = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(interval);
+          this.checkLinkedInStatus();
+          return;
         }
-      },
-      error: () => {
-        this.toast.error('Failed to get LinkedIn auth URL');
-      }
-    });
+        this.service.getLinkedInStatus().subscribe(s => {
+          if (s.authenticated) {
+            this.linkedInStatus = s;
+            clearInterval(interval);
+            popup.close();
+            this.toast.success('LinkedIn connected!');
+          }
+        });
+      }, 2000);
+    }
   }
 
   icons = {
