@@ -88,7 +88,7 @@ class PostUnitTest {
         PostImage image = PostImage.builder().imageUrl("https://example.com/img.png").build();
 
         Post post = new Post(
-                1L, "Title", "Content", "#tag", "vid.mp4", true,
+                1L, "Title", "Content", "#tag", "vid.mp4",
                 PlatformType.FACEBOOK, true, PostStatus.SCHEDULED,
                 now, now, now, true, "https://link.com",
                 50, 5, 2, 500, 0.75, "fp_456", true,
