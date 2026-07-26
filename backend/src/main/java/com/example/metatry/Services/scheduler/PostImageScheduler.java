@@ -24,7 +24,7 @@ public class PostImageScheduler {
     @Scheduled(fixedRate = 30000)
     @Transactional
     public void generatePendingImages() {
-        List<Post> pending = postRepository.findByNeedsImageTrueAndImagesEmpty();
+        List<Post> pending = postRepository.findPlatformsNeedingImagesWithEmptyImages();
         if (pending.isEmpty()) return;
 
         log.info("Image scheduler: {} posts pending image generation", pending.size());

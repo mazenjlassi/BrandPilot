@@ -81,6 +81,23 @@ export class StrategyDashboardComponent implements OnInit {
     });
   }
 
+  async deleteStrategy(id: number) {
+    const ok = await this.confirm.confirm({
+      title: 'Delete Strategy',
+      message: 'This will permanently delete this strategy and its campaigns. Continue?'
+    });
+    if (!ok) return;
+    this.strategyService.delete(id).subscribe({
+      next: () => {
+        this.loadStrategies();
+        this.toast.success('Strategy deleted');
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Failed to delete strategy';
+      }
+    });
+  }
+
   async deleteInactive() {
     const ok = await this.confirm.confirm({
       title: 'Delete Inactive Strategies',

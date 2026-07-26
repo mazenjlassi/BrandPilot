@@ -1,5 +1,6 @@
 package com.example.metatry.Services.scheduler;
 
+import com.example.metatry.Enums.PlatformType;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Services.AiImageService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class WeeklyImageDecisionService {
         List<String> errors = new java.util.ArrayList<>();
         for (Post post : posts) {
             if (post.getPlatform() == null) continue;
-            if (post.getNeedsImage() == null || !post.getNeedsImage()) continue;
+            if (post.getPlatform() == null || post.getPlatform() == PlatformType.LINKEDIN) continue;
 
             try {
                 aiImageService.generateImageForPost(post);

@@ -3,10 +3,16 @@
     <h1>Posts</h1>
 
     <div class="header-actions">
-      <!-- Clean Draft Images -->
-      <button class="btn-clean" (click)="deleteDraftImages()" title="Delete images from draft posts">
+      <!-- Clean Drafts -->
+      <button class="btn-clean" (click)="deleteAllDrafts()" title="Delete all draft posts">
         <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
-        Clean Images
+        Clean Drafts
+      </button>
+
+      <!-- Clean Published -->
+      <button class="btn-clean" (click)="cleanPublished()" title="Delete published posts, keep latest 20">
+        <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+        Clean Published
       </button>
 
       <!-- LinkedIn Connection Badge -->

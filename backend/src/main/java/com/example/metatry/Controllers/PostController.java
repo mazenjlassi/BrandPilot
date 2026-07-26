@@ -131,12 +131,23 @@ public class PostController {
         return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
     }
 
-    @DeleteMapping("/draft/images")
+    @DeleteMapping("/draft/all")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> deleteDraftImages() {
-        int count = postService.deleteImagesForDraftPosts();
+    public ResponseEntity<Map<String, Object>> deleteAllDrafts() {
+        int count = postService.deleteAllDrafts();
         return ResponseEntity.ok(Map.of(
-                "message", count + " image(s) deleted for draft posts",
+                "message", count + " draft post(s) deleted",
+                "deletedCount", count
+        ));
+    }
+
+    @DeleteMapping("/published/clean")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> cleanPublished(
+            @RequestParam(defaultValue = "20") int keep) {
+        int count = postService.cleanPublished(keep);
+        return ResponseEntity.ok(Map.of(
+                "message", count + " published post(s) deleted (kept latest " + keep + ")",
                 "deletedCount", count
         ));
     }
@@ -279,7 +290,7 @@ public class PostController {
         }
         postRepository.save(post);
 
-        if (post.getNeedsImage() != null && post.getNeedsImage()) {
+        if (post.getPlatform() != null && post.getPlatform() != PlatformType.LINKEDIN) {
             try {
                 aiImageService.generateImageForPost(post);
             } catch (Exception e) {

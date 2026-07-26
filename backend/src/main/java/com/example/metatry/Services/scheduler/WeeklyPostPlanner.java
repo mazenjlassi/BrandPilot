@@ -78,8 +78,6 @@ public class WeeklyPostPlanner {
                 continue;
             }
 
-            boolean needsImage = true;
-
             Post post = Post.builder()
                     .title((String) data.getOrDefault("title", ""))
                     .content((String) data.getOrDefault("content", ""))
@@ -92,7 +90,6 @@ public class WeeklyPostPlanner {
                     .status(PostStatus.DRAFT)
                     .permanent(data.get("permanent") != null && (Boolean) data.get("permanent"))
                     .link((String) data.getOrDefault("link", "https://3lm-solutions2.odoo.com/contactus"))
-                    .needsImage(needsImage)
                     .build();
 
             if (data.get("scheduledDay") != null && data.get("scheduledHour") != null) {

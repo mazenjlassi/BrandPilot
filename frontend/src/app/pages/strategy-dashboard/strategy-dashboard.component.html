@@ -95,6 +95,10 @@
           <lucide-icon [img]="icons.x" [size]="16"></lucide-icon>
           Deactivate
         </button>
+        <button *ngIf="s.status === 'INACTIVE'" class="action-btn danger" (click)="deleteStrategy(s.id)">
+          <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+          Delete
+        </button>
       </div>
     </article>
   </div>

@@ -345,6 +345,14 @@ Respond with this exact JSON structure (an array of campaign objects):
     }
 
     @Transactional
+    public void deleteStrategy(Long id) {
+        MarketingStrategy s = strategyRepository.findById(id)
+                .orElseThrow(() -> new StrategyNotFoundException(id));
+        campaignRepository.findByMarketingStrategyId(id).forEach(c -> campaignRepository.delete(c));
+        strategyRepository.delete(s);
+    }
+
+    @Transactional
     public void deleteInactiveStrategies() {
         List<MarketingStrategy> inactive = strategyRepository.findByStatus(MarketingStrategyStatus.INACTIVE);
         for (MarketingStrategy s : inactive) {

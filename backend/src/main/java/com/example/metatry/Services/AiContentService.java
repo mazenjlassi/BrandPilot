@@ -246,7 +246,6 @@ public class AiContentService {
                 .platform(platform)
                 .generatedByAI(true)
                 .approved(false)
-                .needsImage(true)
                 .status(PostStatus.DRAFT)
                 .campaign(campaign)
                 .permanent(false)

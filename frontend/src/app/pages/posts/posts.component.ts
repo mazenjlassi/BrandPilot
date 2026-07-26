@@ -122,19 +122,36 @@ export class PostsComponent implements OnInit {
     });
   }
 
-  async deleteDraftImages() {
+  async deleteAllDrafts() {
     const ok = await this.confirm.confirm({
-      title: 'Delete Draft Images',
-      message: 'This will remove all images from draft posts. Continue?'
+      title: 'Delete All Drafts',
+      message: 'This will permanently delete all draft posts. Continue?'
     });
     if (!ok) return;
-    this.service.deleteDraftImages().subscribe({
+    this.service.deleteAllDrafts().subscribe({
       next: (res) => {
-        this.toast.success(res.message || 'Draft images deleted');
+        this.toast.success(res.message || 'Drafts deleted');
         this.loadPosts();
       },
       error: () => {
-        this.toast.error('Failed to delete draft images');
+        this.toast.error('Failed to delete drafts');
+      }
+    });
+  }
+
+  async cleanPublished() {
+    const ok = await this.confirm.confirm({
+      title: 'Clean Published Posts',
+      message: 'This will delete all published posts except the latest 20. Continue?'
+    });
+    if (!ok) return;
+    this.service.cleanPublished(20).subscribe({
+      next: (res) => {
+        this.toast.success(res.message || 'Published posts cleaned');
+        this.loadPosts();
+      },
+      error: () => {
+        this.toast.error('Failed to clean published posts');
       }
     });
   }

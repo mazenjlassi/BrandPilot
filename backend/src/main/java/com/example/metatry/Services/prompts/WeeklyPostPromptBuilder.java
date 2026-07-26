@@ -57,8 +57,7 @@ Respond with this exact JSON structure:
       "link": "https://3lm-solutions2.odoo.com/contactus",
       "permanent": false,
       "scheduledDay": "2026-07-13",
-      "scheduledHour": 9,
-      "needsImage": true
+      "scheduledHour": 9
     }
   ]
 }

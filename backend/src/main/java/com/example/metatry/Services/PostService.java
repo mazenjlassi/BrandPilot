@@ -134,20 +134,22 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    // ================= DELETE DRAFT IMAGES =================
+    // ================= BULK DELETE =================
 
     @Transactional
-    public int deleteImagesForDraftPosts() {
+    public int deleteAllDrafts() {
         List<Post> drafts = postRepository.findByStatus(PostStatus.DRAFT);
-        int count = 0;
-        for (Post post : drafts) {
-            if (post.getImages() != null && !post.getImages().isEmpty()) {
-                count += post.getImages().size();
-                postImageRepository.deleteAll(post.getImages());
-                post.getImages().clear();
-            }
-        }
-        return count;
+        postRepository.deleteAll(drafts);
+        return drafts.size();
+    }
+
+    @Transactional
+    public int cleanPublished(int keep) {
+        List<Post> published = postRepository.findByStatusOrderByPublishedAtDesc(PostStatus.PUBLISHED);
+        if (published.size() <= keep) return 0;
+        List<Post> toDelete = published.subList(keep, published.size());
+        postRepository.deleteAll(toDelete);
+        return toDelete.size();
     }
 
     // =================  CREATE MANUALLY =================

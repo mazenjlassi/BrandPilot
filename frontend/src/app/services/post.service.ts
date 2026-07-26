@@ -156,8 +156,12 @@ export class PostService {
 
   // ================= CLEANUP =================
 
-  deleteDraftImages() {
-    return this.http.delete<any>(`${this.api}/draft/images`);
+  deleteAllDrafts() {
+    return this.http.delete<any>(`${this.api}/draft/all`);
+  }
+
+  cleanPublished(keep: number = 20) {
+    return this.http.delete<any>(`${this.api}/published/clean?keep=${keep}`);
   }
 
   // ================= LINKEDIN AUTH =================

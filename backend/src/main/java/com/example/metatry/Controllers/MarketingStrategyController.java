@@ -98,6 +98,13 @@ public class MarketingStrategyController {
         return ResponseEntity.ok(strategyService.deactivateStrategy(id));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, Object>> deleteStrategy(@PathVariable Long id) {
+        strategyService.deleteStrategy(id);
+        return ResponseEntity.ok(Map.of("message", "Strategy deleted successfully"));
+    }
+
     @GetMapping("/{id}/campaigns")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<CampaignDTO>> getStrategyCampaigns(@PathVariable Long id) {

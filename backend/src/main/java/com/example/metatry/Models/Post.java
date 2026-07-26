@@ -32,9 +32,6 @@ public class Post {
 
     private String videoUrl;
 
-    @Builder.Default
-    private Boolean needsImage = false;
-
     @Enumerated(EnumType.STRING)
     private PlatformType platform;
 
