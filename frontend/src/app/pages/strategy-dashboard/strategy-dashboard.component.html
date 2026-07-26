@@ -6,6 +6,10 @@
       <h1>Marketing Strategies</h1>
       <p class="subtitle">Create, approve, and manage your content strategies</p>
     </div>
+    <button class="btn-clean" (click)="deleteInactive()" title="Delete inactive strategies">
+      <lucide-icon [img]="icons.trash2" [size]="16"></lucide-icon>
+      Clean Inactive
+    </button>
   </header>
 
   <!-- LOADING STATE -->

@@ -390,6 +390,32 @@
 
 /* Reduced Motion */
 /* LinkedIn Connection Badge */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.btn-clean {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  background: transparent;
+  color: #EF4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-clean:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .linkedin-status {
   display: flex;
   align-items: center;

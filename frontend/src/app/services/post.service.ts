@@ -154,6 +154,12 @@ export class PostService {
     return this.http.post<any>(`${this.api}/${id}/regenerate`, {});
   }
 
+  // ================= CLEANUP =================
+
+  deleteDraftImages() {
+    return this.http.delete<any>(`${this.api}/draft/images`);
+  }
+
   // ================= LINKEDIN AUTH =================
 
   getLinkedInStatus() {

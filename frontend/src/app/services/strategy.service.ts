@@ -56,4 +56,8 @@ export class StrategyService {
   setAutoGenerate(id: number, autoGenerate: boolean) {
     return this.http.put<any>(`${this.api}/${id}/auto-generate`, { autoGenerate });
   }
+
+  deleteInactive() {
+    return this.http.delete<any>(`${this.api}/inactive`);
+  }
 }

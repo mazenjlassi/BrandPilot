@@ -6,7 +6,7 @@ import { PostService } from '../../services/post.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../shared/toast/toast.service';
 import { ConfirmDialogService } from '../../shared/confirm-dialog/confirm-dialog.service';
-import { LucideAngularModule, Eye, Clock, CheckCircle, Send, FileText, Image, Search, Loader2, Linkedin } from 'lucide-angular';
+import { LucideAngularModule, Eye, Clock, CheckCircle, Send, FileText, Image, Search, Loader2, Linkedin, Trash2 } from 'lucide-angular';
 
 @Component({
   selector: 'app-posts',
@@ -122,6 +122,23 @@ export class PostsComponent implements OnInit {
     });
   }
 
+  async deleteDraftImages() {
+    const ok = await this.confirm.confirm({
+      title: 'Delete Draft Images',
+      message: 'This will remove all images from draft posts. Continue?'
+    });
+    if (!ok) return;
+    this.service.deleteDraftImages().subscribe({
+      next: (res) => {
+        this.toast.success(res.message || 'Draft images deleted');
+        this.loadPosts();
+      },
+      error: () => {
+        this.toast.error('Failed to delete draft images');
+      }
+    });
+  }
+
   connectLinkedIn() {
     const popup = window.open(
       `${environment.apiUrl}/api/linkedin/auth-url`,
@@ -156,6 +173,7 @@ export class PostsComponent implements OnInit {
     image: Image,
     search: Search,
     loader2: Loader2,
-    linkedin: Linkedin
+    linkedin: Linkedin,
+    trash2: Trash2
   };
 }
