@@ -7,7 +7,7 @@ import com.example.metatry.Enums.MarketingStrategyStatus;
 import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Repositories.CampaignRepository;
 import com.example.metatry.Repositories.MarketingStrategyRepository;
-import com.example.metatry.Services.AiImageService;
+import com.example.metatry.Services.AsyncImageService;
 import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.MemoryContextService;
 import com.example.metatry.Services.prompts.StrategyPromptBuilder;
@@ -44,7 +44,7 @@ class MarketingStrategyServiceTest {
     @Mock private MemoryContextService memoryContextService;
     @Mock private MarketingStrategyMapper marketingStrategyMapper;
     @Mock private WeeklyPostPlanner weeklyPostPlanner;
-    @Mock private AiImageService aiImageService;
+    @Mock private AsyncImageService asyncImageService;
     @Mock private NotificationService notificationService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -55,7 +55,7 @@ class MarketingStrategyServiceTest {
         strategyService = new MarketingStrategyService(
                 strategyRepository, campaignRepository, geminiService,
                 strategyPromptBuilder, memoryContextService,
-                marketingStrategyMapper, weeklyPostPlanner, aiImageService,
+                marketingStrategyMapper, weeklyPostPlanner, asyncImageService,
                 notificationService, objectMapper
         );
     }

@@ -4,7 +4,6 @@ import com.example.metatry.DTOs.GenerateStrategyRequest;
 import com.example.metatry.DTOs.MarketingStrategyDTO;
 import com.example.metatry.DTOs.MarketingStrategyRequest;
 import com.example.metatry.Enums.MarketingStrategyStatus;
-import com.example.metatry.Enums.PlatformType;
 import com.example.metatry.Exceptions.StrategyConflictException;
 import com.example.metatry.Exceptions.StrategyGenerationException;
 import com.example.metatry.Exceptions.StrategyNotEditableException;
@@ -15,7 +14,7 @@ import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Models.Post;
 import com.example.metatry.Repositories.CampaignRepository;
 import com.example.metatry.Repositories.MarketingStrategyRepository;
-import com.example.metatry.Services.AiImageService;
+import com.example.metatry.Services.AsyncImageService;
 import com.example.metatry.Services.GeminiService;
 import com.example.metatry.Services.MemoryContextService;
 import com.example.metatry.Services.prompts.StrategyPromptBuilder;
@@ -44,7 +43,7 @@ public class MarketingStrategyService {
     private final MemoryContextService memoryContextService;
     private final MarketingStrategyMapper marketingStrategyMapper;
     private final WeeklyPostPlanner weeklyPostPlanner;
-    private final AiImageService aiImageService;
+    private final AsyncImageService asyncImageService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
@@ -272,13 +271,7 @@ Respond with this exact JSON structure (an array of campaign objects):
         try {
             List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(strategy, campaigns);
 
-            for (Post p : posts) {
-                if (p.getPlatform() != null && p.getPlatform() != PlatformType.LINKEDIN) {
-                    try {
-                        aiImageService.generateImageForPost(p);
-                    } catch (Exception ignored) {}
-                }
-            }
+            asyncImageService.generateImagesForPosts(posts);
 
             strategy.setLastWeeklyGeneration(LocalDate.now());
             strategyRepository.save(strategy);

@@ -7,9 +7,8 @@ import com.example.metatry.DTOs.MarketingStrategyRequest;
 import com.example.metatry.Models.Campaign;
 import com.example.metatry.Models.MarketingStrategy;
 import com.example.metatry.Models.Post;
-import com.example.metatry.Enums.PlatformType;
 import com.example.metatry.Repositories.MarketingStrategyRepository;
-import com.example.metatry.Services.AiImageService;
+import com.example.metatry.Services.AsyncImageService;
 import com.example.metatry.Services.CampaignService;
 import com.example.metatry.Services.scheduler.WeeklyCampaignService;
 import com.example.metatry.Services.scheduler.WeeklyPostPlanner;
@@ -36,7 +35,7 @@ public class MarketingStrategyController {
     private final CampaignService campaignService;
     private final WeeklyCampaignService weeklyCampaignService;
     private final WeeklyPostPlanner weeklyPostPlanner;
-    private final AiImageService aiImageService;
+    private final AsyncImageService asyncImageService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -121,13 +120,7 @@ public class MarketingStrategyController {
         List<Campaign> campaigns = weeklyCampaignService.generateWeeklyCampaigns(strategy, 1);
         List<Post> posts = weeklyPostPlanner.generateWeeklyPosts(strategy, campaigns);
 
-        for (Post p : posts) {
-            if (p.getPlatform() != null && p.getPlatform() != PlatformType.LINKEDIN) {
-                try {
-                    aiImageService.generateImageForPost(p);
-                } catch (Exception ignored) {}
-            }
-        }
+        asyncImageService.generateImagesForPosts(posts);
 
         List<CampaignDTO> campaignDTOs = campaignService.getCampaignsByStrategy(id);
 
